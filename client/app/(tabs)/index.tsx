@@ -1,54 +1,170 @@
-import { SafeAreaView, ScrollView, View } from "react-native";
-import { Header } from "@/components/today/Header";
-import { HeroCalories } from "@/components/today/HeroCalories";
-import { CompactStat } from "@/components/today/CompactStat";
-import { RecentMeal } from "@/components/today/RecentMeal";
+import { View, Text, StyleSheet, SafeAreaView } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
 export default function TodayScreen() {
+  const dailyGoal = 2000;
+  const consumed = 850;
+  const remaining = dailyGoal - consumed;
+
   return (
-    <SafeAreaView className="flex-1 bg-[#F8FAFC]">
-      <Header />
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.subtitle}>Overview</Text>
+        <Text style={styles.title}>Today</Text>
+      </View>
 
-      <ScrollView
-        className="flex-1 px-6"
-        contentContainerStyle={{ paddingBottom: 120, paddingTop: 24 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <HeroCalories />
-
-        <View className="flex-row gap-4 mb-10">
-          <CompactStat
-            label="Burned"
-            value="420"
-            icon="activity"
-            color="#ef4444"
-          />
-          <CompactStat
-            label="Steps"
-            value="8,432"
-            icon="trending-up"
-            color="#3b82f6"
-          />
+      {/* Hero Card */}
+      <View style={styles.heroCard}>
+        <View style={styles.heroTop}>
+          <Text style={styles.heroLabel}>Calories</Text>
+          <View style={styles.icon}>
+            <Feather name="zap" size={22} color="#22c55e" />
+          </View>
         </View>
 
-        <RecentMeal
-          icon="coffee"
-          title="Breakfast"
-          subtitle="Oatmeal & Berries"
-          calories="320"
-          color="bg-slate-50"
-        />
+        <View style={styles.heroValueRow}>
+          <Text style={styles.heroValue}>{consumed}</Text>
+          <Text style={styles.heroUnit}>kcal</Text>
+        </View>
 
-        <View className="h-4" />
+        <Text style={styles.heroSub}>{remaining} kcal remaining today</Text>
 
-        <RecentMeal
-          icon="sun"
-          title="Lunch"
-          subtitle="Grilled Chicken"
-          calories="530"
-          color="bg-orange-50"
-        />
-      </ScrollView>
+        {/* Progress Bar */}
+        <View style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${(consumed / dailyGoal) * 100}%` },
+            ]}
+          />
+        </View>
+      </View>
+
+      {/* Stats Row */}
+      <View style={styles.row}>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{dailyGoal}</Text>
+          <Text style={styles.statLabel}>Daily Goal</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{remaining}</Text>
+          <Text style={styles.statLabel}>Remaining</Text>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+    paddingHorizontal: 20,
+  },
+
+  /* Header */
+  header: {
+    marginTop: 12,
+    marginBottom: 24,
+  },
+  subtitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    color: "#94a3b8",
+    marginBottom: 4,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "900",
+    color: "#0f172a",
+  },
+
+  /* Hero Card */
+  heroCard: {
+    backgroundColor: "#0f172a",
+    borderRadius: 32,
+    padding: 24,
+    marginBottom: 24,
+  },
+  heroTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  heroLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#34d399",
+    letterSpacing: 1,
+  },
+  icon: {
+    backgroundColor: "#1e293b",
+    padding: 10,
+    borderRadius: 14,
+  },
+  heroValueRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    marginTop: 12,
+  },
+  heroValue: {
+    fontSize: 56,
+    fontWeight: "900",
+    color: "#ffffff",
+  },
+  heroUnit: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#64748b",
+    marginLeft: 8,
+  },
+  heroSub: {
+    marginTop: 6,
+    fontSize: 14,
+    color: "#94a3b8",
+  },
+
+  /* Progress */
+  progressTrack: {
+    height: 8,
+    backgroundColor: "#1e293b",
+    borderRadius: 4,
+    marginTop: 20,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#22c55e",
+    borderRadius: 4,
+  },
+
+  /* Bottom Stats */
+  row: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    paddingVertical: 20,
+    borderRadius: 24,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+  },
+  statValue: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#0f172a",
+  },
+  statLabel: {
+    fontSize: 13,
+    color: "#94a3b8",
+    marginTop: 4,
+    fontWeight: "600",
+  },
+});

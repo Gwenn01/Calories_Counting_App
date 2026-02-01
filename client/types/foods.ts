@@ -1,4 +1,4 @@
-export type FoodEntry = {
+export type FoodItem = {
   id: string;
   name: string;
   calories: number;

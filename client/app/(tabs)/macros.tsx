@@ -1,73 +1,133 @@
-import React from "react";
-import { View, Text, ScrollView, SafeAreaView, Platform } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  StyleSheet,
+  Pressable,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { MotiView } from "moti";
-// import { useMacroStore } from "@/store/macro.store"; // Assuming your store works
+
+/* ---------- Helpers ---------- */
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
 export default function MacrosScreen() {
-  // Mock data for design - replace with your useMacroStore()
-  const consumed = { calories: 1240, protein: 95, carbs: 140, fat: 42 };
-  const targets = { calories: 2000, protein: 150, carbs: 200, fat: 65 };
+  /* ---------- DATE STATE ---------- */
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const goPrevDay = () =>
+    setCurrentDate((d) => new Date(d.setDate(d.getDate() - 1)));
+
+  const goNextDay = () =>
+    setCurrentDate((d) => new Date(d.setDate(d.getDate() + 1)));
+
+  /* ---------- MOCK DATA PER DATE ---------- */
+  const dataByDate: Record<string, any> = {
+    "2026-01-27": {
+      consumed: { calories: 1650, protein: 120, carbs: 180, fat: 55 },
+      targets: { calories: 2000, protein: 150, carbs: 200, fat: 65 },
+    },
+    "2026-01-28": {
+      consumed: { calories: 1420, protein: 110, carbs: 160, fat: 48 },
+      targets: { calories: 2000, protein: 150, carbs: 200, fat: 65 },
+    },
+    "2026-01-29": {
+      consumed: { calories: 1780, protein: 135, carbs: 190, fat: 60 },
+      targets: { calories: 2000, protein: 150, carbs: 200, fat: 65 },
+    },
+    "2026-01-30": {
+      consumed: { calories: 1320, protein: 98, carbs: 150, fat: 44 },
+      targets: { calories: 2000, protein: 150, carbs: 200, fat: 65 },
+    },
+    "2026-01-31": {
+      consumed: { calories: 1500, protein: 115, carbs: 170, fat: 50 },
+      targets: { calories: 2000, protein: 150, carbs: 200, fat: 65 },
+    },
+
+    /* existing days */
+    "2026-02-01": {
+      consumed: { calories: 1240, protein: 95, carbs: 140, fat: 42 },
+      targets: { calories: 2000, protein: 150, carbs: 200, fat: 65 },
+    },
+    "2026-02-02": {
+      consumed: { calories: 980, protein: 70, carbs: 120, fat: 30 },
+      targets: { calories: 2000, protein: 150, carbs: 200, fat: 65 },
+    },
+  };
+
+  const key = currentDate.toISOString().slice(0, 10);
+  const { consumed, targets } = dataByDate[key];
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50">
+    <SafeAreaView style={styles.container}>
       <ScrollView
-        className="flex-1 px-6 pt-4"
-        contentContainerStyle={{ paddingBottom: 140 }}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View className="mb-8">
-          <Text className="text-slate-400 text-xs font-bold uppercase tracking-[2px] mb-1">
-            Nutrients
-          </Text>
-          <Text className="text-slate-900 text-3xl font-black">Macros</Text>
+        {/* ---------- HEADER WITH DATE ---------- */}
+        <View style={styles.topHeader}>
+          <Pressable style={styles.navButton} onPress={goPrevDay}>
+            <Feather name="chevron-left" size={22} color="#0f172a" />
+          </Pressable>
+
+          <View style={{ alignItems: "center" }}>
+            <Text style={styles.subtitle}>Nutrients</Text>
+            <Text style={styles.title}>{formatDate(currentDate)}</Text>
+          </View>
+
+          <Pressable style={styles.navButton} onPress={goNextDay}>
+            <Feather name="chevron-right" size={22} color="#0f172a" />
+          </Pressable>
         </View>
 
-        {/* Hero Calorie Card - Sleek Dark Design */}
+        {/* ---------- CALORIE CARD ---------- */}
         <MotiView
           from={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-slate-900 rounded-[40px] p-8 mb-8 shadow-2xl shadow-slate-400 relative overflow-hidden"
+          style={styles.calorieCard}
         >
-          {/* Decorative background element */}
-          <View className="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/10 rounded-full" />
+          <View style={styles.calorieDecoration} />
 
-          <View className="flex-row justify-between items-start relative z-10">
+          <View style={styles.calorieHeader}>
             <View>
-              <Text className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2">
-                Energy
-              </Text>
-              <View className="flex-row items-baseline">
-                <Text className="text-white text-6xl font-black">
-                  {consumed.calories}
-                </Text>
-                <Text className="text-slate-500 text-lg font-bold ml-2">
-                  kcal
-                </Text>
+              <Text style={styles.energyLabel}>Energy</Text>
+
+              <View style={styles.calorieRow}>
+                <Text style={styles.calorieValue}>{consumed.calories}</Text>
+                <Text style={styles.calorieUnit}>kcal</Text>
               </View>
-              <Text className="text-slate-400 mt-1 font-medium text-sm">
+
+              <Text style={styles.calorieSubtext}>
                 of {targets.calories} daily target
               </Text>
             </View>
-            <View className="bg-slate-800 p-3 rounded-2xl">
+
+            <View style={styles.iconBox}>
               <Feather name="zap" size={24} color="#10b981" />
             </View>
           </View>
 
-          {/* Simple horizontal progress bar for calories */}
-          <View className="h-2 w-full bg-slate-800 rounded-full mt-8 overflow-hidden">
+          <View style={styles.progressTrack}>
             <View
-              className="h-full bg-emerald-500 rounded-full"
-              style={{
-                width: `${(consumed.calories / targets.calories) * 100}%`,
-              }}
+              style={[
+                styles.progressFill,
+                {
+                  width: `${(consumed.calories / targets.calories) * 100}%`,
+                },
+              ]}
             />
           </View>
         </MotiView>
 
-        {/* Macro Detailed Cards */}
-        <View className="gap-y-4">
+        {/* ---------- MACROS ---------- */}
+        <View style={styles.macroList}>
           <MacroProgressCard
             label="Protein"
             value={consumed.protein}
@@ -98,7 +158,8 @@ export default function MacrosScreen() {
   );
 }
 
-// Custom Macro Card Component
+/* ---------- Macro Card ---------- */
+
 function MacroProgressCard({ label, value, target, color, icon, unit }: any) {
   const percentage = Math.min((value / target) * 100, 100);
 
@@ -106,40 +167,39 @@ function MacroProgressCard({ label, value, target, color, icon, unit }: any) {
     <MotiView
       from={{ opacity: 0, translateX: -20 }}
       animate={{ opacity: 1, translateX: 0 }}
-      className="bg-white p-6 rounded-[30px] border border-slate-100 shadow-sm shadow-slate-200"
+      style={styles.macroCard}
     >
-      <View className="flex-row justify-between items-center mb-4">
-        <View className="flex-row items-center">
-          <View
-            style={{ backgroundColor: `${color}15` }}
-            className="p-2 rounded-lg mr-3"
-          >
+      <View style={styles.macroHeader}>
+        <View style={styles.macroLeft}>
+          <View style={[styles.macroIcon, { backgroundColor: `${color}20` }]}>
             <Feather name={icon} size={16} color={color} />
           </View>
-          <Text className="text-slate-900 font-extrabold text-lg">{label}</Text>
+          <Text style={styles.macroLabel}>{label}</Text>
         </View>
-        <View className="flex-row items-baseline">
-          <Text className="text-slate-900 font-black text-lg">{value}</Text>
-          <Text className="text-slate-400 font-bold text-xs ml-1">
+
+        <View style={styles.macroRight}>
+          <Text style={styles.macroValue}>{value}</Text>
+          <Text style={styles.macroTarget}>
             / {target}
             {unit}
           </Text>
         </View>
       </View>
 
-      {/* Progress Bar Area */}
-      <View className="h-3 w-full bg-slate-50 rounded-full overflow-hidden">
+      <View style={styles.macroTrack}>
         <View
-          className="h-full rounded-full"
-          style={{ width: `${percentage}%`, backgroundColor: color }}
+          style={[
+            styles.macroFill,
+            { width: `${percentage}%`, backgroundColor: color },
+          ]}
         />
       </View>
 
-      <View className="flex-row justify-between mt-2">
-        <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-tighter">
+      <View style={styles.macroFooter}>
+        <Text style={styles.macroFooterText}>
           {Math.round(percentage)}% Achieved
         </Text>
-        <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-tighter">
+        <Text style={styles.macroFooterText}>
           {target - value}
           {unit} Left
         </Text>
@@ -147,3 +207,183 @@ function MacroProgressCard({ label, value, target, color, icon, unit }: any) {
     </MotiView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 140,
+  },
+
+  /* ---------- Top Header (Date Nav) ---------- */
+  topHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+  navButton: {
+    backgroundColor: "#ffffff",
+    padding: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+  },
+  subtitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#94a3b8",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    marginBottom: 2,
+    textAlign: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#0f172a",
+    textAlign: "center",
+  },
+
+  /* ---------- Calorie Card ---------- */
+  calorieCard: {
+    backgroundColor: "#0f172a",
+    borderRadius: 36,
+    padding: 28,
+    marginBottom: 32,
+    overflow: "hidden",
+  },
+  calorieDecoration: {
+    position: "absolute",
+    top: -40,
+    right: -40,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: "rgba(16,185,129,0.12)",
+  },
+  calorieHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  energyLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    color: "#34d399",
+    marginBottom: 8,
+  },
+  calorieRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+  },
+  calorieValue: {
+    fontSize: 56,
+    fontWeight: "900",
+    color: "#ffffff",
+  },
+  calorieUnit: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#64748b",
+    marginLeft: 8,
+  },
+  calorieSubtext: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#94a3b8",
+  },
+  iconBox: {
+    backgroundColor: "#1e293b",
+    padding: 12,
+    borderRadius: 16,
+  },
+
+  /* ---------- Progress ---------- */
+  progressTrack: {
+    height: 8,
+    backgroundColor: "#1e293b",
+    borderRadius: 4,
+    marginTop: 28,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#10b981",
+    borderRadius: 4,
+  },
+
+  /* ---------- Macro Cards ---------- */
+  macroList: {
+    gap: 16,
+  },
+  macroCard: {
+    backgroundColor: "#ffffff",
+    padding: 24,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+  },
+  macroHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  macroLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  macroIcon: {
+    padding: 8,
+    borderRadius: 10,
+    marginRight: 12,
+  },
+  macroLabel: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#0f172a",
+  },
+  macroRight: {
+    flexDirection: "row",
+    alignItems: "baseline",
+  },
+  macroValue: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#0f172a",
+  },
+  macroTarget: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#94a3b8",
+    marginLeft: 4,
+  },
+  macroTrack: {
+    height: 12,
+    backgroundColor: "#f8fafc",
+    borderRadius: 6,
+    overflow: "hidden",
+  },
+  macroFill: {
+    height: "100%",
+    borderRadius: 6,
+  },
+  macroFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
+  macroFooterText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#94a3b8",
+    textTransform: "uppercase",
+  },
+});

@@ -1,178 +1,250 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
-  Pressable,
+  StyleSheet,
   SafeAreaView,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
+  Pressable,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-// import { useMacroStore } from "@/store/macro.store";
+import { FoodPickerModal } from "@/components/food/FoodPickerModal";
+import type { FoodItem } from "@/types/foods";
 
 export default function AddFoodScreen() {
+  type MealType = "Breakfast" | "Lunch" | "Dinner" | "Snacks";
+
   const router = useRouter();
-  // const addFood = useMacroStore((state) => state.addFood);
+  const [showFoodModal, setShowFoodModal] = useState(false);
+  const [activeMeal, setActiveMeal] = useState<MealType | null>(null);
 
-  const [calories, setCalories] = useState("");
-  const [protein, setProtein] = useState("");
-  const [carbs, setCarbs] = useState("");
-  const [fat, setFat] = useState("");
-
-  const handleAdd = () => {
-    // Logic for adding food
-    /*
-    addFood({
-      calories: Number(calories) || 0,
-      protein: Number(protein) || 0,
-      carbs: Number(carbs) || 0,
-      fat: Number(fat) || 0,
-    });
-    */
-    router.back(); // Auto go back after adding
-  };
+  // Mock data
+  const goal = 2000;
+  const food = 850;
+  const exercise = 200;
+  const remaining = goal - food + exercise;
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          className="flex-1 px-6 pt-4"
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Header with Close */}
-          <View className="flex-row justify-between items-center mb-10">
-            <View>
-              <Text className="text-slate-900 text-3xl font-black">
-                Quick Add
-              </Text>
-              <Text className="text-slate-400 font-medium text-sm">
-                Log your meal macros
-              </Text>
+        {/* Header with Date */}
+        <View style={styles.header}>
+          <Pressable style={styles.navButton}>
+            <Feather name="chevron-left" size={22} color="#0f172a" />
+          </Pressable>
+
+          <View>
+            <Text style={styles.subtitle}>Today</Text>
+            <Text style={styles.title}>Feb 1, 2026</Text>
+          </View>
+
+          <Pressable style={styles.navButton}>
+            <Feather name="chevron-right" size={22} color="#0f172a" />
+          </Pressable>
+        </View>
+
+        {/* Calories Remaining Card */}
+        <View style={styles.calorieCard}>
+          <Text style={styles.cardTitle}>Calories Remaining</Text>
+
+          <View style={styles.calorieRow}>
+            <CalorieItem label="Goal" value={goal} />
+            <Text style={styles.operator}>−</Text>
+            <CalorieItem label="Food" value={food} />
+            <Text style={styles.operator}>+</Text>
+            <CalorieItem label="Exercise" value={exercise} />
+            <Text style={styles.operator}>=</Text>
+            <View style={styles.remainingBox}>
+              <Text style={styles.remainingValue}>{remaining}</Text>
+              <Text style={styles.remainingLabel}>Remaining</Text>
             </View>
-            <Pressable
-              onPress={() => router.back()}
-              className="bg-slate-100 p-3 rounded-2xl"
-            >
-              <Feather name="x" size={24} color="#64748b" />
-            </Pressable>
           </View>
+        </View>
 
-          {/* Input Fields */}
-          <View className="gap-y-6">
-            <InputGroup
-              label="Total Calories"
-              placeholder="0"
-              value={calories}
-              onChange={setCalories}
-              icon="zap"
-              color="#10b981"
-              unit="kcal"
-            />
+        {/* Add Food */}
+        <MealCard title="Breakfast" onAdd={() => setShowFoodModal(true)} />
 
-            <View className="h-[1px] bg-slate-50 w-full" />
+        <FoodPickerModal
+          visible={showFoodModal}
+          onClose={() => setShowFoodModal(false)}
+          onSelect={(food: FoodItem) => {
+            console.log("Selected food:", food);
+            setShowFoodModal(false);
+          }}
+        />
 
-            <View className="flex-row gap-4">
-              <View className="flex-1">
-                <InputGroup
-                  label="Protein"
-                  placeholder="0"
-                  value={protein}
-                  onChange={setProtein}
-                  icon="shield"
-                  color="#10b981"
-                  unit="g"
-                />
-              </View>
-              <View className="flex-1">
-                <InputGroup
-                  label="Carbs"
-                  placeholder="0"
-                  value={carbs}
-                  onChange={setCarbs}
-                  icon="droplet"
-                  color="#3b82f6"
-                  unit="g"
-                />
-              </View>
-            </View>
-
-            <InputGroup
-              label="Fat"
-              placeholder="0"
-              value={fat}
-              onChange={setFat}
-              icon="circle"
-              color="#f59e0b"
-              unit="g"
-            />
-          </View>
-
-          {/* Save Button */}
-          <View className="mt-12 mb-10">
-            <Pressable
-              onPress={handleAdd}
-              className="bg-emerald-500 py-5 rounded-[24px] items-center shadow-xl shadow-emerald-200"
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.9 : 1,
-                transform: [{ scale: pressed ? 0.98 : 1 }],
-              })}
-            >
-              <View className="flex-row items-center">
-                <Feather name="check" size={20} color="white" />
-                <Text className="text-white font-black text-lg ml-2">
-                  Log Food
-                </Text>
-              </View>
-            </Pressable>
-
-            <Pressable
-              onPress={() => router.back()}
-              className="mt-6 items-center"
-            >
-              <Text className="text-slate-400 font-bold">Cancel</Text>
-            </Pressable>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {/* Meals */}
+        <MealCard title="Breakfast" onAdd={() => router.push("/add-food")} />
+        <MealCard title="Lunch" onAdd={() => router.push("/add-food")} />
+        <MealCard title="Dinner" onAdd={() => router.push("/add-food")} />
+        <MealCard title="Snacks" onAdd={() => router.push("/add-food")} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
-// Custom Input Component
-function InputGroup({
-  label,
-  placeholder,
-  value,
-  onChange,
-  icon,
-  color,
-  unit,
-}: any) {
+/* ---------- Components ---------- */
+
+function CalorieItem({ label, value }: any) {
   return (
-    <View>
-      <View className="flex-row items-center mb-2">
-        <Feather name={icon} size={14} color={color} />
-        <Text className="text-slate-500 font-bold text-xs uppercase tracking-widest ml-2">
-          {label}
-        </Text>
-      </View>
-      <View className="flex-row items-center bg-slate-50 rounded-2xl px-5 py-2 border border-slate-100 focus:border-emerald-500">
-        <TextInput
-          placeholder={placeholder}
-          keyboardType="numeric"
-          value={value}
-          onChangeText={onChange}
-          placeholderTextColor="#cbd5e1"
-          className="flex-1 py-3 text-xl font-black text-slate-900"
-        />
-        <Text className="text-slate-400 font-bold ml-2">{unit}</Text>
-      </View>
+    <View style={styles.calorieItem}>
+      <Text style={styles.calorieValue}>{value}</Text>
+      <Text style={styles.calorieLabel}>{label}</Text>
     </View>
   );
 }
+
+function MealCard({ title, onAdd }: any) {
+  return (
+    <View style={styles.mealCard}>
+      <View>
+        <Text style={styles.mealTitle}>{title}</Text>
+        <Text style={styles.mealSub}>No food logged</Text>
+      </View>
+
+      <Pressable style={styles.addButton} onPress={onAdd}>
+        <Feather name="plus" size={18} color="#10b981" />
+        <Text style={styles.addText}>Add Food</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+/* ---------- Styles ---------- */
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+  },
+  content: {
+    padding: 20,
+    paddingBottom: 120,
+  },
+
+  /* Header */
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  navButton: {
+    backgroundColor: "#ffffff",
+    padding: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+  },
+  subtitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#94a3b8",
+    textAlign: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#0f172a",
+    textAlign: "center",
+  },
+
+  /* Calories Card */
+  calorieCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 28,
+    padding: 20,
+    marginBottom: 28,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#64748b",
+    marginBottom: 16,
+  },
+  calorieRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  calorieItem: {
+    alignItems: "center",
+    minWidth: 60,
+  },
+  calorieValue: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#0f172a",
+  },
+  calorieLabel: {
+    fontSize: 11,
+    color: "#94a3b8",
+    marginTop: 2,
+  },
+  operator: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#94a3b8",
+    marginHorizontal: 4,
+  },
+  remainingBox: {
+    backgroundColor: "#0f172a",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+  remainingValue: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#22c55e",
+  },
+  remainingLabel: {
+    fontSize: 11,
+    color: "#94a3b8",
+  },
+
+  /* Meals */
+  mealCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  mealTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#0f172a",
+  },
+  mealSub: {
+    fontSize: 13,
+    color: "#94a3b8",
+    marginTop: 2,
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ecfdf5",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+  },
+  addText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#10b981",
+  },
+});

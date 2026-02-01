@@ -1,85 +1,118 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+} from "react-native";
+import { SettingsRow } from "../../components/general/SettingsRow";
 
 export default function ProfileScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
+    <SafeAreaView style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* ---------- Header ---------- */}
+        <View style={styles.header}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>JD</Text>
+          </View>
+          <Text style={styles.name}>John Doe</Text>
+          <Text style={styles.subText}>Fitness Tracking</Text>
+        </View>
 
-      {/* User Info */}
-      <View style={styles.card}>
-        <Text style={styles.name}>John Doe</Text>
-        <Text style={styles.subText}>Daily goal: 2000 kcal</Text>
-      </View>
+        {/* ---------- Goal Card ---------- */}
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>DAILY CALORIE GOAL</Text>
+          <Text style={styles.goalValue}>2000 kcal</Text>
+        </View>
 
-      {/* Settings */}
-      <View style={styles.section}>
-        <Pressable style={styles.row}>
-          <Text style={styles.rowText}>Edit daily calorie goal</Text>
-        </Pressable>
-
-        <Pressable style={styles.row}>
-          <Text style={styles.rowText}>Change weight</Text>
-        </Pressable>
-
-        <Pressable style={styles.row}>
-          <Text style={styles.rowText}>About</Text>
-        </Pressable>
-      </View>
-
-      {/* Logout */}
-      <Pressable style={styles.logout}>
-        <Text style={styles.logoutText}>Log out</Text>
-      </Pressable>
-    </View>
+        {/* ---------- Settings ---------- */}
+        <View style={styles.settingsCard}>
+          <SettingsRow icon="edit-3" label="Edit calorie goal" />
+          <SettingsRow icon="trending-up" label="Update weight" />
+          <SettingsRow icon="info" label="About this app" />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safe: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#f8fafc",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 20,
+  container: {
+    padding: 24,
+    paddingBottom: 60,
   },
-  card: {
-    backgroundColor: "#f4f4f4",
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 30,
+
+  /* ---------- Header ---------- */
+  header: {
+    alignItems: "center",
+    marginBottom: 32,
+  },
+  avatar: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#0f172a",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  avatarText: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "900",
   },
   name: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#0f172a",
   },
   subText: {
     fontSize: 14,
-    color: "#666",
+    color: "#64748b",
     marginTop: 4,
   },
-  section: {
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
+
+  /* ---------- Cards ---------- */
+  card: {
+    backgroundColor: "#0f172a",
+    borderRadius: 28,
+    padding: 24,
+    marginBottom: 24,
   },
-  row: {
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+  cardLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: "#94a3b8",
   },
-  rowText: {
-    fontSize: 16,
+  goalValue: {
+    fontSize: 36,
+    fontWeight: "900",
+    color: "#ffffff",
+    marginTop: 6,
   },
-  logout: {
-    marginTop: "auto",
-    paddingVertical: 16,
-    alignItems: "center",
+
+  settingsCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 28,
+    overflow: "hidden",
+    marginBottom: 32,
   },
-  logoutText: {
-    fontSize: 16,
-    color: "red",
-    fontWeight: "600",
-  },
+
+  // /* ---------- Logout ---------- */
+  // logout: {
+  //   alignItems: "center",
+  //   paddingVertical: 16,
+  // },
+  // logoutText: {
+  //   fontSize: 16,
+  //   fontWeight: "700",
+  //   color: "#ef4444",
+  // },
 });
