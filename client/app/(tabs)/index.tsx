@@ -1,170 +1,72 @@
-import { View, Text, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 
 export default function TodayScreen() {
   const dailyGoal = 2000;
   const consumed = 850;
   const remaining = dailyGoal - consumed;
+  const progress = (consumed / dailyGoal) * 100;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-slate-50 px-5">
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.subtitle}>Overview</Text>
-        <Text style={styles.title}>Today</Text>
+      <View className="mt-3 mb-6">
+        <Text className="text-xs font-bold tracking-[2px] uppercase text-slate-400 mb-1">
+          Overview
+        </Text>
+        <Text className="text-4xl font-black text-slate-900">Today</Text>
       </View>
 
       {/* Hero Card */}
-      <View style={styles.heroCard}>
-        <View style={styles.heroTop}>
-          <Text style={styles.heroLabel}>Calories</Text>
-          <View style={styles.icon}>
+      <View className="bg-slate-900 rounded-[32px] p-6 mb-6">
+        <View className="flex-row justify-between items-center">
+          <Text className="text-sm font-bold tracking-wide text-emerald-400">
+            Calories
+          </Text>
+          <View className="bg-slate-800 p-2.5 rounded-2xl">
             <Feather name="zap" size={22} color="#22c55e" />
           </View>
         </View>
 
-        <View style={styles.heroValueRow}>
-          <Text style={styles.heroValue}>{consumed}</Text>
-          <Text style={styles.heroUnit}>kcal</Text>
+        <View className="flex-row items-baseline mt-3">
+          <Text className="text-[56px] font-black text-white">{consumed}</Text>
+          <Text className="text-lg font-bold text-slate-500 ml-2">kcal</Text>
         </View>
 
-        <Text style={styles.heroSub}>{remaining} kcal remaining today</Text>
+        <Text className="mt-1.5 text-sm text-slate-400">
+          {remaining} kcal remaining today
+        </Text>
 
         {/* Progress Bar */}
-        <View style={styles.progressTrack}>
+        <View className="h-2 bg-slate-800 rounded-full mt-5 overflow-hidden">
           <View
-            style={[
-              styles.progressFill,
-              { width: `${(consumed / dailyGoal) * 100}%` },
-            ]}
+            className="h-full bg-green-500 rounded-full"
+            style={{ width: `${progress}%` }}
           />
         </View>
       </View>
 
       {/* Stats Row */}
-      <View style={styles.row}>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{dailyGoal}</Text>
-          <Text style={styles.statLabel}>Daily Goal</Text>
+      <View className="flex-row gap-4">
+        <View className="flex-1 bg-white py-5 rounded-3xl items-center border border-slate-100">
+          <Text className="text-[22px] font-extrabold text-slate-900">
+            {dailyGoal}
+          </Text>
+          <Text className="text-[13px] font-semibold text-slate-400 mt-1">
+            Daily Goal
+          </Text>
         </View>
 
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{remaining}</Text>
-          <Text style={styles.statLabel}>Remaining</Text>
+        <View className="flex-1 bg-white py-5 rounded-3xl items-center border border-slate-100">
+          <Text className="text-[22px] font-extrabold text-slate-900">
+            {remaining}
+          </Text>
+          <Text className="text-[13px] font-semibold text-slate-400 mt-1">
+            Remaining
+          </Text>
         </View>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-    paddingHorizontal: 20,
-  },
-
-  /* Header */
-  header: {
-    marginTop: 12,
-    marginBottom: 24,
-  },
-  subtitle: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 2,
-    textTransform: "uppercase",
-    color: "#94a3b8",
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "900",
-    color: "#0f172a",
-  },
-
-  /* Hero Card */
-  heroCard: {
-    backgroundColor: "#0f172a",
-    borderRadius: 32,
-    padding: 24,
-    marginBottom: 24,
-  },
-  heroTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  heroLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#34d399",
-    letterSpacing: 1,
-  },
-  icon: {
-    backgroundColor: "#1e293b",
-    padding: 10,
-    borderRadius: 14,
-  },
-  heroValueRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    marginTop: 12,
-  },
-  heroValue: {
-    fontSize: 56,
-    fontWeight: "900",
-    color: "#ffffff",
-  },
-  heroUnit: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#64748b",
-    marginLeft: 8,
-  },
-  heroSub: {
-    marginTop: 6,
-    fontSize: 14,
-    color: "#94a3b8",
-  },
-
-  /* Progress */
-  progressTrack: {
-    height: 8,
-    backgroundColor: "#1e293b",
-    borderRadius: 4,
-    marginTop: 20,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#22c55e",
-    borderRadius: 4,
-  },
-
-  /* Bottom Stats */
-  row: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-    paddingVertical: 20,
-    borderRadius: 24,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#f1f5f9",
-  },
-  statValue: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#0f172a",
-  },
-  statLabel: {
-    fontSize: 13,
-    color: "#94a3b8",
-    marginTop: 4,
-    fontWeight: "600",
-  },
-});
