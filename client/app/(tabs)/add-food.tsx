@@ -22,7 +22,7 @@ export default function AddFoodScreen() {
     <SafeAreaView className="flex-1 bg-slate-50">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="p-5 pb-32"
+        //contentContainerClassName="p-5 pb-32"
       >
         {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
