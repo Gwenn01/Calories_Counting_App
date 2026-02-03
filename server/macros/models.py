@@ -1,12 +1,15 @@
+# macros/models.py
 from django.db import models
+from users.models import UserProfile
 
-# Create your models here.
-# class Macro(models.Model):
-#     name = models.CharField(max_length=100)
-#     calories = models.PositiveIntegerField()
-#     protein = models.PositiveIntegerField()
-#     carbs = models.PositiveIntegerField()
-#     fats = models.PositiveIntegerField()
-
-#     def __str__(self):
-#         return self.name
+class Macros(models.Model):
+    user = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name="macros"
+    )
+    calories = models.IntegerField()
+    protein = models.IntegerField()
+    carbs = models.IntegerField()
+    fats = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -10,8 +10,9 @@ class UserProfile(models.Model):
     target_protein = models.PositiveIntegerField(null=True, blank=True)
     target_carbs = models.PositiveIntegerField(null=True, blank=True)
     target_fats = models.PositiveIntegerField(null=True, blank=True)
-   
     created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.name or "User"
 
     def update_from_dict(self, data):
         for field, value in data.items():
