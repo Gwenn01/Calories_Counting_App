@@ -1,6 +1,7 @@
 # macros/models.py
 from django.db import models
 from users.models import UserProfile
+from logs.models import  DailyLog
 
 class Macros(models.Model):
     user = models.ForeignKey(
@@ -13,3 +14,6 @@ class Macros(models.Model):
     carbs = models.IntegerField()
     fats = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.calories
