@@ -1,47 +1,42 @@
 import json
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from .models import UserProfile
-from django.views.decorators.csrf import csrf_exempt
+from .serializers import UserProfileSerializer
+
 # Create your views here.
-@csrf_exempt
+@api_view(['GET'])
 def index(request):
-    return HttpResponse("Hello, Geeks! Welcome to your first Django app.")
+    return Response("Hello World", status=status.HTTP_201_CREATED)
 
-@csrf_exempt
-# ACCOUNTS
+# SAVE THE USER PROFILE
+@api_view(['POST'])
 def save_profile(request):
-    try:
-        if request.method != 'POST':
-            return JsonResponse("Error: POST request required", status=400)
-        
-        data = json.loads(request.body)
-        
-        Profile, created = UserProfile.objects.get_or_create(id=1)
-        
-        Profile.update_from_dict(data)
-        
-        if created:
-            return JsonResponse({"message": "Profile created"})
-        else:
-            return JsonResponse({"message": "Profile updated"})
-        
-    except Exception as e:
-        return HttpResponse("Error: " + str(e))
+    serializer = UserProfileSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(
+        {"message": "User created successfully"},
+        status=status.HTTP_201_CREATED
+    )
 
-@csrf_exempt  
+# GET USER PROFILE
+@api_view(['GET'])  
 def get_profile(request):
-    try:
-        if request.method != 'GET':
-            return JsonResponse("Error: GET request required", status=400)
+   user_profile = UserProfile.objects.all()
+   serializer = UserProfileSerializer(user_profile, many=True)
+   return Response(serializer.data, status=status.HTTP_200_OK)
 
-        Profile, created = UserProfile.objects.get_or_create(id=1)
-        
-        if created:
-            return JsonResponse({"message": "Profile not found"}, status=404)
-
-        return JsonResponse(Profile.to_dict(), status=200)
-    except Exception as e:
-        return HttpResponse("Error: " + str(e))
+# UPDATE USER PROFILE
+@api_view(['PUT'])
+def update_profile(request, id):
+    user_profile = UserProfile.objects.get(id=id)
+    serializer = UserProfileSerializer(user_profile, data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(
+        {"message": "User updated successfully"},
+        status=status.HTTP_200_OK
+    )

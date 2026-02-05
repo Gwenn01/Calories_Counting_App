@@ -14,10 +14,7 @@ class FoodSerializer(serializers.ModelSerializer):
         ]
         
     def validate(self, data):
-        try:
-            if data.get('calories') < 0 or data.get('protein', 0) < 0 or data.get('carbs', 0) < 0 or data.get('fat', 0) < 0:
-                raise serializers.ValidationError("Macros cannot be negative")
-            return data
-        except Exception as e:
-            raise serializers.ValidationError(str(e))
+        if data.get('calories') < 0 or data.get('protein', 0) < 0 or data.get('carbs', 0) < 0 or data.get('fat', 0) < 0:
+            raise serializers.ValidationError("Macros cannot be negative")
+        return data
 

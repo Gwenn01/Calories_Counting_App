@@ -14,6 +14,9 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.name or "User"
 
+
+
+# CREATE MANUALLY WITHOUT SERIALIZER============================================
     def update_from_dict(self, data):
         for field, value in data.items():
             if hasattr(self, field):
