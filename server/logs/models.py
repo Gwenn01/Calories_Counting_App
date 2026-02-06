@@ -10,4 +10,4 @@ class DailyLog(models.Model):
     created_at = models.DateField()
 
     def total_calories(self):
-        return self.food.meal_type * self.quantity
+        return self.food.meal_type
