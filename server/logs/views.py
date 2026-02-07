@@ -1,5 +1,5 @@
-from django.shortcuts import render
-from rest_framework.decorators import api_view
+from datetime import datetime
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.http import Http404
 from rest_framework.views import APIView
@@ -13,13 +13,34 @@ class LogsList(APIView):
     """
     List all logs, or create a new log.
     """
+    permission_classes = [IsAuthenticated]
+    
     def get(self, request, format=None):
-        logs = DailyLog.objects.all()
+        logs = DailyLog.objects.filter(user=request.user)
+        print("AUTH USER:", request.user, request.user.id)
+
+        date = request.query_params.get("date")
+        meal_type = request.query_params.get("meal_type")
+        
+        #get log base on date
+        if date:
+            try:
+                parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
+                logs = logs.filter(created_at=parsed_date)
+            except ValueError:
+                return Response(
+                    {"error": "Date must be in YYYY-MM-DD format"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        #get by meal type
+        if meal_type:
+            logs = logs.filter(meal_type=meal_type)
+        
         serializer = LogSerializer(logs, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = LogSerializer(data=request.data)
+        serializer = LogSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "Log created successfully"}, status=status.HTTP_201_CREATED)

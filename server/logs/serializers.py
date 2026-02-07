@@ -4,11 +4,17 @@ from foods.serializers import FoodSerializer
 from foods.models import Food
 
 class LogSerializer(serializers.ModelSerializer):
+    # init the user
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    
     food = serializers.PrimaryKeyRelatedField(
         queryset=Food.objects.all(),
         write_only=True
     )
     food_details = FoodSerializer(source="food", read_only=True)
+    username = serializers.CharField(source="user.username", read_only=True)
     class Meta:
         model = DailyLog
         fields = '__all__'

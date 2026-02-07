@@ -2,6 +2,7 @@ from django.db.models import Sum, F, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from .models import DailyLog
+from .serializers import LogSerializer
 
 class FoodLogService:
     
@@ -31,10 +32,12 @@ class FoodLogService:
     @staticmethod
     def get_daily_logs(user):
         today = timezone.now().date()
-        return DailyLog.objects.filter(
+        log =  DailyLog.objects.filter(
             user=user,
             created_at=today
-        ).select_related("food")
+        )
+        serializer = LogSerializer(log, many=True)
+        return serializer.data
     # calculate the food nutrition base on the data log of user
     @staticmethod
     def get_daily_macros(user):
