@@ -6,8 +6,11 @@ class DailyLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
     meal_type = models.CharField(max_length=50)
-    quantity = models.IntegerField(null=True, blank=True)
-    created_at = models.DateField()
+    quantity = models.IntegerField(default=1)
+    created_at = models.DateField(auto_now_add=True)
 
     def total_calories(self):
-        return self.food.meal_type
+        return (self.food.calories or 0) * self.quantity
+
+    def __str__(self):
+        return f"{self.user.username} - {self.food.name}"
