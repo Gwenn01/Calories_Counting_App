@@ -1,9 +1,10 @@
 from django.urls import path
 from . import views
+from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('save-profile/', views.save_profile, name='save_profile'),
-    path('get-profile/', views.get_profile, name='get_profile'),
-    path('update-profile/<int:id>', views.update_profile, name='update_profile')
+    path('profile/', views.UserProfileList.as_view(), name='profile-list'),
+    path('profile/<int:pk>/', views.UserProfileDetail.as_view(), name='profile-list'),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

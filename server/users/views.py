@@ -2,41 +2,48 @@ import json
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.shortcuts import render
 from .models import UserProfile
 from .serializers import UserProfileSerializer
 
 # Create your views here.
-@api_view(['GET'])
-def index(request):
-    return Response("Hello World", status=status.HTTP_201_CREATED)
+class UserProfileList(APIView):
 
-# SAVE THE USER PROFILE
-@api_view(['POST'])
-def save_profile(request):
-    serializer = UserProfileSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-    return Response(
-        {"message": "User created successfully"},
-        status=status.HTTP_201_CREATED
-    )
+    def get(self, request):
+        user_profile = UserProfile.objects.all()
+        serializer = UserProfileSerializer(user_profile, many=True)
+        return Response(serializer.data)
 
-# GET USER PROFILE
-@api_view(['GET'])  
-def get_profile(request):
-   user_profile = UserProfile.objects.all()
-   serializer = UserProfileSerializer(user_profile, many=True)
-   return Response(serializer.data, status=status.HTTP_200_OK)
+    def post(self, request):
+        serializer = UserProfileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Message": "User profile saved successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UserProfileDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return UserProfile.objects.get(pk=pk)
+        except UserProfile.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-# UPDATE USER PROFILE
-@api_view(['PUT'])
-def update_profile(request, id):
-    user_profile = UserProfile.objects.get(id=id)
-    serializer = UserProfileSerializer(user_profile, data=request.data)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-    return Response(
-        {"message": "User updated successfully"},
-        status=status.HTTP_200_OK
-    )
+    def get(self, request, pk):
+        user_profile = self.get_object(pk)
+        serializer = UserProfileSerializer(user_profile)
+        return Response(serializer.data)
+
+    def put(self, request, pk): 
+        user_profile = self.get_object(pk)
+        serializer = UserProfileSerializer(user_profile, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Message": "User updated successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        user_profile = self.get_object(pk)
+        user_profile.delete()
+        return Response({"Message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        

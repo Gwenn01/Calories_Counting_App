@@ -7,13 +7,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
     # User fields (not part of UserProfile model)
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
-
+    
+    username_display = serializers.CharField(
+        source="user.username",
+        read_only=True
+    )
     class Meta:
         model = UserProfile
         fields = [
             "id",
             "username",
             "password",
+            "username_display",
             "name",
             "age",
             "weight",
