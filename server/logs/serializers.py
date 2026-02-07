@@ -1,7 +1,14 @@
 from rest_framework import serializers
 from .models import DailyLog
+from foods.serializers import FoodSerializer
+from foods.models import Food
 
 class LogSerializer(serializers.ModelSerializer):
+    food = serializers.PrimaryKeyRelatedField(
+        queryset=Food.objects.all(),
+        write_only=True
+    )
+    food_details = FoodSerializer(source="food", read_only=True)
     class Meta:
         model = DailyLog
         fields = '__all__'

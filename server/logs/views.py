@@ -1,34 +1,55 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.http import Http404
+from rest_framework.views import APIView
 from rest_framework import status
 from .models import DailyLog
 from .serializers import  LogSerializer
-from django.contrib.auth.models import User
-from users.models import UserProfile
-from foods.models import Food
 from macros.services import MacrosService
 # Create your views here.
 
-@api_view(['POST'])
-def create_log(request):
-    serializer = LogSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+class LogsList(APIView):
+    """
+    List all logs, or create a new log.
+    """
+    def get(self, request, format=None):
+        logs = DailyLog.objects.all()
+        serializer = LogSerializer(logs, many=True)
+        return Response(serializer.data)
 
-    log = serializer.save()  # uses user from request body
+    def post(self, request, format=None):
+        serializer = LogSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Log created successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    MacrosService.upsert_today_macros(user=log.user)
+class LogsDetail(APIView):
+    """
+    Retrieve, update or delete a log instance.
+    """
+    def get_object(self, pk):
+        try:
+            return DailyLog.objects.get(pk=pk)
+        except DailyLog.DoesNotExist:
+            raise Http404
 
-    return Response(
-        "Log created successfully",
-        status=status.HTTP_201_CREATED
-    )
-        
-@api_view(['GET'])
-def get_logs(request):
-    # Get logs from the database
-    logs = DailyLog.objects.all()
-    # Serialize the logs
-    serializer = LogSerializer(logs, many=True)
-    # Return the serialized logs
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request, pk, format=None):
+        log = self.get_object(pk)
+        serializer = LogSerializer(log) 
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, pk, format=None):
+        log = self.get_object(pk)
+        serializer = LogSerializer(log, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Log updated successfully"})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        log = self.get_object(pk)
+        log.delete()
+        return Response({"message": "Log Remove successfully"}, status=status.HTTP_204_NO_CONTENT)
+    
