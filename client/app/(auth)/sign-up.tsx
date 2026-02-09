@@ -10,8 +10,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
 import { MotiView } from "moti";
+import Toast from "react-native-toast-message";
+import { useRouter } from "expo-router";
+import { registerUser } from "@/api/auth";
+import LoadingOverlay from "@/components/LoadingOverplay";
 
 export default function SignUpScreen() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -44,16 +51,36 @@ export default function SignUpScreen() {
       target_fats: targetFats ? Number(targetFats) : null,
     };
 
-    console.log("SIGN UP PAYLOAD:", payload);
+    try {
+      setLoading(true);
 
-    // 🔗 Connect to backend later
-    // await fetch("/api/register/", { ... })
+      await registerUser(payload);
 
-    Alert.alert("Success", "Account created successfully 🎉");
+      Toast.show({
+        type: "success",
+        text1: "Account created",
+        text2: "Please login to continue",
+      });
+
+      router.replace("/(auth)/sign-in");
+    } catch (error: any) {
+      Toast.show({
+        type: "error",
+        text1: "Registration failed",
+        text2: error?.response?.data?.detail || "Please try again",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50">
+    <SafeAreaView className="flex-1 bg-slate-50 relative">
+      {/* 🔔 GLOBAL TOAST */}
+      <Toast />
+
+      {/* 🔄 GLOBAL LOADING */}
+      {loading && <LoadingOverlay text="Creating account..." />}
       <ScrollView
         className="px-6"
         contentContainerStyle={{ paddingBottom: 120 }}
@@ -143,6 +170,14 @@ export default function SignUpScreen() {
               Create Account
             </Text>
           </Pressable>
+          <View className="flex-row items-center justify-center mt-4">
+            <Text className="text-gray-400 text-sm">
+              Already have an account?
+            </Text>
+            <Pressable onPress={() => router.push("/sign-in")}>
+              <Text className="text-emerald-500 text-sm ml-1">Sign In</Text>
+            </Pressable>
+          </View>
         </MotiView>
       </ScrollView>
     </SafeAreaView>

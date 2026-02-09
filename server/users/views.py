@@ -11,18 +11,23 @@ from .serializers import UserProfileSerializer
 
 # Create your views here.
 class UserProfileList(APIView):
-
+    permission_classes = [AllowAny]
     def get(self, request):
         user_profile = UserProfile.objects.all()
         serializer = UserProfileSerializer(user_profile, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        permission_classes = [AllowAny]
         serializer = UserProfileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"Message": "User profile saved successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    "message": "User profile saved successfully",
+                    "data": serializer.data,
+                },
+                status=status.HTTP_201_CREATED,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class UserProfileDetail(APIView):

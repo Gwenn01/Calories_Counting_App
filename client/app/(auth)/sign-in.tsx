@@ -1,16 +1,24 @@
 import { View, Text, TextInput, Pressable, Alert } from "react-native";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
 import { MotiView } from "moti";
+import Toast from "react-native-toast-message";
 
 export default function SignInScreen() {
+  const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSignIn = () => {
     if (!username || !password) {
-      Alert.alert("Missing fields", "Please enter username and password");
+      Toast.show({
+        type: "error",
+        text1: "Missing fields",
+        text2: "Username, password and name are required",
+      });
       return;
     }
 
@@ -29,14 +37,22 @@ export default function SignInScreen() {
         className="bg-white rounded-3xl p-6 border border-slate-100"
       >
         {/* ---------- HEADER ---------- */}
-        <View className="items-center mb-6">
-          <View className="bg-emerald-100 p-3 rounded-2xl mb-3">
-            <Feather name="user" size={24} color="#10b981" />
+        <View className="items-center mb-8">
+          {/* Icon */}
+          <View className="bg-emerald-100 p-4 rounded-full mb-4">
+            <Feather name="user" size={28} color="#10b981" />
           </View>
-          <Text className="text-2xl font-black text-slate-900">Sign In</Text>
-          <Text className="text-slate-400 mt-1">Welcome back 👋</Text>
-        </View>
 
+          {/* Title */}
+          <Text className="text-3xl font-bold text-slate-900">
+            Welcome Back
+          </Text>
+
+          {/* Subtitle */}
+          <Text className="text-slate-400 mt-2 text-center">
+            Sign in to continue tracking your calories
+          </Text>
+        </View>
         {/* ---------- USERNAME ---------- */}
         <View className="mb-4">
           <Text className="text-xs font-bold tracking-wide text-slate-400 mb-2">
@@ -79,6 +95,20 @@ export default function SignInScreen() {
           <Text className="text-white font-extrabold text-base">Sign In</Text>
         </Pressable>
       </MotiView>
+      <View className="flex-row justify-center mt-6">
+        <Text className="text-gray-500">Don’t have an account? </Text>
+
+        <Pressable
+          onPress={() => router.push("/(auth)/sign-up")}
+          className="active:opacity-70"
+        >
+          <Text className="text-blue-600 font-semibold, underline">
+            Register
+          </Text>
+        </Pressable>
+      </View>
+
+      <Toast />
     </SafeAreaView>
   );
 }
