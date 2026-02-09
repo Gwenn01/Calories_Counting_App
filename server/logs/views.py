@@ -14,7 +14,9 @@ class LogsList(APIView):
     List all logs, or create a new log.
     """
     permission_classes = [IsAuthenticated]
-    
+    def get_user(self):
+        return self.request.user
+        
     def get(self, request, format=None):
         logs = DailyLog.objects.filter(user=request.user)
         print("AUTH USER:", request.user, request.user.id)
@@ -42,7 +44,7 @@ class LogsList(APIView):
                 )
         elif meal_type:
             logs = logs.filter(meal_type=meal_type)
-        
+        # serialize it before returning
         serializer = LogSerializer(logs, many=True)
         return Response(serializer.data)
 
@@ -50,6 +52,8 @@ class LogsList(APIView):
         serializer = LogSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             serializer.save()
+            # now every time the user add food log update their macros
+            MacrosService.upsert_today_macros(self.get_user())
             return Response({"message": "Log created successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

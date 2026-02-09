@@ -13,13 +13,9 @@ class MacrosService:
         Recompute and insert/update today's macros for a user
         """
         today = timezone.now().date()
-
         user_profile = UserProfile.objects.get(user=user)
-
         macros_data = FoodLogService.get_daily_macros(user)
-        
         print(macros_data)
-        
         macros, created = Macros.objects.update_or_create(
             user=user_profile,
             date=today,
