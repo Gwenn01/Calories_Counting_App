@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ProfileScreen() {
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
-      <ScrollView contentContainerClassName="p-6 pb-16">
+      <ScrollView className="p-6 pb-16">
         {/* ---------- Header ---------- */}
         <View className="items-center mb-8">
           <View className="w-[72px] h-[72px] rounded-full bg-slate-900 items-center justify-center mb-3">
