@@ -1,11 +1,14 @@
 import json
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import render
 from .models import UserProfile
 from .serializers import UserProfileSerializer
+
 
 # Create your views here.
 class UserProfileList(APIView):
@@ -16,6 +19,7 @@ class UserProfileList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        permission_classes = [AllowAny]
         serializer = UserProfileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -25,10 +29,10 @@ class UserProfileList(APIView):
 class UserProfileDetail(APIView):
     permission_classes = [IsAuthenticated]
     def get_object(self):
-        try:
-            return UserProfile.objects.get(user=self.request.user)
-        except UserProfile.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        return get_object_or_404(
+            UserProfile,
+            user=self.request.user
+        )
 
     def get(self, request):
         user_profile = self.get_object()
@@ -37,7 +41,7 @@ class UserProfileDetail(APIView):
 
     def put(self, request): 
         user_profile = self.get_object()
-        serializer = UserProfileSerializer(user_profile, data=request.data)
+        serializer = UserProfileSerializer(user_profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({"Message": "User updated successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)

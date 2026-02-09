@@ -23,7 +23,15 @@ class LogsList(APIView):
         meal_type = request.query_params.get("meal_type")
         
         #get log base on date
-        if date:
+        if date and meal_type:
+            try:
+                parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
+                logs = logs.filter(created_at=parsed_date, meal_type=meal_type)
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST
+                )
+        elif date:
             try:
                 parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
                 logs = logs.filter(created_at=parsed_date)
@@ -32,8 +40,7 @@ class LogsList(APIView):
                     {"error": "Date must be in YYYY-MM-DD format"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        #get by meal type
-        if meal_type:
+        elif meal_type:
             logs = logs.filter(meal_type=meal_type)
         
         serializer = LogSerializer(logs, many=True)

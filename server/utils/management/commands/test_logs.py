@@ -5,9 +5,9 @@ from logs.services import FoodLogService
 
 class Command(BaseCommand):
     help = "Test food log service logic"
-
+    
     def handle(self, *args, **kwargs):
-        user = User.objects.get(id=1)
+        user = User.objects.get(username="gwen")
 
         # Create a new food log
         logs = FoodLogService.get_daily_logs(user=user)
