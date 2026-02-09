@@ -76,10 +76,10 @@ export default function SignUpScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50 relative">
-      {/* 🔔 GLOBAL TOAST */}
+      {/* GLOBAL TOAST */}
       <Toast />
 
-      {/* 🔄 GLOBAL LOADING */}
+      {/* GLOBAL LOADING */}
       {loading && <LoadingOverlay text="Creating account..." />}
       <ScrollView
         className="px-6"

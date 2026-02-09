@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { MotiView } from "moti";
 import { BlurView } from "expo-blur";
 
@@ -7,38 +7,72 @@ type LoadingOverlayProps = {
 };
 
 export default function LoadingOverlay({
-  text = "Please wait...",
+  text = "Please wait…",
 }: LoadingOverlayProps) {
   return (
-    <View className="absolute inset-0 z-50 items-center justify-center">
-      {/* 🔹 BLUR BACKGROUND */}
+    <View style={styles.root} pointerEvents="auto">
+      {/* 🔹 BLUR + DIM BACKGROUND */}
       <MotiView
         from={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ type: "timing", duration: 200 }}
-        className="absolute inset-0"
+        transition={{ duration: 200 }}
+        style={StyleSheet.absoluteFill}
       >
-        <BlurView intensity={30} tint="dark" className="absolute inset-0" />
-        {/* optional dark overlay for contrast */}
-        <View className="absolute inset-0 bg-black/20" />
+        <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+        <View style={[StyleSheet.absoluteFill, styles.dim]} />
       </MotiView>
 
-      {/* 🔹 CARD */}
-      <MotiView
-        from={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          type: "spring",
-          damping: 15,
-          stiffness: 200,
-        }}
-        className="bg-white rounded-3xl px-8 py-6 items-center shadow-xl"
-      >
-        <ActivityIndicator size="large" />
-        <Text className="mt-4 text-slate-600 text-sm font-semibold">
-          {text}
-        </Text>
-      </MotiView>
+      {/* 🔹 CENTERED CARD */}
+      <View style={styles.center}>
+        <MotiView
+          from={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", damping: 14, stiffness: 180 }}
+          style={styles.card}
+        >
+          <ActivityIndicator size="large" color="#10b981" />
+          <Text style={styles.text}>{text}</Text>
+        </MotiView>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 9999,
+    elevation: 9999, // 🔑 Android
+  },
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dim: {
+    backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  card: {
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderRadius: 28,
+    paddingHorizontal: 32,
+    paddingVertical: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 12,
+  },
+  text: {
+    marginTop: 16,
+    color: "#334155",
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+});
