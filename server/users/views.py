@@ -86,3 +86,13 @@ class GenerateMacrosView(APIView):
         total_calories = request.data.get('total_calories')
         data = UserProfileService.generate_macros_base_calories(total_calories)
         return Response(data, status=status.HTTP_200_OK)
+    
+    
+class GenerateDailyCaloriesView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = request.data
+        daily_calories = UserProfileService.calculate_daily_calories(
+            data['age'], data['weight'], data['height'], data['gender'], data['activity_level'], data['goal'])
+        return Response({'daily_calories': daily_calories}, status=status.HTTP_200_OK)

@@ -2,6 +2,14 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class UserProfile(models.Model): 
+    ACTIVITY_CHOICES = [
+        ("sedentary", "Sedentary (little or no exercise)"),
+        ("light", "Light exercise (1–3 days/week)"),
+        ("moderate", "Moderate exercise (3–5 days/week)"),
+        ("active", "Very active (6–7 days/week)"),
+        ("athlete", "Athlete (physical job or intense training)"),
+    ]
+    
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -13,6 +21,22 @@ class UserProfile(models.Model):
     age = models.PositiveIntegerField(null=True, blank=True)
     weight = models.PositiveIntegerField(null=True, blank=True)  # kg
     height = models.PositiveIntegerField(null=True, blank=True)  # cm
+    gender = models.CharField(max_length=100, blank=True, default="male")
+    activity_level = models.CharField(
+        max_length=20,
+        choices=ACTIVITY_CHOICES,
+        default="sedentary"
+    )
+    goal = models.CharField(
+        max_length=10,
+        choices=[
+            ("loss", "Weight Loss"),
+            ("maintain", "Maintain"),
+            ("gain", "Weight Gain"),
+        ],
+        default="maintain"
+    )
+
     target_calories = models.PositiveIntegerField(null=True, blank=True)
     target_protein = models.PositiveIntegerField(null=True, blank=True)
     target_carbs = models.PositiveIntegerField(null=True, blank=True)

@@ -56,5 +56,35 @@ class UserProfileService:
             "carbs_g": round(carbs_grams),
             "fat_g": round(fat_grams)
         }
+    
+    # calculate the calories
+    @staticmethod
+    def calculate_bmr(weight, height, age, gender):
+        if gender == "male":
+            return 10 * weight + 6.25 * height - 5 * age + 5
+        else:  # female
+            return 10 * weight + 6.25 * height - 5 * age - 161
+            
+    @staticmethod
+    def calculate_daily_calories(age, weight, height, gender, activity_level, goal):
+        ACTIVITY_MULTIPLIER = {
+            "sedentary": 1.2,
+            "light": 1.375,
+            "moderate": 1.55,
+            "active": 1.725,
+            "athlete": 1.9,
+        }
+        bmr = UserProfileService.calculate_bmr(weight, height, age, gender)
+        activity_multiplier = ACTIVITY_MULTIPLIER[activity_level]
+
+        if goal == "loss":
+            daily_calories = bmr * activity_multiplier * 0.8
+        elif goal == "gain":
+            daily_calories = bmr * activity_multiplier * 1.2
+        else:
+            daily_calories = bmr * activity_multiplier
+
+        return daily_calories
+
 
         
