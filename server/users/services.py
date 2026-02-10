@@ -20,21 +20,21 @@ class UserProfileService:
         fats = daily_macros.fats if daily_macros else 0
 
         return {
-            "calories_goal": profile.target_calories,
-            "current_calories": calories,
-            "calories_remaining": profile.target_calories - calories,
+            "calories_goal": int(profile.target_calories),
+            "current_calories": int(calories),
+            "calories_remaining": int(profile.target_calories - calories),
 
-            "protein_goal": profile.target_protein,
-            "current_protein": protein,
-            "protein_remaining": profile.target_protein - protein,
+            "protein_goal": int(profile.target_protein),
+            "current_protein": int(protein),
+            "protein_remaining": int(profile.target_protein - protein),
 
-            "carbs_goal": profile.target_carbs,
-            "current_carbs": carbs,
-            "carbs_remaining": profile.target_carbs - carbs,
+            "carbs_goal": int(profile.target_carbs),
+            "current_carbs": int(carbs),
+            "carbs_remaining": int(profile.target_carbs - carbs),
 
-            "fats_goal": profile.target_fats,
-            "current_fats": fats,
-            "fats_remaining": profile.target_fats - fats,
+            "fats_goal": int(profile.target_fats),
+            "current_fats": int(fats),
+            "fats_remaining": int(profile.target_fats - fats),
         }
 
         

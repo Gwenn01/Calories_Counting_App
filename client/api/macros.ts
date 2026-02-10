@@ -5,3 +5,8 @@ export const generateBalancedMacros = (calories: number) => {
     calories,
   });
 };
+
+export const fetchMacrosByDate = async () => {
+  const res = await api.get("api/macros/");
+  return res.data;
+};
