@@ -6,6 +6,7 @@ urlpatterns = [
     path('profile/', views.UserProfileList.as_view(), name='profile-list'),
     path('profile-details/', views.UserProfileDetail.as_view(), name='profile-details'),
     path("auth/logout/", views.LogoutView.as_view(), name="logout"),
+    path("overview/", views.UserOverviewView.as_view(), name="overview")
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)   

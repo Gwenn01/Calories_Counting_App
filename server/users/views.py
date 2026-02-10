@@ -6,9 +6,10 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import render
+from rest_framework.authtoken.models import Token
 from .models import UserProfile
 from .serializers import UserProfileSerializer
-from rest_framework.authtoken.models import Token
+from .services import UserProfileService
 
 # Create your views here.
 class UserProfileList(APIView):
@@ -68,3 +69,11 @@ class LogoutView(APIView):
             {"message": "Logged out successfully"},
             status=status.HTTP_200_OK
         )
+  
+        
+class UserOverviewView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = UserProfileService.calculate_remaining_macros(request.user)
+        return Response(data, status=status.HTTP_200_OK)

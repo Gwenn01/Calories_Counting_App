@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
-from users.services import get_user_profile
+from users.services import UserProfileService
 from .models import Macros
 from .serializers import MacrosSerializer
 # Create your views here.
@@ -16,7 +16,7 @@ class MacrosList(APIView):
     
     def get(self, request):
         #get macros base on the user only
-        profile = get_user_profile(request.user)
+        profile = UserProfileService.get_user_profile(request.user)
         macros = Macros.objects.filter(user=profile)
         serializer = MacrosSerializer(macros, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

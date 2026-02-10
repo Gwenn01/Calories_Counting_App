@@ -23,3 +23,13 @@ class MacrosService:
         )
 
         return macros
+    
+    @staticmethod
+    def get_today_macros(user):
+        today = timezone.now().date()
+        user_profile = UserProfile.objects.get(user=user)
+
+        return Macros.objects.filter(
+            user=user_profile,
+            date=today
+        ).first()
