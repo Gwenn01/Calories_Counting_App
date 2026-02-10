@@ -6,6 +6,7 @@ import {
   Pressable,
   Alert,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -118,14 +119,22 @@ export default function SignUpScreen() {
           className="bg-white rounded-3xl p-6 border border-slate-100 mt-6"
         >
           {/* ---------- HEADER ---------- */}
-          <View className="items-center mb-6">
-            <View className="bg-emerald-100 p-3 rounded-2xl mb-3">
-              <Feather name="user-plus" size={24} color="#10b981" />
+          <View className="items-center mb-8">
+            {/* Logo with Glow Effect */}
+            <View className="mb-6 shadow-lg shadow-emerald-200 bg-white rounded-3xl">
+              <Image
+                source={require("@/assets/image/logo.jpg")}
+                className="w-24 h-24 rounded-3xl"
+                resizeMode="contain"
+              />
             </View>
-            <Text className="text-2xl font-black text-slate-900">
+
+            {/* Modern Typography */}
+            <Text className="text-3xl font-bold text-slate-900 tracking-tight">
               Create Account
             </Text>
-            <Text className="text-slate-400 mt-1">
+
+            <Text className="text-slate-500 mt-2 text-base font-medium">
               Set up your nutrition profile
             </Text>
           </View>
@@ -252,12 +261,16 @@ export default function SignUpScreen() {
               Create Account
             </Text>
           </Pressable>
-          <View className="flex-row items-center justify-center mt-4">
-            <Text className="text-gray-400 text-sm">
-              Already have an account?
+          <View className="flex-row items-center justify-center mt-6 gap-x-2">
+            <Text className="text-slate-400 text-sm font-medium">
+              Member already?
             </Text>
-            <Pressable onPress={() => router.push("/sign-in")}>
-              <Text className="text-emerald-500 text-sm ml-1">Sign In</Text>
+
+            <Pressable
+              onPress={() => router.push("/sign-in")}
+              className="bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100 active:bg-emerald-100"
+            >
+              <Text className="text-emerald-600 text-sm font-bold">Log In</Text>
             </Pressable>
           </View>
         </MotiView>

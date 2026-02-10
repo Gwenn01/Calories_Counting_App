@@ -8,3 +8,7 @@ export const registerUser = (data: RegisterPayload) => {
 export const loginUser = (data: { username: string; password: string }) => {
   return api.post("login/", data);
 };
+
+export const logoutUser = () => {
+  return api.post("/api/auth/logout/");
+};

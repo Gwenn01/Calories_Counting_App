@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,6 +20,7 @@ import Toast from "react-native-toast-message";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import FloatingInput from "@/components/floatingInput";
 import { useToast } from "@/components/ToastProvider";
+import { setAuthHeader } from "@/api/client";
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -43,6 +45,8 @@ export default function SignInScreen() {
       const token = res.data.token; // or res.data.token
 
       await saveToken(token);
+      setAuthHeader(token);
+      router.replace("/");
 
       showToast("Success!", "Welcome Back", "success");
 
@@ -79,18 +83,22 @@ export default function SignInScreen() {
           >
             {/* ---------- HEADER ---------- */}
             <View className="items-center mb-8">
-              {/* Icon */}
-              <View className="bg-emerald-100 p-4 rounded-full mb-4">
-                <Feather name="user" size={28} color="#10b981" />
+              {/* LOGO REPLACEMENT */}
+              <View className="mb-6 shadow-xl shadow-emerald-200">
+                <Image
+                  source={require("@/assets/image/logo.jpg")} // 2. Check this path matches exactly
+                  className="w-24 h-24 rounded-3xl" // 3. Size and round corners
+                  resizeMode="contain"
+                />
               </View>
 
               {/* Title */}
-              <Text className="text-3xl font-bold text-slate-900">
+              <Text className="text-3xl font-bold text-slate-900 tracking-tight">
                 Welcome Back
               </Text>
 
               {/* Subtitle */}
-              <Text className="text-slate-400 mt-2 text-center">
+              <Text className="text-slate-400 mt-2 text-center text-base font-medium">
                 Sign in to continue tracking your calories
               </Text>
             </View>
@@ -137,15 +145,17 @@ export default function SignInScreen() {
               </Text>
             </Pressable>
           </MotiView>
-          <View className="flex-row justify-center mt-6">
-            <Text className="text-gray-500">Don’t have an account? </Text>
+          <View className="flex-row items-center justify-center mt-8 gap-x-2">
+            <Text className="text-slate-400 font-medium text-sm">
+              New here?
+            </Text>
 
             <Pressable
               onPress={() => router.push("/(auth)/sign-up")}
-              className="active:opacity-70"
+              className="bg-indigo-50 px-4 py-2 rounded-full active:bg-indigo-100 transition-colors"
             >
-              <Text className="text-blue-600 font-semibold, underline">
-                Register
+              <Text className="text-indigo-600 font-bold text-sm">
+                Create Account
               </Text>
             </Pressable>
           </View>

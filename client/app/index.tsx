@@ -7,6 +7,7 @@ import LoadingOverlay from "@/components/LoadingOverplay";
 export default function Index() {
   const [ready, setReady] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const isAuthenticated = Boolean(token && token.length > 10);
 
   useEffect(() => {
     (async () => {
@@ -18,7 +19,7 @@ export default function Index() {
 
   if (!ready) return <LoadingOverlay text="Starting app..." />;
 
-  return token ? (
+  return isAuthenticated ? (
     <Redirect href="/(tabs)" />
   ) : (
     <Redirect href="/(auth)/sign-in" />

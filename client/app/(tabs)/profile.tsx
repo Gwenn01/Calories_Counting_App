@@ -1,28 +1,56 @@
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
+import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SettingsRow } from "../../components/Profile/SettingsRow";
 import { Feather } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useAlert } from "@/components/AlertProvider";
+import { useToast } from "@/components/ToastProvider";
+import LoadingOverlay from "@/components/LoadingOverplay";
+import { removeToken } from "@/utils/token";
+import { Platform } from "react-native";
+import { setAuthHeader } from "@/api/client";
+import { logoutUser } from "@/api/auth";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { showAlert } = useAlert();
+  const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
 
   const handleSignOut = () => {
-    showAlert("Sign Out", "Are you sure you want to log out of your account?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-        // No onPress needed, it closes automatically
-      },
+    showAlert("Sign Out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
       {
         text: "Yes, Sign Out",
-        style: "destructive", // Triggers the Red styling
+        style: "destructive",
         onPress: async () => {
-          await AsyncStorage.removeItem("token");
-          router.replace("/(auth)/sign-in");
+          try {
+            setLoading(true);
+            await logoutUser(); // backend logout (token still exists)
+            await removeToken();
+            setAuthHeader(null);
+            router.replace("/");
+
+            showToast("Success!", "Logout successful", "success");
+          } catch (e) {
+            setLoading(false);
+            showToast("Error", "Server error", "error");
+            // ignore (token might already be invalid)
+          } finally {
+            // 2️ Clear local auth
+            await removeToken();
+            setAuthHeader(null);
+            // 🔥 THIS is the fix
+            router.replace("/(auth)/sign-in");
+
+            // 3️ Hard reset navigation
+            if (Platform.OS === "web") {
+              window.location.href = "/";
+            } else {
+              router.replace("/(auth)/sign-in");
+            }
+          }
         },
       },
     ]);
@@ -30,6 +58,8 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
+      {/* GLOBAL LOADING */}
+      {loading && <LoadingOverlay text="Creating account..." />}
       <ScrollView
         className="p-6"
         contentContainerStyle={{ paddingBottom: 120 }} // space for tabs

@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from django.shortcuts import render
 from .models import UserProfile
 from .serializers import UserProfileSerializer
+from rest_framework.authtoken.models import Token
 
 # Create your views here.
 class UserProfileList(APIView):
@@ -55,4 +56,15 @@ class UserProfileDetail(APIView):
         user_profile = self.get_object()
         user_profile.delete()
         return Response({"Message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+    
         
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Delete the user's token
+        Token.objects.filter(user=request.user).delete()
+        return Response(
+            {"message": "Logged out successfully"},
+            status=status.HTTP_200_OK
+        )
