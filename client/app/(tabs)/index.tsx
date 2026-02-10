@@ -1,72 +1,172 @@
-import { View, Text } from "react-native";
+import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
+import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import { fetchTodayOverview } from "@/api/overview";
+import LoadingOverlay from "@/components/LoadingOverplay";
 
 export default function TodayScreen() {
-  const dailyGoal = 2000;
-  const consumed = 850;
-  const remaining = dailyGoal - consumed;
-  const progress = (consumed / dailyGoal) * 100;
+  const [overview, setOverview] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadOverview = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await fetchTodayOverview();
+      setOverview(data);
+    } catch {
+      setError("Failed to load overview");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useFocusEffect(
+    useCallback(() => {
+      loadOverview();
+    }, []),
+  );
+
+  /* ---------- ERROR ---------- */
+  if (error || !overview) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-neutral-50">
+        <Text className="text-neutral-500 text-sm">
+          Something went wrong. Please try again.
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  /* ---------- SAFE DATA ---------- */
+  const calorieProgress =
+    (overview.current_calories / overview.calories_goal) * 100 || 0;
+
+  const macros = [
+    {
+      label: "Protein",
+      value: overview.current_protein,
+      goal: overview.protein_goal,
+      unit: "g",
+      bg: "bg-indigo-500",
+      track: "bg-indigo-100",
+    },
+    {
+      label: "Carbs",
+      value: overview.current_carbs,
+      goal: overview.carbs_goal,
+      unit: "g",
+      bg: "bg-sky-500",
+      track: "bg-sky-100",
+    },
+    {
+      label: "Fats",
+      value: overview.current_fats,
+      goal: overview.fats_goal,
+      unit: "g",
+      bg: "bg-rose-500",
+      track: "bg-rose-100",
+    },
+  ];
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 px-5">
-      {/* Header */}
-      <View className="mt-3 mb-6">
-        <Text className="text-xs font-bold tracking-[2px] uppercase text-slate-400 mb-1">
-          Overview
-        </Text>
-        <Text className="text-4xl font-black text-slate-900">Today</Text>
-      </View>
-
-      {/* Hero Card */}
-      <View className="bg-slate-900 rounded-[32px] p-6 mb-6">
-        <View className="flex-row justify-between items-center">
-          <Text className="text-sm font-bold tracking-wide text-emerald-400">
-            Calories
-          </Text>
-          <View className="bg-slate-800 p-2.5 rounded-2xl">
-            <Feather name="zap" size={22} color="#22c55e" />
+    <SafeAreaView className="flex-1 bg-neutral-50">
+      {/* GLOBAL LOADING */}
+      {loading && <LoadingOverlay text="Creating account..." />}
+      <ScrollView
+        className="flex-1 px-5 pt-2"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View className="flex-row justify-between items-center mb-6 mt-2">
+          <View>
+            <Text className="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-1">
+              Summary
+            </Text>
+            <Text className="text-3xl font-black text-neutral-900">Today</Text>
+          </View>
+          <View className="bg-white p-3 rounded-full border border-neutral-100">
+            <Feather name="calendar" size={20} color="#525252" />
           </View>
         </View>
 
-        <View className="flex-row items-baseline mt-3">
-          <Text className="text-[56px] font-black text-white">{consumed}</Text>
-          <Text className="text-lg font-bold text-slate-500 ml-2">kcal</Text>
+        {/* Calories Card */}
+        <View className="bg-slate-900 rounded-[36px] p-7 mb-6">
+          <View className="flex-row justify-between items-start">
+            <View>
+              <Text className="text-emerald-400 font-bold text-xs uppercase mb-2">
+                Calories
+              </Text>
+              <View className="flex-row items-baseline">
+                <Text className="text-6xl font-black text-white">
+                  {overview.current_calories}
+                </Text>
+                <Text className="text-lg text-slate-500 ml-2">
+                  / {overview.calories_goal}
+                </Text>
+              </View>
+            </View>
+            <View className="bg-slate-800 h-12 w-12 rounded-full items-center justify-center">
+              <Feather name="zap" size={24} color="#34d399" />
+            </View>
+          </View>
+
+          <View className="mt-6">
+            <View className="h-3 bg-slate-800 rounded-full overflow-hidden">
+              <View
+                className="h-full bg-emerald-500 rounded-full"
+                style={{ width: `${calorieProgress}%` }}
+              />
+            </View>
+            <Text className="mt-4 text-center text-slate-400 text-sm">
+              {overview.calories_remaining} kcal remaining
+            </Text>
+          </View>
         </View>
 
-        <Text className="mt-1.5 text-sm text-slate-400">
-          {remaining} kcal remaining today
+        {/* Macros */}
+        <Text className="text-lg font-bold text-neutral-800 mb-4">
+          Macronutrients
         </Text>
 
-        {/* Progress Bar */}
-        <View className="h-2 bg-slate-800 rounded-full mt-5 overflow-hidden">
-          <View
-            className="h-full bg-green-500 rounded-full"
-            style={{ width: `${progress}%` }}
-          />
-        </View>
-      </View>
+        <View className="flex-row gap-3 mb-6">
+          {macros.map((macro) => {
+            const progress = (macro.value / macro.goal) * 100 || 0;
 
-      {/* Stats Row */}
-      <View className="flex-row gap-4">
-        <View className="flex-1 bg-white py-5 rounded-3xl items-center border border-slate-100">
-          <Text className="text-[22px] font-extrabold text-slate-900">
-            {dailyGoal}
-          </Text>
-          <Text className="text-[13px] font-semibold text-slate-400 mt-1">
-            Daily Goal
-          </Text>
-        </View>
+            return (
+              <View
+                key={macro.label}
+                className="flex-1 bg-white p-4 rounded-[24px] border border-neutral-100"
+              >
+                <Text className="text-xs font-bold text-neutral-400 uppercase mb-2">
+                  {macro.label}
+                </Text>
 
-        <View className="flex-1 bg-white py-5 rounded-3xl items-center border border-slate-100">
-          <Text className="text-[22px] font-extrabold text-slate-900">
-            {remaining}
-          </Text>
-          <Text className="text-[13px] font-semibold text-slate-400 mt-1">
-            Remaining
-          </Text>
+                <Text className="text-2xl font-black text-neutral-800">
+                  {macro.value}
+                </Text>
+                <Text className="text-[10px] text-neutral-400 font-bold mb-2">
+                  / {macro.goal}
+                  {macro.unit}
+                </Text>
+
+                <View
+                  className={`w-full h-1.5 ${macro.track} rounded-full overflow-hidden`}
+                >
+                  <View
+                    className={`h-full ${macro.bg}`}
+                    style={{ width: `${progress}%` }}
+                  />
+                </View>
+              </View>
+            );
+          })}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
