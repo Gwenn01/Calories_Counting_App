@@ -166,6 +166,47 @@ export default function TodayScreen() {
           </View>
         </View>
 
+        {/* Macros Grid */}
+        <Text className="text-lg font-bold text-neutral-800 mb-4 tracking-tight">
+          Macronutrients
+        </Text>
+
+        <View className="flex-row gap-3 mb-8">
+          {macros.map((macro) => {
+            const progress = (macro.value / macro.goal) * 100 || 0;
+
+            return (
+              <View
+                key={macro.label}
+                className="flex-1 bg-white p-4 rounded-[24px] border border-neutral-100 shadow-sm"
+              >
+                <Text className="text-[10px] font-bold text-neutral-400 uppercase mb-2 tracking-wide">
+                  {macro.label}
+                </Text>
+
+                <View className="mb-2">
+                  <Text className="text-2xl font-black text-neutral-800 tracking-tighter">
+                    {macro.value}
+                  </Text>
+                  <Text className="text-[10px] text-neutral-400 font-bold">
+                    / {macro.goal}
+                    {macro.unit}
+                  </Text>
+                </View>
+
+                <View
+                  className={`w-full h-1.5 ${macro.track} rounded-full overflow-hidden`}
+                >
+                  <View
+                    className={`h-full ${macro.bg}`}
+                    style={{ width: `${progress}%` }}
+                  />
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
         {/* --- 3. NEW CHART SECTION --- */}
         <View className="bg-white rounded-[28px] p-6 mb-6 border border-slate-100 shadow-sm">
           <View className="flex-row justify-between items-center mb-6">
@@ -232,47 +273,6 @@ export default function TodayScreen() {
           </View>
         </View>
         {/* --- END CHART SECTION --- */}
-
-        {/* Macros Grid */}
-        <Text className="text-lg font-bold text-neutral-800 mb-4 tracking-tight">
-          Macronutrients
-        </Text>
-
-        <View className="flex-row gap-3 mb-8">
-          {macros.map((macro) => {
-            const progress = (macro.value / macro.goal) * 100 || 0;
-
-            return (
-              <View
-                key={macro.label}
-                className="flex-1 bg-white p-4 rounded-[24px] border border-neutral-100 shadow-sm"
-              >
-                <Text className="text-[10px] font-bold text-neutral-400 uppercase mb-2 tracking-wide">
-                  {macro.label}
-                </Text>
-
-                <View className="mb-2">
-                  <Text className="text-2xl font-black text-neutral-800 tracking-tighter">
-                    {macro.value}
-                  </Text>
-                  <Text className="text-[10px] text-neutral-400 font-bold">
-                    / {macro.goal}
-                    {macro.unit}
-                  </Text>
-                </View>
-
-                <View
-                  className={`w-full h-1.5 ${macro.track} rounded-full overflow-hidden`}
-                >
-                  <View
-                    className={`h-full ${macro.bg}`}
-                    style={{ width: `${progress}%` }}
-                  />
-                </View>
-              </View>
-            );
-          })}
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

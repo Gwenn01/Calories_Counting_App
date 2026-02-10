@@ -11,8 +11,8 @@ export default function RootLayout() {
           {/* You don't strictly need to list every screen here 
            if you just want defaults, but it's good practice.
         */}
-          <Stack.Screen name="index" />
           <Stack.Screen name="(auth)" />
+          <Stack.Screen name="index" />
           <Stack.Screen name="(tabs)" />
         </Stack>
       </AlertProvider>

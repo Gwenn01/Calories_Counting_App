@@ -4,7 +4,6 @@ import { useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { MotiView } from "moti";
-
 import { fetchMacrosByDate } from "@/api/macros";
 import LoadingOverlay from "@/components/LoadingOverplay";
 

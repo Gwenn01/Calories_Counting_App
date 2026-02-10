@@ -3,43 +3,77 @@ import { View, Text, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { FoodPickerModal } from "@/components/food/FoodPickerModal";
+import { FoodPickerModal } from "@/components/AddFood/FoodPickerModal";
+import { AddFoodManualModal } from "@/components/AddFood/AddFoodManualModal";
 import type { FoodItem } from "@/types/foods";
+import LoadingOverlay from "@/components/LoadingOverplay";
+import { useToast } from "@/components/ToastProvider";
+
+/* ---------------- DATE HELPERS ---------------- */
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
 type MealType = "Breakfast" | "Lunch" | "Dinner" | "Snacks";
 
 export default function AddFoodScreen() {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // add food model
   const [showFoodModal, setShowFoodModal] = useState(false);
+  const [showManualModal, setShowManualModal] = useState(false);
+
+  //
   const [activeMeal, setActiveMeal] = useState<MealType | null>(null);
 
+  // date provider
+  const goPrevDay = () =>
+    setCurrentDate((d) => new Date(d.getTime() - 86400000));
+
+  const goNextDay = () =>
+    setCurrentDate((d) => new Date(d.getTime() + 86400000));
+
+  // data
   const goal = 2000;
   const food = 850;
-  const exercise = 200;
-  const remaining = goal - food + exercise;
+  const remaining = goal - food;
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
+      {loading && <LoadingOverlay text="Loading nutrition..." />}
       <ScrollView
         showsVerticalScrollIndicator={false}
         //contentContainerClassName="p-5 pb-32"
       >
         {/* Header */}
+        {/* ---------- HEADER ---------- */}
         <View className="flex-row items-center justify-between mb-6">
-          <Pressable className="bg-white p-2.5 rounded-xl border border-slate-100">
+          <Pressable
+            onPress={goPrevDay}
+            className="bg-white p-2.5 rounded-2xl border border-slate-100"
+          >
             <Feather name="chevron-left" size={22} color="#0f172a" />
           </Pressable>
 
-          <View>
-            <Text className="text-xs font-bold text-slate-400 text-center">
-              Today
+          <View className="items-center">
+            <Text className="text-xs font-bold tracking-[2px] uppercase text-slate-400">
+              Today Food
             </Text>
-            <Text className="text-xl font-black text-slate-900 text-center">
-              Feb 1, 2026
+            <Text className="text-xl font-black text-slate-900">
+              {formatDate(currentDate)}
             </Text>
           </View>
 
-          <Pressable className="bg-white p-2.5 rounded-xl border border-slate-100">
+          <Pressable
+            onPress={goNextDay}
+            className="bg-white p-2.5 rounded-2xl border border-slate-100"
+          >
             <Feather name="chevron-right" size={22} color="#0f172a" />
           </Pressable>
         </View>
@@ -52,10 +86,8 @@ export default function AddFoodScreen() {
 
           <View className="flex-row items-center justify-between flex-wrap">
             <CalorieItem label="Goal" value={goal} />
-            <Text className="text-lg font-extrabold text-slate-400">−</Text>
+            <Text className="text-lg font-extrabold text-slate-400">−−</Text>
             <CalorieItem label="Food" value={food} />
-            <Text className="text-lg font-extrabold text-slate-400">+</Text>
-            <CalorieItem label="Exercise" value={exercise} />
             <Text className="text-lg font-extrabold text-slate-400">=</Text>
 
             <View className="bg-slate-900 px-4 py-2.5 rounded-xl items-center">
@@ -73,6 +105,7 @@ export default function AddFoodScreen() {
         <MealCard title="Dinner" onAdd={() => router.push("/add-food")} />
         <MealCard title="Snacks" onAdd={() => router.push("/add-food")} />
 
+        {/* modal for add foods */}
         <FoodPickerModal
           visible={showFoodModal}
           onClose={() => setShowFoodModal(false)}
@@ -80,7 +113,17 @@ export default function AddFoodScreen() {
             console.log("Selected food:", food);
             setShowFoodModal(false);
           }}
+          onAddManual={() => {
+            setShowFoodModal(false); // close picker
+            setShowManualModal(true); // OPEN manual modal
+          }}
         />
+        {/* add manual */}
+        <AddFoodManualModal
+          visible={showManualModal}
+          onClose={() => setShowManualModal(false)}
+        />
+        {/* add using scan */}
       </ScrollView>
     </SafeAreaView>
   );
