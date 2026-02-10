@@ -5,6 +5,7 @@ import {
   ScrollView,
   Pressable,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -13,11 +14,17 @@ import { MotiView } from "moti";
 import Toast from "react-native-toast-message";
 import { useRouter } from "expo-router";
 import { registerUser } from "@/api/auth";
+import { generateBalancedMacros } from "@/api/macros";
 import LoadingOverlay from "@/components/LoadingOverplay";
+import FloatingInput from "@/components/floatingInput";
+import TargetInput from "@/components/TargetInput";
+import { useToast } from "@/components/ToastProvider";
 
 export default function SignUpScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const { showToast } = useToast();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -32,9 +39,36 @@ export default function SignUpScreen() {
   const [targetCarbs, setTargetCarbs] = useState("");
   const [targetFats, setTargetFats] = useState("");
 
+  const onGenerateMacros = async () => {
+    if (!targetCalories) {
+      showToast("Missing Input", "Please enter calories first! ⚡️", "warning");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // 1. Convert input string to number for the API
+      const calories = Number(targetCalories);
+
+      // 2. Call your API
+      const res = await generateBalancedMacros(calories);
+
+      // 3. Update state (Convert back to String for the Inputs!)
+      // Assuming res.data returns numbers like 150, 200, etc.
+      setTargetProtein(String(res.data.protein));
+      setTargetCarbs(String(res.data.carbs));
+      setTargetFats(String(res.data.fats));
+      showToast("Success!", "Macros calculated perfectly.", "success");
+    } catch (err) {
+      showToast("Error", "Could not connect to server.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSignUp = async () => {
     if (!username || !password || !name) {
-      Alert.alert("Missing fields", "Username, password and name are required");
+      showToast("Missing Input", "Username and Password! ⚡️", "warning");
       return;
     }
 
@@ -56,19 +90,11 @@ export default function SignUpScreen() {
 
       await registerUser(payload);
 
-      Toast.show({
-        type: "success",
-        text1: "Account created",
-        text2: "Please login to continue",
-      });
+      showToast("Success!", "Account Created Successfully.", "success");
 
       router.replace("/(auth)/sign-in");
     } catch (error: any) {
-      Toast.show({
-        type: "error",
-        text1: "Registration failed",
-        text2: error?.response?.data?.detail || "Please try again",
-      });
+      showToast("Error", "Could not connect to server.", "error");
     } finally {
       setLoading(false);
     }
@@ -105,60 +131,116 @@ export default function SignUpScreen() {
           </View>
 
           {/* ---------- AUTH ---------- */}
-          <Input label="Username" value={username} onChange={setUsername} />
-          <Input
+          <FloatingInput
+            label="Username"
+            value={username}
+            onChange={setUsername}
+            leftIcon={<Feather name="at-sign" size={18} color="#64748b" />}
+            returnKeyType="next"
+          />
+
+          <FloatingInput
             label="Password"
             value={password}
             onChange={setPassword}
             secure
+            leftIcon={<Feather name="lock" size={18} color="#64748b" />}
+            rightIcon={
+              <Feather
+                name={showPassword ? "eye-off" : "eye"}
+                size={18}
+                color="#64748b"
+              />
+            }
+            onRightPress={() => setShowPassword(!showPassword)}
+            returnKeyType="done"
           />
 
           {/* ---------- PROFILE ---------- */}
-          <Input label="Full Name" value={name} onChange={setName} />
-          <Input label="Age" value={age} onChange={setAge} number />
-          <Input
+          <FloatingInput
+            label="Full Name"
+            value={name}
+            onChange={setName}
+            leftIcon={<Feather name="user" size={18} color="#64748b" />}
+          />
+
+          <FloatingInput
+            label="Age"
+            value={age}
+            onChange={setAge}
+            isNumeric
+            leftIcon={<Feather name="calendar" size={18} color="#64748b" />}
+          />
+
+          <FloatingInput
             label="Weight (kg)"
             value={weight}
             onChange={setWeight}
-            number
+            isNumeric
+            leftIcon={<Feather name="activity" size={18} color="#64748b" />}
           />
-          <Input
+
+          <FloatingInput
             label="Height (cm)"
             value={height}
             onChange={setHeight}
-            number
+            isNumeric
+            leftIcon={<Feather name="arrow-up" size={18} color="#64748b" />}
           />
 
           {/* ---------- TARGETS ---------- */}
-          <View className="mt-4 mb-2">
+          <View className="mt-6 mb-3">
             <Text className="text-xs font-bold tracking-wide text-slate-400">
               DAILY TARGETS
             </Text>
           </View>
 
-          <Input
+          <TargetInput
             label="Target Calories"
             value={targetCalories}
             onChange={setTargetCalories}
-            number
+            icon="zap"
+            color="#f59e0b"
           />
-          <Input
+
+          <TouchableOpacity
+            // FIX: Wrap in arrow function and convert string state to number
+            onPress={onGenerateMacros}
+            activeOpacity={0.8}
+            className="my-5 flex-row items-center justify-center rounded-2xl bg-indigo-600 py-4 shadow-lg shadow-indigo-200"
+          >
+            {/* Glowing Icon Container */}
+            <View className="mr-2 rounded-full bg-white/20 p-1.5">
+              <Feather name="zap" size={16} color="white" />
+            </View>
+
+            <Text className="text-sm font-bold tracking-wide text-white">
+              Auto-Balance Macros
+            </Text>
+          </TouchableOpacity>
+
+          <TargetInput
             label="Target Protein (g)"
             value={targetProtein}
             onChange={setTargetProtein}
-            number
+            icon="dribbble"
+            color="#ef4444"
           />
-          <Input
+
+          <TargetInput
             label="Target Carbs (g)"
             value={targetCarbs}
             onChange={setTargetCarbs}
-            number
+            icon="layers"
+            color="#3b82f6"
           />
-          <Input
+
+          <TargetInput
             label="Target Fats (g)"
             value={targetFats}
             onChange={setTargetFats}
-            number
+            icon="droplet"
+            color="#a855f7"
           />
 
           {/* ---------- BUTTON ---------- */}
@@ -181,35 +263,5 @@ export default function SignUpScreen() {
         </MotiView>
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-/* ---------------- REUSABLE INPUT ---------------- */
-function Input({
-  label,
-  value,
-  onChange,
-  secure = false,
-  number = false,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  secure?: boolean;
-  number?: boolean;
-}) {
-  return (
-    <View className="mb-4">
-      <Text className="text-xs font-bold tracking-wide text-slate-400 mb-2">
-        {label.toUpperCase()}
-      </Text>
-      <TextInput
-        value={value}
-        onChangeText={onChange}
-        secureTextEntry={secure}
-        keyboardType={number ? "numeric" : "default"}
-        className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-900"
-      />
-    </View>
   );
 }

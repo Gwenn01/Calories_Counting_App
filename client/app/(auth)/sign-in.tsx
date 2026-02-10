@@ -18,8 +18,11 @@ import { saveToken } from "@/utils/token";
 import Toast from "react-native-toast-message";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import FloatingInput from "@/components/floatingInput";
+import { useToast } from "@/components/ToastProvider";
+
 export default function SignInScreen() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -28,7 +31,7 @@ export default function SignInScreen() {
 
   const handleSignIn = async () => {
     if (!username || !password) {
-      Alert.alert("Missing fields", "Username and password required");
+      showToast("Missing Input", "Username and Password! ⚡️", "warning");
       return;
     }
 
@@ -41,18 +44,11 @@ export default function SignInScreen() {
 
       await saveToken(token);
 
-      Toast.show({
-        type: "success",
-        text1: "Welcome back 👋",
-      });
+      showToast("Success!", "Welcome Back", "success");
 
       router.replace("/(tabs)"); // go to app
     } catch (error: any) {
-      Toast.show({
-        type: "error",
-        text1: "Login failed",
-        text2: "Invalid credentials",
-      });
+      showToast("Error", "Invalid Username or Password", "error");
     } finally {
       setLoading(false);
     }

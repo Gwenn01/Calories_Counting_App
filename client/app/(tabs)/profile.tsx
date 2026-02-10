@@ -3,15 +3,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { SettingsRow } from "../../components/Profile/SettingsRow";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
+import { useAlert } from "@/components/AlertProvider";
 
 export default function ProfileScreen() {
+  const router = useRouter();
+  const { showAlert } = useAlert();
+
   const handleSignOut = () => {
-    Alert.alert("Sign out", "Do you really want to sign out?", [
-      { text: "Cancel", style: "cancel" },
+    showAlert("Sign Out", "Are you sure you want to log out of your account?", [
       {
-        text: "Sign out",
-        style: "destructive",
+        text: "Cancel",
+        style: "cancel",
+        // No onPress needed, it closes automatically
+      },
+      {
+        text: "Yes, Sign Out",
+        style: "destructive", // Triggers the Red styling
         onPress: async () => {
           await AsyncStorage.removeItem("token");
           router.replace("/(auth)/sign-in");
