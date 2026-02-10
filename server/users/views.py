@@ -77,3 +77,12 @@ class UserOverviewView(APIView):
     def get(self, request):
         data = UserProfileService.calculate_remaining_macros(request.user)
         return Response(data, status=status.HTTP_200_OK)
+    
+    
+class GenerateMacrosView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        total_calories = request.data.get('total_calories')
+        data = UserProfileService.generate_macros_base_calories(total_calories)
+        return Response(data, status=status.HTTP_200_OK)
