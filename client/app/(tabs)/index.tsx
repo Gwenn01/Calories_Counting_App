@@ -113,7 +113,7 @@ export default function TodayScreen() {
 
           {/* Right: Logo + Calendar */}
           <View className="flex-row items-center gap-3">
-            {/* App Logo */}
+            {/* App Logo
             <View className="bg-white p-2 rounded-full border border-neutral-100 shadow-sm">
               <Image
                 source={require("@/assets/image/logo.jpg")}
@@ -121,7 +121,7 @@ export default function TodayScreen() {
                 resizeMode="contain"
               />
             </View>
-
+              */}
             {/* Calendar Button */}
             <View className="bg-white p-3 rounded-full border border-neutral-100 shadow-sm">
               <Feather name="calendar" size={20} color="#525252" />
