@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from .models import DailyLog
 from .serializers import  LogSerializer
+from .selectors import LogSelectors
 from macros.services import MacrosService
 # Create your views here.
 
@@ -19,7 +20,6 @@ class LogsList(APIView):
         
     def get(self, request, format=None):
         logs = DailyLog.objects.filter(user=request.user)
-        print("AUTH USER:", request.user, request.user.id)
 
         date = request.query_params.get("date")
         meal_type = request.query_params.get("meal_type")
@@ -29,6 +29,9 @@ class LogsList(APIView):
             try:
                 parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
                 logs = logs.filter(created_at=parsed_date, meal_type=meal_type)
+                # serialize it before returning
+                serializer = LogSerializer(logs, many=True)
+                return Response(serializer.data)
             except ValueError:
                 return Response(
                     {"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST
@@ -36,7 +39,9 @@ class LogsList(APIView):
         elif date:
             try:
                 parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
-                logs = logs.filter(created_at=parsed_date)
+                #format the data base on meal type and filter by date
+                data = LogSelectors.format_daily_logs(user=request.user, date=parsed_date)
+                return Response(data)
             except ValueError:
                 return Response(
                     {"error": "Date must be in YYYY-MM-DD format"},
@@ -44,9 +49,9 @@ class LogsList(APIView):
                 )
         elif meal_type:
             logs = logs.filter(meal_type=meal_type)
-        # serialize it before returning
-        serializer = LogSerializer(logs, many=True)
-        return Response(serializer.data)
+            # serialize it before returning
+            serializer = LogSerializer(logs, many=True)
+            return Response(serializer.data)
 
     def post(self, request, format=None):
         serializer = LogSerializer(data=request.data, context={"request": request})
