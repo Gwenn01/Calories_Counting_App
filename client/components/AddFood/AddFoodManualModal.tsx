@@ -9,96 +9,393 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { Feather } from "@expo/vector-icons";
+import LoadingOverlay from "@/components/LoadingOverplay";
+import { useToast } from "@/components/ToastProvider";
+import { createFood } from "../../api/food";
+
+const SectionHeader = ({ title }: { title: string }) => (
+  <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2 mt-5">
+    {title}
+  </Text>
+);
+
+const Field = ({
+  placeholder,
+  value,
+  onChange,
+  numeric,
+}: {
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  numeric?: boolean;
+}) => (
+  <TextInput
+    placeholder={placeholder}
+    value={value}
+    keyboardType={numeric ? "numeric" : "default"}
+    onChangeText={onChange}
+    placeholderTextColor="#94a3b8"
+    className="border border-slate-200 bg-slate-50 p-4 mb-2 rounded-xl text-slate-800"
+  />
+);
+
+const Row = ({ children }: { children: React.ReactNode }) => (
+  <View className="flex-row gap-2">{children}</View>
+);
+
+const HalfField = ({
+  placeholder,
+  value,
+  onChange,
+}: {
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+}) => (
+  <View className="flex-1">
+    <TextInput
+      placeholder={placeholder}
+      value={value}
+      keyboardType="numeric"
+      onChangeText={onChange}
+      placeholderTextColor="#94a3b8"
+      className="border border-slate-200 bg-slate-50 p-4 mb-2 rounded-xl text-slate-800"
+    />
+  </View>
+);
 
 export function AddFoodManualModal({ visible, onClose }: any) {
+  const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
   const [form, setForm] = useState({
+    // Basic
     name: "",
     serving: "",
     calories: "",
-    protein: "",
-    total_carbs: "",
+    water: "",
+
+    // Fats
     total_fat: "",
+    saturated_fat: "",
+    monounsaturated_fat: "",
+    polyunsaturated_fat: "",
+    cholesterol: "",
+
+    // Carbs
+    total_carbs: "",
+    starch: "",
+    sugars: "",
+    fiber: "",
+
+    // Protein
+    protein: "",
+
+    // Vitamins
+    vitamin_a: "",
+    vitamin_c: "",
+    vitamin_e: "",
+    vitamin_k: "",
+    thiamin_b1: "",
+    riboflavin_b2: "",
+    niacin_b3: "",
+    vitamin_b6: "",
+    folate_b9: "",
+
+    // Minerals
+    calcium: "",
+    iron: "",
+    magnesium: "",
+    phosphorus: "",
+    potassium: "",
+    sodium: "",
+    zinc: "",
+    copper: "",
+    manganese: "",
   });
 
-  const handleChange = (key: string, value: string) => {
+  const set = (key: string) => (value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
-  };
+
+  const numericFields = [
+    "calories",
+    "water",
+    "total_fat",
+    "saturated_fat",
+    "monounsaturated_fat",
+    "polyunsaturated_fat",
+    "cholesterol",
+    "total_carbs",
+    "starch",
+    "sugars",
+    "fiber",
+    "protein",
+    "vitamin_a",
+    "vitamin_c",
+    "vitamin_e",
+    "vitamin_k",
+    "thiamin_b1",
+    "riboflavin_b2",
+    "niacin_b3",
+    "vitamin_b6",
+    "folate_b9",
+    "calcium",
+    "iron",
+    "magnesium",
+    "phosphorus",
+    "potassium",
+    "sodium",
+    "zinc",
+    "copper",
+    "manganese",
+  ];
 
   const handleSubmit = async () => {
-    const payload = {
-      ...form,
-      calories: Number(form.calories),
-      protein: Number(form.protein),
-      total_carbs: Number(form.total_carbs),
-      total_fat: Number(form.total_fat),
-    };
-
+    const payload: Record<string, any> = { ...form };
+    numericFields.forEach((k) => {
+      if (payload[k] !== "") payload[k] = Number(payload[k]);
+    });
     try {
-      console.log("Submitting:", payload);
-      alert("Food added!");
-      onClose(); // ✅ close modal after save
+      setLoading(true);
+      const newFood = await createFood(payload);
+      showToast("Success!", "Food Created Successfully.", "success");
+      onClose();
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong");
+      console.error("Create food error:", error);
+      showToast("Error", "Could not connect to server.", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      {/* Overlay */}
       <View className="flex-1 bg-black/40 justify-end">
-        {/* Bottom Sheet */}
-        <View className="bg-white rounded-t-3xl max-h-[90%] p-5">
+        {loading && <LoadingOverlay text="Creating food..." />}
+        <View className="bg-white rounded-t-3xl max-h-[92%] p-5">
           {/* Header */}
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-xl font-bold">Add Food Manually</Text>
-            <Pressable onPress={onClose}>
+          <View className="flex-row justify-between items-center mb-1">
+            <Text className="text-xl font-bold text-slate-800">
+              Add Food Manually
+            </Text>
+            <Pressable onPress={onClose} className="p-1">
               <Feather name="x" size={22} color="#64748b" />
             </Pressable>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <TextInput
+          <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+            {/* ── General ── */}
+            <SectionHeader title="General" />
+            <Field
               placeholder="Food name"
-              onChangeText={(v) => handleChange("name", v)}
-              className="border border-slate-200 p-4 mb-3 rounded-xl"
+              value={form.name}
+              onChange={set("name")}
             />
-            <TextInput
-              placeholder="Serving (e.g. 1 pack 300ml)"
-              onChangeText={(v) => handleChange("serving", v)}
-              className="border border-slate-200 p-4 mb-3 rounded-xl"
+            <Field
+              placeholder="Serving (e.g. 1 pack 300 ml)"
+              value={form.serving}
+              onChange={set("serving")}
+            />
+            <Row>
+              <HalfField
+                placeholder="Calories (kcal)"
+                value={form.calories}
+                onChange={set("calories")}
+              />
+              <HalfField
+                placeholder="Water (ml)"
+                value={form.water}
+                onChange={set("water")}
+              />
+            </Row>
+
+            {/* ── Macros ── */}
+            <SectionHeader title="Macronutrients" />
+            <Field
+              placeholder="Protein (g)"
+              value={form.protein}
+              onChange={set("protein")}
+              numeric
+            />
+            <Field
+              placeholder="Total Carbs (g)"
+              value={form.total_carbs}
+              onChange={set("total_carbs")}
+              numeric
+            />
+            <Row>
+              <HalfField
+                placeholder="Starch (g)"
+                value={form.starch}
+                onChange={set("starch")}
+              />
+              <HalfField
+                placeholder="Sugars (g)"
+                value={form.sugars}
+                onChange={set("sugars")}
+              />
+            </Row>
+            <Field
+              placeholder="Fiber (g)"
+              value={form.fiber}
+              onChange={set("fiber")}
+              numeric
             />
 
-            <TextInput
-              placeholder="Calories"
-              keyboardType="numeric"
-              onChangeText={(v) => handleChange("calories", v)}
-              className="border border-slate-200 p-4 mb-3 rounded-xl"
+            {/* ── Fats ── */}
+            <SectionHeader title="Fats" />
+            <Field
+              placeholder="Total Fat (g)"
+              value={form.total_fat}
+              onChange={set("total_fat")}
+              numeric
             />
-            <TextInput
-              placeholder="Protein (g)"
-              keyboardType="numeric"
-              onChangeText={(v) => handleChange("protein", v)}
-              className="border border-slate-200 p-4 mb-3 rounded-xl"
+            <Row>
+              <HalfField
+                placeholder="Saturated (g)"
+                value={form.saturated_fat}
+                onChange={set("saturated_fat")}
+              />
+              <HalfField
+                placeholder="Cholesterol (mg)"
+                value={form.cholesterol}
+                onChange={set("cholesterol")}
+              />
+            </Row>
+            <Row>
+              <HalfField
+                placeholder="Monounsat. (g)"
+                value={form.monounsaturated_fat}
+                onChange={set("monounsaturated_fat")}
+              />
+              <HalfField
+                placeholder="Polyunsat. (g)"
+                value={form.polyunsaturated_fat}
+                onChange={set("polyunsaturated_fat")}
+              />
+            </Row>
+
+            {/* ── Vitamins ── */}
+            <SectionHeader title="Vitamins" />
+            <Row>
+              <HalfField
+                placeholder="Vitamin A (µg)"
+                value={form.vitamin_a}
+                onChange={set("vitamin_a")}
+              />
+              <HalfField
+                placeholder="Vitamin C (mg)"
+                value={form.vitamin_c}
+                onChange={set("vitamin_c")}
+              />
+            </Row>
+            <Row>
+              <HalfField
+                placeholder="Vitamin E (mg)"
+                value={form.vitamin_e}
+                onChange={set("vitamin_e")}
+              />
+              <HalfField
+                placeholder="Vitamin K (µg)"
+                value={form.vitamin_k}
+                onChange={set("vitamin_k")}
+              />
+            </Row>
+            <Row>
+              <HalfField
+                placeholder="B1 Thiamin (mg)"
+                value={form.thiamin_b1}
+                onChange={set("thiamin_b1")}
+              />
+              <HalfField
+                placeholder="B2 Riboflavin (mg)"
+                value={form.riboflavin_b2}
+                onChange={set("riboflavin_b2")}
+              />
+            </Row>
+            <Row>
+              <HalfField
+                placeholder="B3 Niacin (mg)"
+                value={form.niacin_b3}
+                onChange={set("niacin_b3")}
+              />
+              <HalfField
+                placeholder="B6 (mg)"
+                value={form.vitamin_b6}
+                onChange={set("vitamin_b6")}
+              />
+            </Row>
+            <Field
+              placeholder="B9 Folate (µg)"
+              value={form.folate_b9}
+              onChange={set("folate_b9")}
+              numeric
             />
-            <TextInput
-              placeholder="Carbs (g)"
-              keyboardType="numeric"
-              onChangeText={(v) => handleChange("total_carbs", v)}
-              className="border border-slate-200 p-4 mb-3 rounded-xl"
+
+            {/* ── Minerals ── */}
+            <SectionHeader title="Minerals" />
+            <Row>
+              <HalfField
+                placeholder="Calcium (mg)"
+                value={form.calcium}
+                onChange={set("calcium")}
+              />
+              <HalfField
+                placeholder="Iron (mg)"
+                value={form.iron}
+                onChange={set("iron")}
+              />
+            </Row>
+            <Row>
+              <HalfField
+                placeholder="Magnesium (mg)"
+                value={form.magnesium}
+                onChange={set("magnesium")}
+              />
+              <HalfField
+                placeholder="Phosphorus (mg)"
+                value={form.phosphorus}
+                onChange={set("phosphorus")}
+              />
+            </Row>
+            <Row>
+              <HalfField
+                placeholder="Potassium (mg)"
+                value={form.potassium}
+                onChange={set("potassium")}
+              />
+              <HalfField
+                placeholder="Sodium (mg)"
+                value={form.sodium}
+                onChange={set("sodium")}
+              />
+            </Row>
+            <Row>
+              <HalfField
+                placeholder="Zinc (mg)"
+                value={form.zinc}
+                onChange={set("zinc")}
+              />
+              <HalfField
+                placeholder="Copper (mg)"
+                value={form.copper}
+                onChange={set("copper")}
+              />
+            </Row>
+            <Field
+              placeholder="Manganese (mg)"
+              value={form.manganese}
+              onChange={set("manganese")}
+              numeric
             />
-            <TextInput
-              placeholder="Fat (g)"
-              keyboardType="numeric"
-              onChangeText={(v) => handleChange("total_fat", v)}
-              className="border border-slate-200 p-4 mb-6 rounded-xl"
-            />
+
+            <View className="h-6" />
           </ScrollView>
 
           {/* Save button */}
           <TouchableOpacity
             onPress={handleSubmit}
-            className="bg-black py-4 rounded-xl"
+            className="bg-black py-4 rounded-xl mt-3"
           >
             <Text className="text-white text-center font-semibold text-base">
               Save Food

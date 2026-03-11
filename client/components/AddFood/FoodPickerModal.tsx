@@ -54,7 +54,7 @@ export function FoodPickerModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 bg-black/40 justify-end">
-        {loading && <LoadingOverlay text="Loading nutrition..." />}
+        {loading && <LoadingOverlay text="Loading foods..." />}
         <View className="bg-white rounded-t-3xl px-5 pt-5 pb-8 max-h-[85%]">
           {/* Header */}
           <View className="flex-row items-center justify-between mb-4">
