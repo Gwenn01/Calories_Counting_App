@@ -6,6 +6,8 @@ import { Feather } from "@expo/vector-icons";
 import { MotiView } from "moti";
 import { fetchMacrosByDate } from "@/api/macros";
 import LoadingOverlay from "@/components/LoadingOverplay";
+import { NUTRIENTS } from "@/constants/nutrients";
+import { MacroData } from "@/types/macros";
 
 /* ---------------- DATE HELPERS ---------------- */
 const formatDate = (date: Date) =>
@@ -16,91 +18,6 @@ const formatDate = (date: Date) =>
   });
 
 const toKey = (date: Date) => date.toISOString().slice(0, 10);
-
-/* ---------------- TYPES ---------------- */
-export type MacroData = {
-  id: number;
-  date: string;
-
-  calories: number;
-  protein: number;
-  carbs: number;
-  fats: number;
-  fiber: number;
-  sugar: number;
-
-  saturated_fat: number;
-  monounsaturated_fat: number;
-  polyunsaturated_fat: number;
-  trans_fat: number;
-
-  cholesterol: number;
-  sodium: number;
-
-  vitamin_a: number;
-  vitamin_c: number;
-  vitamin_d: number;
-  vitamin_e: number;
-  vitamin_k: number;
-
-  vitamin_b1: number;
-  vitamin_b2: number;
-  vitamin_b3: number;
-  vitamin_b6: number;
-  vitamin_b9: number;
-  vitamin_b12: number;
-
-  calcium: number;
-  iron: number;
-  magnesium: number;
-  phosphorus: number;
-  potassium: number;
-  zinc: number;
-  copper: number;
-  manganese: number;
-};
-/* ---------------- UI FIELD MAP ---------------- */
-const NUTRIENTS: {
-  key: keyof MacroData;
-  label: string;
-  unit: string;
-}[] = [
-  { key: "protein", label: "Protein", unit: "g" },
-  { key: "carbs", label: "Carbohydrates", unit: "g" },
-  { key: "fats", label: "Total Fat", unit: "g" },
-  { key: "fiber", label: "Dietary Fiber", unit: "g" },
-  { key: "sugar", label: "Sugars", unit: "g" },
-
-  { key: "saturated_fat", label: "Saturated Fat", unit: "g" },
-  { key: "monounsaturated_fat", label: "Monounsaturated Fat", unit: "g" },
-  { key: "polyunsaturated_fat", label: "Polyunsaturated Fat", unit: "g" },
-  { key: "trans_fat", label: "Trans Fat", unit: "g" },
-
-  { key: "cholesterol", label: "Cholesterol", unit: "mg" },
-  { key: "sodium", label: "Sodium", unit: "mg" },
-
-  { key: "vitamin_a", label: "Vitamin A", unit: "µg" },
-  { key: "vitamin_c", label: "Vitamin C", unit: "mg" },
-  { key: "vitamin_d", label: "Vitamin D", unit: "µg" },
-  { key: "vitamin_e", label: "Vitamin E", unit: "mg" },
-  { key: "vitamin_k", label: "Vitamin K", unit: "µg" },
-
-  { key: "vitamin_b1", label: "Vitamin B1", unit: "mg" },
-  { key: "vitamin_b2", label: "Vitamin B2", unit: "mg" },
-  { key: "vitamin_b3", label: "Vitamin B3", unit: "mg" },
-  { key: "vitamin_b6", label: "Vitamin B6", unit: "mg" },
-  { key: "vitamin_b9", label: "Vitamin B9", unit: "µg" },
-  { key: "vitamin_b12", label: "Vitamin B12", unit: "µg" },
-
-  { key: "calcium", label: "Calcium", unit: "mg" },
-  { key: "iron", label: "Iron", unit: "mg" },
-  { key: "magnesium", label: "Magnesium", unit: "mg" },
-  { key: "phosphorus", label: "Phosphorus", unit: "mg" },
-  { key: "potassium", label: "Potassium", unit: "mg" },
-  { key: "zinc", label: "Zinc", unit: "mg" },
-  { key: "copper", label: "Copper", unit: "mg" },
-  { key: "manganese", label: "Manganese", unit: "mg" },
-];
 
 /* ---------------- SCREEN ---------------- */
 export default function NutritionScreen() {
