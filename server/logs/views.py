@@ -1,6 +1,7 @@
 from datetime import datetime
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework import status
@@ -20,38 +21,37 @@ class LogsList(APIView):
         
     def get(self, request, format=None):
         logs = DailyLog.objects.filter(user=request.user)
-
         date = request.query_params.get("date")
         meal_type = request.query_params.get("meal_type")
-        
-        #get log base on date
+
         if date and meal_type:
             try:
                 parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
                 logs = logs.filter(created_at=parsed_date, meal_type=meal_type)
-                # serialize it before returning
                 serializer = LogSerializer(logs, many=True)
                 return Response(serializer.data)
             except ValueError:
                 return Response(
-                    {"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST
+                    {"error": "Invalid date format. Use YYYY-MM-DD."},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
         elif date:
             try:
                 parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
-                #format the data base on meal type and filter by date
                 data = LogSelectors.format_daily_logs(user=request.user, date=parsed_date)
                 return Response(data)
             except ValueError:
                 return Response(
                     {"error": "Date must be in YYYY-MM-DD format"},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
         elif meal_type:
             logs = logs.filter(meal_type=meal_type)
-            # serialize it before returning
             serializer = LogSerializer(logs, many=True)
             return Response(serializer.data)
+        # DEFAULT RETURN
+        serializer = LogSerializer(logs, many=True)
+        return Response(serializer.data)
 
     def post(self, request, format=None):
         serializer = LogSerializer(data=request.data, context={"request": request})
@@ -68,10 +68,7 @@ class LogsDetail(APIView):
     """
     permission_classes = [IsAuthenticated]
     def get_object(self, pk):
-        try:
-            return DailyLog.objects.get(pk=pk)
-        except DailyLog.DoesNotExist:
-            raise Http404
+        return get_object_or_404(DailyLog, pk=pk)
 
     def get(self, request, pk, format=None):
         log = self.get_object(pk)
