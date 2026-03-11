@@ -5,7 +5,19 @@ export const createLogs = async (data: any) => {
   return res.data;
 };
 
-export const getLogs = async (date: string) => {
-  const res = await api.get(`api/food-logs/${date}/`);
+// get log by meal type
+export const getLogsByMeal = async (date: string, mealType: string) => {
+  const res = await api.get("/api/food-logs/", {
+    params: {
+      date: date,
+      meal_type: mealType,
+    },
+  });
+
   return res.data;
+};
+
+/// remove logs
+export const removeLogs = async (id: number) => {
+  const res = await api.delete(`/api/food-logs/${id}/`);
 };

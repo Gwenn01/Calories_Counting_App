@@ -69,6 +69,9 @@ class LogsDetail(APIView):
     permission_classes = [IsAuthenticated]
     def get_object(self, pk):
         return get_object_or_404(DailyLog, pk=pk)
+    
+    def get_user(self):
+        return self.request.user
 
     def get(self, request, pk, format=None):
         log = self.get_object(pk)
@@ -86,5 +89,7 @@ class LogsDetail(APIView):
     def delete(self, request, pk, format=None):
         log = self.get_object(pk)
         log.delete()
-        return Response({"message": "Log Remove successfully"}, status=status.HTTP_204_NO_CONTENT)
+         # now every time the user add food log update their macros
+        MacrosService.upsert_today_macros(self.get_user())
+        return Response(status=status.HTTP_204_NO_CONTENT)
     

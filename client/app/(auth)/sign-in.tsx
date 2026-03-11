@@ -64,7 +64,7 @@ export default function SignInScreen() {
       <Toast position="top" />
 
       {/* GLOBAL LOADING */}
-      {loading && <LoadingOverlay text="Creating account..." />}
+      {loading && <LoadingOverlay text="Login....." />}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
