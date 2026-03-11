@@ -11,13 +11,11 @@ export const api = axios.create({
 // Attach token automatically
 api.interceptors.request.use(async (config) => {
   const token = await getToken();
-
   if (token) {
     config.headers.Authorization = `Token ${token}`;
   } else {
     delete config.headers.Authorization;
   }
-
   return config;
 });
 

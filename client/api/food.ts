@@ -9,3 +9,8 @@ export const createFood = async (food: any) => {
   const res = await api.post("api/foods/", food);
   return res.data;
 };
+
+export const getOneFoods = async (id: number) => {
+  const res = await api.get(`api/foods/${id}/`);
+  return res.data;
+};

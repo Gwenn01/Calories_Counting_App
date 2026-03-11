@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -23,10 +23,7 @@ class FoodList(APIView):
     
 class FoodDetail(APIView):
     def get_object(self, pk):
-        try:
-            return Food.objects.get(pk=pk)
-        except Food.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        return get_object_or_404(Food, pk=pk)
 
     def get(self, request, pk):
         food = self.get_object(pk)

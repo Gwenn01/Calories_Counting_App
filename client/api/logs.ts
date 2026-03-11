@@ -21,3 +21,9 @@ export const getLogsByMeal = async (date: string, mealType: string) => {
 export const removeLogs = async (id: number) => {
   const res = await api.delete(`/api/food-logs/${id}/`);
 };
+
+// get the totals logs
+export const getFoodLogsTotal = async (date: string) => {
+  const res = await api.get(`/api/food-logs/${date}/totals/`);
+  return res.data;
+};
