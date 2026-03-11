@@ -93,3 +93,15 @@ class LogsDetail(APIView):
         MacrosService.upsert_today_macros(self.get_user())
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+class TotalFoodLogCalculation(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get_user(self):
+        return self.request.user
+    
+    def get(self, request, date, format=None):
+        user = self.get_user()
+        parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
+        data = LogSelectors.total_foods_logs(user, parsed_date)
+        return Response(data, status=status.HTTP_200_OK)
+    
