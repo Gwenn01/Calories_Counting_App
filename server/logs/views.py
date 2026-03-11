@@ -66,6 +66,7 @@ class LogsDetail(APIView):
     """
     Retrieve, update or delete a log instance.
     """
+    permission_classes = [IsAuthenticated]
     def get_object(self, pk):
         try:
             return DailyLog.objects.get(pk=pk)

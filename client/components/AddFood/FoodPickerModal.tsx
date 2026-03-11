@@ -1,5 +1,6 @@
 // components/food/FoodPickerModal.tsx
 import React from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,30 +10,18 @@ import {
   FlatList,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import LoadingOverlay from "@/components/LoadingOverplay";
+import { getAllFoods } from "../../api/food";
 
-/**
- * Example food data (same shape as backend)
- */
-const FOOD_DATA = [
-  {
-    id: 1,
-    name: "White Rice (Kanin)",
-    serving: "1 cup cooked",
-    calories: 205,
-    protein: 4.3,
-    total_carbs: 45,
-    total_fat: 0.4,
-  },
-  {
-    id: 2,
-    name: "Chicken Adobo",
-    serving: "1 cup",
-    calories: 250,
-    protein: 23,
-    total_carbs: 3,
-    total_fat: 16,
-  },
-];
+interface Food {
+  id: number;
+  name: string;
+  serving: string;
+  calories: number;
+  protein: number;
+  total_carbs: number;
+  total_fat: number;
+}
 
 export function FoodPickerModal({
   visible,
@@ -41,9 +30,31 @@ export function FoodPickerModal({
   onAddManual,
   onAddByPhoto,
 }: any) {
+  const [foods, setFoods] = useState<Food[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchFoods = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllFoods();
+        setFoods(data);
+      } catch (error) {
+        console.log("Error fetching foods:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (visible) {
+      fetchFoods();
+    }
+  }, [visible]);
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 bg-black/40 justify-end">
+        {loading && <LoadingOverlay text="Loading nutrition..." />}
         <View className="bg-white rounded-t-3xl px-5 pt-5 pb-8 max-h-[85%]">
           {/* Header */}
           <View className="flex-row items-center justify-between mb-4">
@@ -83,7 +94,7 @@ export function FoodPickerModal({
 
           {/* Food list */}
           <FlatList
-            data={FOOD_DATA}
+            data={foods}
             keyExtractor={(item) => item.id.toString()}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
