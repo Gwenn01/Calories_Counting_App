@@ -1,6 +1,5 @@
 from django.db.models import F, Sum, FloatField
 from django.db.models.functions import Coalesce
-from django.utils import timezone
 from .models import DailyLog
 from .serializers import LogSerializer
 
@@ -8,7 +7,6 @@ class FoodLogService:
     
     @staticmethod
     def get_date_logs(user, date):
-        today = timezone.now().date()
         log =  DailyLog.objects.filter(
             user=user,
             created_at=date

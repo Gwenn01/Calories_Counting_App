@@ -1,39 +1,86 @@
+import { useState, useEffect } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { getStreak } from "@/api/history";
+import LoadingOverlay from "@/components/LoadingOverplay";
 
 export default function HistoryScreen() {
+  const [loading, setLoading] = useState(false);
+  const [streak, setStreak] = useState(0);
+
+  useEffect(() => {
+    const fetchStreak = async () => {
+      try {
+        setLoading(true);
+        const res = await getStreak();
+        setStreak(res.data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStreak();
+  }, []);
+
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
+      {loading && <LoadingOverlay text="Loading nutrition..." />}
       <ScrollView
-        className="px-6 pt-6 pb-28"
+        className="px-6 pt-4 pb-28"
         showsVerticalScrollIndicator={false}
       >
         {/* ---------- Header ---------- */}
-        <View className="mb-8">
-          <Text className="text-[34px] font-black text-slate-900 tracking-tight">
+        <View className="mb-8 mt-2">
+          <Text className="text-[32px] font-extrabold text-slate-900 tracking-tight">
             History
           </Text>
-          <Text className="mt-2 text-[15px] text-slate-500 max-w-[260px]">
-            Track your past calorie and macro intake over time
+          <Text className="mt-1.5 text-base font-medium text-slate-500">
+            Track your past calorie and macro intake.
           </Text>
         </View>
 
-        {/* ---------- Summary Card ---------- */}
-        <View className="bg-slate-900 rounded-[30px] p-7 mb-10 shadow-xl shadow-slate-900/20">
-          <Text className="text-[11px] font-bold tracking-[2px] text-slate-400 uppercase">
-            Total Days Logged
-          </Text>
+        {/* ---------- Summary Card (Premium Emerald Theme) ---------- */}
+        {/* Added relative and overflow-hidden to contain the decorative background circle */}
+        <View className="bg-black rounded-[32px] p-7 shadow-xl shadow-emerald-900/20 relative overflow-hidden mb-10">
+          {/* Subtle decorative background shape for a premium app feel */}
+          <View className="absolute -top-12 -right-10 w-40 h-40 bg-emerald-800 rounded-full opacity-40" />
 
-          <View className="flex-row items-end mt-3 mb-2">
-            <Text className="text-5xl font-black text-white mr-2">0</Text>
-            <Text className="text-base text-slate-400 mb-1">days</Text>
+          {/* Content wrapper with z-10 so it sits above the decorative circle */}
+          <View className="relative z-10">
+            {/* Card Header & Badge */}
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-xs font-bold tracking-[2px] text-white uppercase">
+                Total Days Logged
+              </Text>
+              {/* Gamification Badge */}
+              {streak > 0 && (
+                <View className="bg-orange-500/20 px-2.5 py-1 rounded-full flex-row items-center">
+                  <Text className="text-xs font-bold text-orange-400">
+                    Streak
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Large Number Callout */}
+            <View className="flex-row items-baseline mt-2 mb-1">
+              <Text className="text-[64px] font-black text-white tracking-tighter mr-3 leading-none">
+                {streak}
+              </Text>
+              <Text className="text-xl font-bold text-white">days</Text>
+            </View>
+
+            {/* Divider */}
+            <View className="h-[1px] bg-white my-5" />
+
+            {/* Footer Text */}
+            <Text className="text-sm font-medium text-white leading-relaxed pr-4">
+              Start logging meals to unlock insights about your eating habits.
+              Keep the momentum going!
+            </Text>
           </View>
-
-          <View className="h-px bg-slate-700/60 my-4" />
-
-          <Text className="text-sm text-indigo-200 leading-5">
-            Start logging meals to unlock insights about your eating habits.
-          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>

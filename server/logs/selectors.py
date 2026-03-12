@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from datetime import timedelta
 from .models import DailyLog
 from .serializers import LogSerializer
 from users.models import UserProfile
@@ -54,3 +56,18 @@ class LogSelectors:
         data["remaining"] = data["goal_calories"] - data["food_calories"]
         return data
     
+    @staticmethod
+    def streak_logs(user):
+        today = timezone.now().date()
+        streak = 0
+        current_day = today
+        while True:
+            has_log = DailyLog.objects.filter(
+                user=user,
+                created_at=current_day
+            ).exists()
+            if not has_log:
+                break
+            streak += 1
+            current_day -= timedelta(days=1)
+        return streak

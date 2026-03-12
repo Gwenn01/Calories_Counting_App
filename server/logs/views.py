@@ -92,3 +92,14 @@ class TotalFoodLogCalculation(APIView):
         data = LogSelectors.total_foods_logs(user, parsed_date)
         return Response(data, status=status.HTTP_200_OK)
     
+class StreakLogs(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_user(self):
+        return self.request.user
+
+    def get(self, request, format=None):
+        user = self.get_user()
+        data = LogSelectors.streak_logs(user)
+        return Response({"data": data}, status=status.HTTP_200_OK)
+    
