@@ -1,7 +1,12 @@
 import { api } from "./client";
 
 export const createLogs = async (data: any) => {
-  const res = await api.post("api/food-logs/", data);
+  const formattedDate = data.created_at.toISOString().split("T")[0];
+  const payload = {
+    ...data,
+    created_at: formattedDate,
+  };
+  const res = await api.post("api/food-logs/", payload);
   return res.data;
 };
 
@@ -19,8 +24,9 @@ export const getLogsByMeal = async (date: Date, mealType: string) => {
 };
 
 /// remove logs
-export const removeLogs = async (id: number) => {
-  const res = await api.delete(`/api/food-logs/${id}/`);
+export const removeLogs = async (id: number, date: Date) => {
+  const formattedDate = date.toISOString().split("T")[0];
+  await api.delete(`/api/food-logs/${id}/${formattedDate}/`);
 };
 
 // get the totals logs

@@ -133,6 +133,7 @@ export default function AddFoodScreen() {
         food: id,
         meal_type: mealType,
         quantity: quantity,
+        created_at: currentDate,
       });
       fetchLogs(currentDate);
       fetchTotal(currentDate);
@@ -159,7 +160,7 @@ export default function AddFoodScreen() {
   const handleRemoveFoodLogs = async (id: number): Promise<void> => {
     try {
       setLoading(true);
-      await removeLogs(id);
+      await removeLogs(id, currentDate);
       showToast("Success", "Food logs removed successfully", "success");
       fetchLogs(currentDate);
       fetchTotal(currentDate);

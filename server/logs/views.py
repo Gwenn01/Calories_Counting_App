@@ -58,11 +58,11 @@ class LogsList(APIView):
         if serializer.is_valid():
             serializer.save()
             # now every time the user add food log update their macros
-            MacrosService.upsert_today_macros(self.get_user())
+            MacrosService.upsert_today_macros(self.get_user(), date=request.data['created_at'])
             return Response({"message": "Log created successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class LogsDetail(APIView):
+class DeleteLogs(APIView):
     """
     Retrieve, update or delete a log instance.
     """
@@ -73,24 +73,11 @@ class LogsDetail(APIView):
     def get_user(self):
         return self.request.user
 
-    def get(self, request, pk, format=None):
-        log = self.get_object(pk)
-        serializer = LogSerializer(log) 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def put(self, request, pk, format=None):
-        log = self.get_object(pk)
-        serializer = LogSerializer(log, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Log updated successfully"})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
+    def delete(self, request, pk, date, format=None):
         log = self.get_object(pk)
         log.delete()
          # now every time the user add food log update their macros
-        MacrosService.upsert_today_macros(self.get_user())
+        MacrosService.upsert_today_macros(self.get_user(), date)
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class TotalFoodLogCalculation(APIView):

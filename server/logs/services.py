@@ -7,17 +7,17 @@ from .serializers import LogSerializer
 class FoodLogService:
     
     @staticmethod
-    def get_daily_logs(user):
+    def get_date_logs(user, date):
         today = timezone.now().date()
         log =  DailyLog.objects.filter(
             user=user,
-            created_at=today
+            created_at=date
         )
         return log
     # calculate the food nutrition base on the data log of user
     @staticmethod
-    def get_daily_macros(user):
-        logs = FoodLogService.get_daily_logs(user=user)
+    def get_date_macros(user, date):
+        logs = FoodLogService.get_date_logs(user=user, date=date)
 
         NUTRIENT_FIELDS = {
             # Core
@@ -68,3 +68,6 @@ class FoodLogService:
 
         result = logs.aggregate(**aggregates)
         return  result
+    
+    
+    
