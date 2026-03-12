@@ -6,10 +6,11 @@ export const createLogs = async (data: any) => {
 };
 
 // get log by meal type
-export const getLogsByMeal = async (date: string, mealType: string) => {
+export const getLogsByMeal = async (date: Date, mealType: string) => {
+  const formattedDate = date.toISOString().split("T")[0];
   const res = await api.get("/api/food-logs/", {
     params: {
-      date: date,
+      date: formattedDate,
       meal_type: mealType,
     },
   });
@@ -23,7 +24,8 @@ export const removeLogs = async (id: number) => {
 };
 
 // get the totals logs
-export const getFoodLogsTotal = async (date: string) => {
-  const res = await api.get(`/api/food-logs/${date}/totals/`);
+export const getFoodLogsTotal = async (date: Date) => {
+  const formattedDate = date.toISOString().split("T")[0];
+  const res = await api.get(`/api/food-logs/${formattedDate}/totals/`);
   return res.data;
 };

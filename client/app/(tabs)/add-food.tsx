@@ -8,7 +8,12 @@ import { AddFoodManualModal } from "@/components/AddFood/AddFoodManualModal";
 import type { FoodItem } from "@/types/foods";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { useToast } from "@/components/ToastProvider";
-import { createLogs, getLogsByMeal, removeLogs } from "@/api/logs";
+import {
+  createLogs,
+  getLogsByMeal,
+  removeLogs,
+  getFoodLogsTotal,
+} from "@/api/logs";
 
 /* ---------------- DATE HELPERS ---------------- */
 const formatDate = (date: Date) =>
@@ -19,6 +24,11 @@ const formatDate = (date: Date) =>
   });
 
 type MealType = "Breakfast" | "Lunch" | "Dinner" | "Snacks";
+type MealCardProps = {
+  title: string;
+  calories: number;
+  onAdd: () => void;
+};
 
 export default function AddFoodScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -31,44 +41,80 @@ export default function AddFoodScreen() {
   const [showFoodModal, setShowFoodModal] = useState(false);
   const [showManualModal, setShowManualModal] = useState(false);
   // the selected foods
-  const today = new Date().toISOString().slice(0, 10);
   const [breakfastLogs, setBreakfastLogs] = useState([]);
   const [lunchLogs, setLunchLogs] = useState([]);
   const [dinnerLogs, setDinnerLogs] = useState([]);
   const [snackLogs, setSnackLogs] = useState([]);
+  // total
+  const [goalCalories, setGoalCalories] = useState(0);
+  const [foodCalories, setFoodCalories] = useState(0);
+  const [remainingCalories, setRemainingCalories] = useState(0);
+  const [breakfastCalories, setBreakfastCalories] = useState(0);
+  const [lunchCalories, setLunchCalories] = useState(0);
+  const [dinnerCalories, setDinnerCalories] = useState(0);
+  const [snackCalories, setSnackCalories] = useState(0);
+
   // for long press remove logs
   const [selectedLogId, setSelectedLogId] = useState<number | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  // function to explicity go to next and previous day
+  // date provider
+  const goPrevDay = () =>
+    setCurrentDate((d) => {
+      const newDate = new Date(d);
+      newDate.setDate(newDate.getDate() - 1);
+      return newDate;
+    });
+  const goNextDay = () =>
+    setCurrentDate((d) => {
+      const newDate = new Date(d);
+      newDate.setDate(newDate.getDate() + 1);
+      return newDate;
+    });
 
   // fetch the log
-  const fetchLogs = async () => {
+  const fetchLogs = async (date: Date) => {
     try {
+      setLoading(true);
       const [breakfast, lunch, dinner, snack] = await Promise.all([
-        getLogsByMeal(today, "breakfast"),
-        getLogsByMeal(today, "lunch"),
-        getLogsByMeal(today, "dinner"),
-        getLogsByMeal(today, "snack"),
+        getLogsByMeal(date, "breakfast"),
+        getLogsByMeal(date, "lunch"),
+        getLogsByMeal(date, "dinner"),
+        getLogsByMeal(date, "snack"),
       ]);
-
       setBreakfastLogs(breakfast);
       setLunchLogs(lunch);
       setDinnerLogs(dinner);
       setSnackLogs(snack);
     } catch (error) {
       console.error("Failed to fetch logs:", error);
+    } finally {
+      setLoading(false);
     }
   };
-
+  // fetch total
+  const fetchTotal = async (date: Date) => {
+    try {
+      setLoading(true);
+      const total = await getFoodLogsTotal(date);
+      setGoalCalories(total.goal_calories);
+      setFoodCalories(total.food_calories);
+      setRemainingCalories(total.remaining);
+      setBreakfastCalories(total.breakfast_calories);
+      setLunchCalories(total.lunch_calories);
+      setDinnerCalories(total.dinner_calories);
+      setSnackCalories(total.snack_calories);
+    } catch (error) {
+      console.error("Failed to fetch total:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  // fetch logs
   useEffect(() => {
-    fetchLogs();
-  }, []);
-
-  // date provider
-  const goPrevDay = () =>
-    setCurrentDate((d) => new Date(d.getTime() - 86400000));
-
-  const goNextDay = () =>
-    setCurrentDate((d) => new Date(d.getTime() + 86400000));
+    fetchLogs(currentDate);
+    fetchTotal(currentDate);
+  }, [currentDate]);
 
   // function for handle
   const handleInsertFoodLogs = async (
@@ -83,7 +129,8 @@ export default function AddFoodScreen() {
         meal_type: mealType,
         quantity: quantity,
       });
-      fetchLogs();
+      fetchLogs(currentDate);
+      fetchTotal(currentDate);
       showToast("Success!", "Food logs inserted successfully", "success");
     } catch (error: any) {
       showToast("Error", "Something went wrong", "error");
@@ -97,7 +144,8 @@ export default function AddFoodScreen() {
       setLoading(true);
       await removeLogs(id);
       showToast("Success", "Food logs removed successfully", "success");
-      fetchLogs();
+      fetchLogs(currentDate);
+      fetchTotal(currentDate);
     } catch (error) {
       console.log(error);
       showToast("Error", "Something went wrong", "error");
@@ -106,9 +154,6 @@ export default function AddFoodScreen() {
     }
   };
   // data
-  const goal = 2000;
-  const food = 850;
-  const remaining = goal - food;
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
@@ -152,14 +197,14 @@ export default function AddFoodScreen() {
           </Text>
 
           <View className="flex-row items-center justify-between flex-wrap">
-            <CalorieItem label="Goal" value={goal} />
+            <CalorieItem label="Goal" value={goalCalories} />
             <Text className="text-lg font-extrabold text-slate-400">−−</Text>
-            <CalorieItem label="Food" value={food} />
+            <CalorieItem label="Food" value={foodCalories} />
             <Text className="text-lg font-extrabold text-slate-400">=</Text>
 
             <View className="bg-slate-900 px-4 py-2.5 rounded-xl items-center">
               <Text className="text-xl font-black text-green-500">
-                {remaining}
+                {remainingCalories}
               </Text>
               <Text className="text-[11px] text-slate-400">Remaining</Text>
             </View>
@@ -170,6 +215,7 @@ export default function AddFoodScreen() {
         {/* Breakfast */}
         <MealCard
           title="Breakfast"
+          calories={breakfastCalories}
           onAdd={() => {
             setSelectedMealType("breakfast");
             setShowFoodModal(true);
@@ -190,6 +236,7 @@ export default function AddFoodScreen() {
         {/* Lunch */}
         <MealCard
           title="Lunch"
+          calories={lunchCalories}
           onAdd={() => {
             setSelectedMealType("lunch");
             setShowFoodModal(true);
@@ -210,6 +257,7 @@ export default function AddFoodScreen() {
         {/* Dinner */}
         <MealCard
           title="Dinner"
+          calories={dinnerCalories}
           onAdd={() => {
             setSelectedMealType("dinner");
             setShowFoodModal(true);
@@ -230,6 +278,7 @@ export default function AddFoodScreen() {
         {/* Snacks */}
         <MealCard
           title="Snacks"
+          calories={snackCalories}
           onAdd={() => {
             setSelectedMealType("snack");
             setShowFoodModal(true);
@@ -315,20 +364,27 @@ function CalorieItem({ label, value }: any) {
   );
 }
 
-function MealCard({ title, onAdd }: any) {
+function MealCard({ title, calories, onAdd }: MealCardProps) {
   return (
-    <View className="bg-white rounded-3xl p-5 mb-4 border border-slate-100 flex-row items-center justify-between">
-      <View>
-        <Text className="text-lg font-extrabold text-slate-900">{title}</Text>
-        <Text className="text-sm text-slate-400 mt-0.5">No food logged</Text>
+    <View className="bg-white rounded-[24px] p-4 mb-4 border border-slate-100 shadow-sm flex-row items-center justify-between">
+      {/* Added flex-1 and pr-4 so long titles don't push the button off-screen */}
+      <View className="flex-1 pr-4">
+        <Text className="text-base font-bold text-slate-800 tracking-tight">
+          {title}
+        </Text>
+
+        <Text className="text-sm font-medium text-slate-500 mt-0.5">
+          {calories > 0 ? `${calories} kcal` : "No food logged"}
+        </Text>
       </View>
 
       <Pressable
         onPress={onAdd}
-        className="flex-row items-center bg-emerald-50 px-3.5 py-2 rounded-xl"
+        // Changed to a pill-shaped, solid primary button for a more tactile, app-like feel
+        className="flex-row items-center bg-emerald-500 px-4 py-2.5 rounded-full active:bg-emerald-600"
       >
-        <Feather name="plus" size={18} color="#10b981" />
-        <Text className="ml-1.5 text-sm font-bold text-emerald-500">
+        <Feather name="plus" size={16} color="#ffffff" />
+        <Text className="ml-1.5 text-sm font-semibold text-white tracking-wide">
           Add Food
         </Text>
       </Pressable>
