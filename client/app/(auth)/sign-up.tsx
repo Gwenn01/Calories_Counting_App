@@ -15,7 +15,7 @@ import { MotiView } from "moti";
 import Toast from "react-native-toast-message";
 import { useRouter } from "expo-router";
 import { registerUser } from "@/api/auth";
-import { generateBalancedMacros } from "@/api/macros";
+import { generateBalancedMacros, calculateDailyCalories } from "@/api/macros";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import FloatingInput from "@/components/floatingInput";
 import TargetInput from "@/components/TargetInput";
@@ -34,6 +34,9 @@ export default function SignUpScreen() {
   const [age, setAge] = useState("");
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
+  const [gender, setGender] = useState("male");
+  const [activityLevel, setActivityLevel] = useState("light");
+  const [goal, setGoal] = useState("maintain");
 
   const [targetCalories, setTargetCalories] = useState("");
   const [targetProtein, setTargetProtein] = useState("");
@@ -45,23 +48,42 @@ export default function SignUpScreen() {
       showToast("Missing Input", "Please enter calories first! ⚡️", "warning");
       return;
     }
-
     try {
       setLoading(true);
       // 1. Convert input string to number for the API
       const calories = Number(targetCalories);
-
       // 2. Call your API
       const res = await generateBalancedMacros(calories);
-
-      // 3. Update state (Convert back to String for the Inputs!)
-      // Assuming res.data returns numbers like 150, 200, etc.
-      setTargetProtein(String(res.data.protein));
-      setTargetCarbs(String(res.data.carbs));
-      setTargetFats(String(res.data.fats));
+      setTargetProtein(String(res.data.protein_g));
+      setTargetCarbs(String(res.data.carbs_g));
+      setTargetFats(String(res.data.fat_g));
       showToast("Success!", "Macros calculated perfectly.", "success");
     } catch (err) {
       showToast("Error", "Could not connect to server.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCalulateCalories = async () => {
+    try {
+      setLoading(true);
+      if (!weight && !height && !age && !gender && !activityLevel && !goal) {
+        showToast("Missing Input", "Please enter calories first!", "warning");
+        return;
+      }
+      const data = {
+        weight: Number(weight),
+        height: Number(height),
+        age: Number(age),
+        gender: gender,
+        activity_level: activityLevel,
+        goal: goal,
+      };
+
+      const res = await calculateDailyCalories(data);
+      setTargetCalories(String(res.data.daily_calories));
+    } catch (err) {
     } finally {
       setLoading(false);
     }
@@ -80,12 +102,16 @@ export default function SignUpScreen() {
       age: age ? Number(age) : null,
       weight: weight ? Number(weight) : null,
       height: height ? Number(height) : null,
-      target_calories: targetCalories ? Number(targetCalories) : null,
+      gender,
+      activity_level: activityLevel,
+      goal,
+      target_calories: targetCalories
+        ? Math.round(Number(targetCalories))
+        : null,
       target_protein: targetProtein ? Number(targetProtein) : null,
       target_carbs: targetCarbs ? Number(targetCarbs) : null,
       target_fats: targetFats ? Number(targetFats) : null,
     };
-
     try {
       setLoading(true);
 
@@ -95,6 +121,8 @@ export default function SignUpScreen() {
 
       router.replace("/(auth)/sign-in");
     } catch (error: any) {
+      console.log("SERVER ERROR:", error.response?.data);
+      console.log("STATUS:", error.response?.status);
       showToast("Error", "Could not connect to server.", "error");
     } finally {
       setLoading(false);
@@ -196,6 +224,39 @@ export default function SignUpScreen() {
             isNumeric
             leftIcon={<Feather name="arrow-up" size={18} color="#64748b" />}
           />
+          <FloatingInput
+            label="Male/Female"
+            value={gender}
+            onChange={setGender}
+            leftIcon={<Feather name="arrow-up" size={18} color="#64748b" />}
+          />
+          <FloatingInput
+            label="Light Active, Moderate,"
+            value={activityLevel}
+            onChange={setActivityLevel}
+            leftIcon={<Feather name="arrow-up" size={18} color="#64748b" />}
+          />
+          <FloatingInput
+            label="Loss, Maintain, Gain"
+            value={goal}
+            onChange={setGoal}
+            leftIcon={<Feather name="arrow-up" size={18} color="#64748b" />}
+          />
+          <TouchableOpacity
+            // FIX: Wrap in arrow function and convert string state to number
+            onPress={handleCalulateCalories}
+            activeOpacity={0.8}
+            className="my-5 flex-row items-center justify-center rounded-2xl bg-emerald-900 py-4 shadow-lg shadow-indigo-200"
+          >
+            {/* Glowing Icon Container */}
+            <View className="mr-2 rounded-full bg-white/20 p-1.5">
+              <Feather name="zap" size={16} color="white" />
+            </View>
+
+            <Text className="text-sm font-bold tracking-wide text-white">
+              Generate Calories
+            </Text>
+          </TouchableOpacity>
 
           {/* ---------- TARGETS ---------- */}
           <View className="mt-6 mb-3">

@@ -30,6 +30,9 @@ export default function ProfileScreen() {
     age: 0,
     weight: 0,
     height: 0,
+    gender: "",
+    activity_level: "",
+    goal: "",
     target_calories: 0,
     target_protein: 0,
     target_carbs: 0,
@@ -144,6 +147,14 @@ export default function ProfileScreen() {
             <MetricItem label="Age" value={`${profile.age}`} />
             <MetricItem label="Weight" value={`${profile.weight} kg`} />
             <MetricItem label="Height" value={`${profile.height} cm`} />
+          </View>
+          <View className="flex-row justify-between">
+            <MetricItem label="gender" value={`${profile.gender}`} />
+            <MetricItem
+              label="activity_level"
+              value={`${profile.activity_level}`}
+            />
+            <MetricItem label="goal" value={`${profile.goal}`} />
           </View>
         </View>
 

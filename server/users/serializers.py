@@ -25,7 +25,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "height",
             "gender",
             "activity_level",
-            "goal"
+            "goal",
             "target_calories",
             "target_protein",
             "target_carbs",
