@@ -1,21 +1,57 @@
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SettingsRow } from "../../components/Profile/SettingsRow";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+// components
 import { useAlert } from "@/components/AlertProvider";
 import { useToast } from "@/components/ToastProvider";
 import LoadingOverlay from "@/components/LoadingOverplay";
+import { SettingsRow } from "../../components/Profile/SettingsRow";
+import MacroItem from "@/components/Profile/MacroItem";
+import MetricItem from "@/components/Profile/MetricItem";
+// token
 import { removeToken } from "@/utils/token";
 import { Platform } from "react-native";
 import { logoutUser } from "@/api/auth";
+// apis
+import { fetchProfile, editProfile } from "@/api/profile";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
+  const [profile, setProfile] = useState({
+    id: 1,
+    username_display: "",
+    name: "",
+    age: 0,
+    weight: 0,
+    height: 0,
+    target_calories: 0,
+    target_protein: 0,
+    target_carbs: 0,
+    target_fats: 0,
+  });
+
+  // fetch profile data
+  const fetchProfileData = async () => {
+    try {
+      setLoading(true);
+      const profileData = await fetchProfile();
+      setProfile(profileData);
+    } catch (err) {
+      console.error(err);
+      showToast("error", "Error fetching profile data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
 
   const handleSignOut = () => {
     showAlert("Sign Out", "Are you sure you want to log out?", [
@@ -50,6 +86,9 @@ export default function ProfileScreen() {
       },
     ]);
   };
+  if (!profile) {
+    return <LoadingOverlay text="Loading profile..." />;
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
@@ -62,31 +101,78 @@ export default function ProfileScreen() {
       >
         {/* ---------- HEADER ---------- */}
         <View className="items-center mb-8">
-          <View className="w-[72px] h-[72px] rounded-full bg-slate-900 items-center justify-center mb-3">
-            <Text className="text-white text-2xl font-black">JD</Text>
+          <View className="w-[80px] h-[80px] rounded-full bg-emerald-500 items-center justify-center mb-3">
+            <Text className="text-white text-2xl font-black">
+              {profile.name
+                ?.split(" ")
+                .map((n: string) => n[0])
+                .join("")
+                .slice(0, 2)}
+            </Text>
           </View>
 
           <Text className="text-[22px] font-extrabold text-slate-900">
-            John Doe
+            {profile.name}
           </Text>
-          <Text className="text-sm text-slate-500 mt-1">Fitness Tracking</Text>
+
+          <Text className="text-sm text-slate-500 mt-1">
+            @{profile.username_display}
+          </Text>
         </View>
 
-        {/* ---------- GOAL CARD ---------- */}
+        {/* ---------- BODY METRICS ---------- */}
+        <View className="bg-white rounded-[28px] p-6 mb-6 shadow-sm">
+          <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-4">
+            BODY METRICS
+          </Text>
+
+          <View className="flex-row justify-between">
+            <MetricItem label="Age" value={`${profile.age}`} />
+            <MetricItem label="Weight" value={`${profile.weight} kg`} />
+            <MetricItem label="Height" value={`${profile.height} cm`} />
+          </View>
+        </View>
+
+        {/* ---------- CALORIE GOAL ---------- */}
         <View className="bg-slate-900 rounded-[28px] p-6 mb-6">
           <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase">
             DAILY CALORIE GOAL
           </Text>
 
           <Text className="text-4xl font-black text-white mt-1.5">
-            2000 kcal
+            {profile.target_calories} kcal
           </Text>
+        </View>
+
+        {/* ---------- MACRO GOALS ---------- */}
+        <View className="bg-white rounded-[28px] p-6 mb-6 shadow-sm">
+          <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-4">
+            MACRONUTRIENT GOALS
+          </Text>
+
+          <View className="flex-row justify-between">
+            <MacroItem
+              label="Protein"
+              value={`${profile.target_protein}g`}
+              color="text-blue-600"
+            />
+            <MacroItem
+              label="Carbs"
+              value={`${profile.target_carbs}g`}
+              color="text-amber-600"
+            />
+            <MacroItem
+              label="Fats"
+              value={`${profile.target_fats}g`}
+              color="text-rose-600"
+            />
+          </View>
         </View>
 
         {/* ---------- SETTINGS ---------- */}
         <View className="bg-white rounded-[28px] overflow-hidden shadow-sm mb-8">
           <SettingsRow icon="edit-3" label="Edit calorie goal" />
-          <SettingsRow icon="trending-up" label="Update weight" />
+          <SettingsRow icon="activity" label="Update body metrics" />
           <SettingsRow icon="info" label="About this app" />
         </View>
 

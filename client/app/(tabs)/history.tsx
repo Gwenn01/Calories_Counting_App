@@ -35,29 +35,6 @@ export default function HistoryScreen() {
             Start logging meals to unlock insights about your eating habits.
           </Text>
         </View>
-
-        {/* ---------- Empty State ---------- */}
-        <View className="items-center px-6">
-          <View className="w-20 h-20 rounded-full bg-indigo-100 items-center justify-center mb-5">
-            <Text className="text-[36px]">📊</Text>
-          </View>
-
-          <Text className="text-xl font-extrabold text-slate-900 mb-2">
-            No history yet
-          </Text>
-
-          <Text className="text-sm text-slate-500 text-center leading-6 mb-6">
-            Your past calorie and macro logs will appear here once you start
-            tracking meals.
-          </Text>
-
-          {/* CTA Button */}
-          <Pressable className="bg-indigo-600 px-6 py-3 rounded-full active:opacity-90">
-            <Text className="text-white font-bold text-sm tracking-wide">
-              Start Logging Meals
-            </Text>
-          </Pressable>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

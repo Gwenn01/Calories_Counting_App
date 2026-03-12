@@ -6,7 +6,7 @@ export const fetchProfile = async () => {
   return res.data;
 };
 
-export const editProfile = async () => {
+export const editProfile = async (data: any) => {
   const res = await api.put("api/profile-details/");
   return res.data;
 };
