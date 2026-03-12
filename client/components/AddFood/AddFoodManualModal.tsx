@@ -68,6 +68,7 @@ const HalfField = ({
 export function AddFoodManualModal({ visible, onClose }: any) {
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
+  const [pasteText, setPasteText] = useState("");
   const [form, setForm] = useState({
     // Basic
     name: "",
@@ -149,6 +150,29 @@ export function AddFoodManualModal({ visible, onClose }: any) {
     "copper",
     "manganese",
   ];
+  // handle functions
+  const handlePasteNutrition = () => {
+    try {
+      const parsed = JSON.parse(pasteText);
+
+      setForm((prev) => {
+        const updated = { ...prev };
+
+        Object.keys(parsed).forEach((key) => {
+          if (key in updated) {
+            const typedKey = key as keyof typeof prev;
+            updated[typedKey] = String(parsed[key]);
+          }
+        });
+
+        return updated;
+      });
+
+      showToast("Success", "Nutrition data imported.", "success");
+    } catch (error) {
+      showToast("Error", "Invalid JSON format.", "error");
+    }
+  };
 
   const handleSubmit = async () => {
     const payload: Record<string, any> = { ...form };
@@ -184,6 +208,27 @@ export function AddFoodManualModal({ visible, onClose }: any) {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+            {/* ── General ── */}
+            <SectionHeader title="Paste Nutrition JSON" />
+            <View className="mb-4">
+              <TextInput
+                multiline
+                value={pasteText}
+                onChangeText={setPasteText}
+                placeholder="Paste nutrition JSON here"
+                className="border border-slate-200 bg-slate-50 rounded-xl p-3 text-sm"
+                style={{ minHeight: 100 }}
+              />
+
+              <Pressable
+                onPress={handlePasteNutrition}
+                className="bg-emerald-500 py-3 rounded-xl mt-2"
+              >
+                <Text className="text-white text-center font-semibold">
+                  Auto Fill Fields
+                </Text>
+              </Pressable>
+            </View>
             {/* ── General ── */}
             <SectionHeader title="General" />
             <Field
