@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 type SettingsRowProps = {
@@ -9,35 +9,17 @@ type SettingsRowProps = {
 
 export function SettingsRow({ icon, label, onPress }: SettingsRowProps) {
   return (
-    <Pressable style={styles.row} onPress={onPress}>
-      <View style={styles.left}>
+    <Pressable
+      onPress={onPress}
+      className="flex-row items-center justify-between px-5 py-4 border-b border-slate-100 active:bg-slate-50"
+    >
+      <View className="flex-row items-center gap-3">
         <Feather name={icon} size={18} color="#64748b" />
-        <Text style={styles.text}>{label}</Text>
+
+        <Text className="text-base font-semibold text-slate-900">{label}</Text>
       </View>
 
       <Feather name="chevron-right" size={18} color="#cbd5e1" />
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  row: {
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
-  },
-  left: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#0f172a",
-  },
-});

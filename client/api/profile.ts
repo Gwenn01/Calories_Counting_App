@@ -7,6 +7,6 @@ export const fetchProfile = async () => {
 };
 
 export const editProfile = async (data: any) => {
-  const res = await api.put("api/profile-details/");
+  const res = await api.put("/api/profile-details/", data);
   return res.data;
 };

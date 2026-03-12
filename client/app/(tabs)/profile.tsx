@@ -10,6 +10,7 @@ import LoadingOverlay from "@/components/LoadingOverplay";
 import { SettingsRow } from "../../components/Profile/SettingsRow";
 import MacroItem from "@/components/Profile/MacroItem";
 import MetricItem from "@/components/Profile/MetricItem";
+import EditProfileModal from "@/components/Profile/EditProfileModal";
 // token
 import { removeToken } from "@/utils/token";
 import { Platform } from "react-native";
@@ -34,6 +35,7 @@ export default function ProfileScreen() {
     target_carbs: 0,
     target_fats: 0,
   });
+  const [showEditProfile, setShowEditProfile] = useState(false);
 
   // fetch profile data
   const fetchProfileData = async () => {
@@ -52,6 +54,18 @@ export default function ProfileScreen() {
   useEffect(() => {
     fetchProfileData();
   }, []);
+  // functions
+  const handleSaveProfile = async (data: any) => {
+    try {
+      await editProfile(data); // PUT request
+      setProfile(data);
+      setShowEditProfile(false);
+      showToast("Success!", "Update successful", "success");
+    } catch (error) {
+      showToast("Error", "Server error", "error");
+      console.log("Failed to update profile");
+    }
+  };
 
   const handleSignOut = () => {
     showAlert("Sign Out", "Are you sure you want to log out?", [
@@ -171,10 +185,20 @@ export default function ProfileScreen() {
 
         {/* ---------- SETTINGS ---------- */}
         <View className="bg-white rounded-[28px] overflow-hidden shadow-sm mb-8">
-          <SettingsRow icon="edit-3" label="Edit calorie goal" />
-          <SettingsRow icon="activity" label="Update body metrics" />
+          <SettingsRow
+            icon="edit-3"
+            label="Edit Profile"
+            onPress={() => setShowEditProfile(true)}
+          />
           <SettingsRow icon="info" label="About this app" />
         </View>
+        {/* ---------- Edit Modal ---------- */}
+        <EditProfileModal
+          visible={showEditProfile}
+          onClose={() => setShowEditProfile(false)}
+          profile={profile}
+          onSave={handleSaveProfile}
+        />
 
         {/* ---------- SIGN OUT ---------- */}
         <Pressable
