@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getToken } from "@/utils/token";
+import { getToken, removeToken } from "@/utils/token";
 
 export const api = axios.create({
   baseURL: "http://192.168.0.229:8000/",
@@ -8,22 +8,26 @@ export const api = axios.create({
   },
 });
 
-// Attach token automatically
-api.interceptors.request.use(async (config) => {
-  const token = await getToken();
-  if (token) {
-    config.headers.Authorization = `Token ${token}`;
-  } else {
-    delete config.headers.Authorization;
-  }
-  return config;
-});
+api.interceptors.request.use(
+  async (config) => {
+    const token = await getToken();
 
-// Explicit control (OPTIONAL)
-export const setAuthHeader = (token: string | null) => {
-  if (token) {
-    api.defaults.headers.common.Authorization = `Token ${token}`;
-  } else {
-    delete api.defaults.headers.common.Authorization;
-  }
-};
+    if (token) {
+      config.headers.Authorization = `Token ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      await removeToken();
+    }
+
+    return Promise.reject(error);
+  },
+);

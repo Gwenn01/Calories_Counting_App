@@ -9,7 +9,6 @@ import { useToast } from "@/components/ToastProvider";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { removeToken } from "@/utils/token";
 import { Platform } from "react-native";
-import { setAuthHeader } from "@/api/client";
 import { logoutUser } from "@/api/auth";
 
 export default function ProfileScreen() {
@@ -29,7 +28,6 @@ export default function ProfileScreen() {
             setLoading(true);
             await logoutUser(); // backend logout (token still exists)
             await removeToken();
-            setAuthHeader(null);
             router.replace("/(auth)/sign-in");
 
             showToast("Success!", "Logout successful", "success");
@@ -40,9 +38,7 @@ export default function ProfileScreen() {
           } finally {
             // 2️ Clear local auth
             await removeToken();
-            setAuthHeader(null);
             router.replace("/(auth)/sign-in");
-
             // 3️ Hard reset navigation
             if (Platform.OS === "web") {
               window.location.replace("/(auth)/sign-in");
