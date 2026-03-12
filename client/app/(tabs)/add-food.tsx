@@ -9,6 +9,7 @@ import { useToast } from "@/components/ToastProvider";
 import { FoodPickerModal } from "@/components/AddFood/FoodPickerModal";
 import { AddFoodManualModal } from "@/components/AddFood/AddFoodManualModal";
 import FoodDetailModal from "@/components/AddFood/FoodDetailModal";
+import DeleteFoodModal from "@/components/AddFood/DeleteFoodModal";
 import FoodRow from "@/components/AddFood/FoodRow";
 import CalorieItem from "@/components/AddFood/CalorieItem";
 import MealCard from "@/components/AddFood/MealCard";
@@ -29,13 +30,6 @@ const formatDate = (date: Date) =>
     day: "numeric",
     year: "numeric",
   });
-
-type MealType = "Breakfast" | "Lunch" | "Dinner" | "Snacks";
-type MealCardProps = {
-  title: string;
-  calories: number;
-  onAdd: () => void;
-};
 
 export default function AddFoodScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -360,38 +354,12 @@ export default function AddFoodScreen() {
           setShowDetailFood={setShowDetailFood}
         />
         {/* remove food modal confirmations */}
-        <Modal visible={showDeleteModal} transparent animationType="fade">
-          <View className="flex-1 bg-black/40 justify-center items-center">
-            <View className="bg-white p-6 rounded-2xl w-72">
-              <Text className="text-lg font-bold mb-2">Remove Food?</Text>
-
-              <Text className="text-slate-500 mb-5">
-                This food will be removed from your log.
-              </Text>
-
-              <View className="flex-row justify-end gap-3">
-                <Pressable
-                  onPress={() => setShowDeleteModal(false)}
-                  className="px-4 py-2"
-                >
-                  <Text className="text-slate-500">Cancel</Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => {
-                    if (selectedLogId) {
-                      handleRemoveFoodLogs(selectedLogId);
-                    }
-                    setShowDeleteModal(false);
-                  }}
-                  className="px-4 py-2 bg-red-500 rounded-lg"
-                >
-                  <Text className="text-white font-bold">Delete</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        </Modal>
+        <DeleteFoodModal
+          visible={showDeleteModal}
+          selectedLogId={selectedLogId}
+          onClose={() => setShowDeleteModal(false)}
+          onDelete={handleRemoveFoodLogs}
+        />
       </ScrollView>
     </SafeAreaView>
   );
