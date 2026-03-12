@@ -3,17 +3,21 @@ import { Modal, View, Text, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { FoodPickerModal } from "@/components/AddFood/FoodPickerModal";
-import { AddFoodManualModal } from "@/components/AddFood/AddFoodManualModal";
-import type { FoodItem } from "@/types/foods";
+// components
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { useToast } from "@/components/ToastProvider";
+import { FoodPickerModal } from "@/components/AddFood/FoodPickerModal";
+import { AddFoodManualModal } from "@/components/AddFood/AddFoodManualModal";
+import FoodDetailModal from "@/components/AddFood/FoodDetailModal";
+import type { FoodItem } from "@/types/foods";
+// apis
 import {
   createLogs,
   getLogsByMeal,
   removeLogs,
   getFoodLogsTotal,
 } from "@/api/logs";
+import { getOneFoods } from "@/api/food";
 
 /* ---------------- DATE HELPERS ---------------- */
 const formatDate = (date: Date) =>
@@ -54,7 +58,11 @@ export default function AddFoodScreen() {
   const [dinnerCalories, setDinnerCalories] = useState(0);
   const [snackCalories, setSnackCalories] = useState(0);
 
-  // for long press remove logs
+  // for long press and press detail and remove logs
+  // details foods
+  const [selectedFood, setSelectedFood] = useState<any>(null);
+  const [showDetailFood, setShowDetailFood] = useState(false);
+  // remove modal
   const [selectedLogId, setSelectedLogId] = useState<number | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   // function to explicity go to next and previous day
@@ -138,7 +146,19 @@ export default function AddFoodScreen() {
       setLoading(false);
     }
   };
-
+  // handle details foods
+  const handleDetailsFood = async (id: number): Promise<void> => {
+    try {
+      setLoading(true);
+      const food = await getOneFoods(id);
+      setSelectedFood(food);
+      setShowDetailFood(true);
+    } catch (error) {
+      console.error("Failed to fetch food:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleRemoveFoodLogs = async (id: number): Promise<void> => {
     try {
       setLoading(true);
@@ -211,7 +231,7 @@ export default function AddFoodScreen() {
           </View>
         </View>
 
-        {/* Meals Cards */}
+        {/* MEAL CARDS ========================================================================================= */}
         {/* Breakfast */}
         <MealCard
           title="Breakfast"
@@ -226,6 +246,9 @@ export default function AddFoodScreen() {
           <FoodRow
             key={item.id}
             item={item}
+            onPress={(id: number) => {
+              handleDetailsFood(id);
+            }}
             onLongPress={(id: number) => {
               setSelectedLogId(id);
               setShowDeleteModal(true);
@@ -295,6 +318,8 @@ export default function AddFoodScreen() {
             }}
           />
         ))}
+
+        {/* FOOD PICKER MODAL ========================================================================================= */}
         {/* modal for add foods */}
         <FoodPickerModal
           visible={showFoodModal}
@@ -314,6 +339,14 @@ export default function AddFoodScreen() {
           onClose={() => setShowManualModal(false)}
         />
         {/* add using scan */}
+
+        {/* MODAL ========================================================================================= */}
+        {/*  food details modal confirmations */}
+        <FoodDetailModal
+          showDetailFood={showDetailFood}
+          selectedFood={selectedFood}
+          setShowDetailFood={setShowDetailFood}
+        />
         {/* remove food modal confirmations */}
         <Modal visible={showDeleteModal} transparent animationType="fade">
           <View className="flex-1 bg-black/40 justify-center items-center">
@@ -366,13 +399,12 @@ function CalorieItem({ label, value }: any) {
 
 function MealCard({ title, calories, onAdd }: MealCardProps) {
   return (
-    <View className="bg-white rounded-[24px] p-4 mb-4 border border-slate-100 shadow-sm flex-row items-center justify-between">
+    <View className="bg-white rounded-[24px] p-4 mt-4 border border-slate-100 shadow-sm flex-row items-center justify-between">
       {/* Added flex-1 and pr-4 so long titles don't push the button off-screen */}
       <View className="flex-1 pr-4">
         <Text className="text-base font-bold text-slate-800 tracking-tight">
           {title}
         </Text>
-
         <Text className="text-sm font-medium text-slate-500 mt-0.5">
           {calories > 0 ? `${calories} kcal` : "No food logged"}
         </Text>
@@ -392,17 +424,51 @@ function MealCard({ title, calories, onAdd }: MealCardProps) {
   );
 }
 
-const FoodRow = ({ item, onLongPress }: any) => (
-  <Pressable onLongPress={() => onLongPress(item.id)}>
-    <View className="flex-row justify-between px-4 py-3 border-b border-slate-100">
-      <View>
-        <Text className="font-semibold">{item.food_details.name}</Text>
-        <Text className="text-xs text-slate-500">
+const FoodRow = ({ item, onPress, onLongPress }: any) => (
+  <Pressable
+    onPress={() => onPress?.(item.food_details.id)}
+    onLongPress={() => onLongPress?.(item.id)}
+  >
+    <View className="flex-row items-center justify-between px-5 py-4 bg-white border-b border-slate-100">
+      <View className="flex-1 pr-4">
+        {/* Title & Serving */}
+        <Text className="text-base font-bold text-slate-800 tracking-tight">
+          {item.food_details.name}
+        </Text>
+        <Text className="text-sm font-medium text-slate-500 mt-0.5">
           {item.food_details.serving}
         </Text>
-      </View>
 
-      <Text className="font-bold">{item.food_details.calories} kcal</Text>
+        {/* Macros - Upgraded to modern pill tags */}
+        <View className="flex-row items-center mt-2.5 space-x-2">
+          <View className="bg-blue-50 px-2 py-1 rounded-md">
+            <Text className="text-xs font-semibold text-blue-600">
+              P {item.food_details.protein}g
+            </Text>
+          </View>
+
+          <View className="bg-amber-50 px-2 py-1 rounded-md">
+            <Text className="text-xs font-semibold text-amber-600">
+              C {item.food_details.total_carbs}g
+            </Text>
+          </View>
+
+          <View className="bg-rose-50 px-2 py-1 rounded-md">
+            <Text className="text-xs font-semibold text-rose-600">
+              F {item.food_details.total_fat}g
+            </Text>
+          </View>
+        </View>
+      </View>
+      {/* Calories - Separated number and unit for cleaner reading */}
+      <View className="items-end">
+        <Text className="text-lg font-extrabold text-slate-900">
+          {item.food_details.calories}
+        </Text>
+        <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+          kcal
+        </Text>
+      </View>
     </View>
   </Pressable>
 );
