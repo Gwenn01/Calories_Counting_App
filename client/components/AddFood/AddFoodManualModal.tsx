@@ -68,7 +68,45 @@ const HalfField = ({
 export function AddFoodManualModal({ visible, onClose }: any) {
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
-  const [pasteText, setPasteText] = useState("");
+  const [pasteText, setPasteText] = useState(`{
+    "name": "",
+    "serving": "",
+    "calories": "",
+    "water": "",
+
+    "total_fat": "",
+    "saturated_fat": "",
+    "monounsaturated_fat": "",
+    "polyunsaturated_fat": "",
+    "cholesterol": "",
+
+    "total_carbs": "",
+    "starch": "",
+    "sugars": "",
+    "fiber": "",
+
+    "protein": "",
+
+    "vitamin_a": "",
+    "vitamin_c": "",
+    "vitamin_e": "",
+    "vitamin_k": "",
+    "thiamin_b1": "",
+    "riboflavin_b2": "",
+    "niacin_b3": "",
+    "vitamin_b6": "",
+    "folate_b9": "",
+
+    "calcium": "",
+    "iron": "",
+    "magnesium": "",
+    "phosphorus": "",
+    "potassium": "",
+    "sodium": "",
+    "zinc": "",
+    "copper": "",
+    "manganese": ""
+  }`);
   const [form, setForm] = useState({
     // Basic
     name: "",
@@ -213,11 +251,13 @@ export function AddFoodManualModal({ visible, onClose }: any) {
             <View className="mb-4">
               <TextInput
                 multiline
+                scrollEnabled
                 value={pasteText}
                 onChangeText={setPasteText}
                 placeholder="Paste nutrition JSON here"
+                placeholderTextColor="#94a3b8"
                 className="border border-slate-200 bg-slate-50 rounded-xl p-3 text-sm"
-                style={{ minHeight: 100 }}
+                style={{ height: 150, textAlignVertical: "top" }}
               />
 
               <Pressable
