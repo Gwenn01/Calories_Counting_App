@@ -32,6 +32,7 @@ export function FoodPickerModal({
 }: any) {
   const [foods, setFoods] = useState<Food[]>([]);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchFoods = async () => {
@@ -50,6 +51,10 @@ export function FoodPickerModal({
       fetchFoods();
     }
   }, [visible]);
+  // search
+  const filteredFoods = foods.filter((food) =>
+    food.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -70,6 +75,8 @@ export function FoodPickerModal({
             <TextInput
               placeholder="Search food (e.g. rice, chicken)"
               className="flex-1 py-3 px-3 text-base"
+              value={search}
+              onChangeText={setSearch}
             />
           </View>
 
@@ -94,7 +101,7 @@ export function FoodPickerModal({
 
           {/* Food list */}
           <FlatList
-            data={foods}
+            data={filteredFoods}
             keyExtractor={(item) => item.id.toString()}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
