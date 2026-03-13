@@ -246,8 +246,11 @@ export function AddFoodManualModal({ visible, onClose }: any) {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-            {/* ── General ── */}
-            <SectionHeader title="Paste Nutrition JSON" />
+            <View className="mb-3">
+              <Text className="text-slate-400 text-lg font-semibold">
+                Paste Nutrition JSON
+              </Text>
+            </View>
             <View className="mb-4">
               <TextInput
                 multiline
@@ -270,6 +273,11 @@ export function AddFoodManualModal({ visible, onClose }: any) {
               </Pressable>
             </View>
             {/* ── General ── */}
+            <View className="mb-0">
+              <Text className="text-slate-400 text-lg font-semibold">
+                Food Details
+              </Text>
+            </View>
             <SectionHeader title="General" />
             <Field
               placeholder="Food name"
