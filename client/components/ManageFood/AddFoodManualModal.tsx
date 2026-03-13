@@ -238,7 +238,7 @@ export function AddFoodManualModal({ visible, onClose }: any) {
           {/* Header */}
           <View className="flex-row justify-between items-center mb-1">
             <Text className="text-xl font-bold text-slate-800">
-              Add Food Manually
+              Create Food
             </Text>
             <Pressable onPress={onClose} className="p-1">
               <Feather name="x" size={22} color="#64748b" />

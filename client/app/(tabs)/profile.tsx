@@ -17,6 +17,7 @@ import { Platform } from "react-native";
 import { logoutUser } from "@/api/auth";
 // apis
 import { fetchProfile, editProfile } from "@/api/profile";
+import { getStreak } from "@/api/history";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -39,6 +40,24 @@ export default function ProfileScreen() {
     target_fats: 0,
   });
   const [showEditProfile, setShowEditProfile] = useState(false);
+  // streak
+  const [streak, setStreak] = useState(0);
+
+  useEffect(() => {
+    const fetchStreak = async () => {
+      try {
+        setLoading(true);
+        const res = await getStreak();
+        setStreak(res.data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStreak();
+  }, []);
 
   // fetch profile data
   const fetchProfileData = async () => {
@@ -158,17 +177,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* ---------- CALORIE GOAL ---------- */}
-        <View className="bg-slate-900 rounded-[28px] p-6 mb-6">
-          <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase">
-            DAILY CALORIE GOAL
-          </Text>
-
-          <Text className="text-4xl font-black text-white mt-1.5">
-            {profile.target_calories} kcal
-          </Text>
-        </View>
-
         {/* ---------- MACRO GOALS ---------- */}
         <View className="bg-white rounded-[28px] p-6 mb-6 shadow-sm">
           <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-4">
@@ -191,6 +199,56 @@ export default function ProfileScreen() {
               value={`${profile.target_fats}g`}
               color="text-rose-600"
             />
+          </View>
+        </View>
+        {/* ---------- CALORIE GOAL ---------- */}
+        <View className="bg-slate-900 rounded-[28px] p-6 mb-6">
+          <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+            DAILY CALORIE GOAL
+          </Text>
+
+          <Text className="text-4xl font-black text-white mt-1.5">
+            {profile.target_calories} kcal
+          </Text>
+        </View>
+        {/* STREAK SECTION Added relative and overflow-hidden to contain the decorative background circle */}
+        <View className="bg-black rounded-[32px] p-7 shadow-xl shadow-emerald-900/20 relative overflow-hidden mb-10">
+          {/* Subtle decorative background shape for a premium app feel */}
+          <View className="absolute -top-12 -right-10 w-40 h-40 bg-emerald-800 rounded-full opacity-40" />
+
+          {/* Content wrapper with z-10 so it sits above the decorative circle */}
+          <View className="relative z-10">
+            {/* Card Header & Badge */}
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-xs font-bold tracking-[2px] text-white uppercase">
+                Total Days Logged
+              </Text>
+              {/* Gamification Badge */}
+              {streak > 0 && (
+                <View className="bg-orange-500/20 px-2.5 py-1 rounded-full flex-row items-center">
+                  <Text className="text-xs font-bold text-orange-400">
+                    Streak
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Large Number Callout */}
+            <View className="flex-row items-baseline mt-2 mb-1">
+              <Text className="text-[64px] font-black text-white tracking-tighter mr-3 leading-none">
+                {streak}
+              </Text>
+              <Text className="text-xl font-bold text-white">days</Text>
+            </View>
+
+            {/* Divider */}
+            <View className="h-[1px] bg-white my-5" />
+
+            {/* Footer Text */}
+            <Text className="text-sm font-medium text-white leading-relaxed pr-4">
+              Start logging meals to unlock insights about your eating habits.
+              Keep the momentum going!
+            </Text>
           </View>
         </View>
 

@@ -7,7 +7,6 @@ import { useRouter } from "expo-router";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { useToast } from "@/components/ToastProvider";
 import { FoodPickerModal } from "@/components/AddFood/FoodPickerModal";
-import { AddFoodManualModal } from "@/components/AddFood/AddFoodManualModal";
 import FoodDetailModal from "@/components/AddFood/FoodDetailModal";
 import DeleteFoodModal from "@/components/AddFood/DeleteFoodModal";
 import FoodRow from "@/components/AddFood/FoodRow";
@@ -40,7 +39,6 @@ export default function AddFoodScreen() {
   >("breakfast");
   // add food model
   const [showFoodModal, setShowFoodModal] = useState(false);
-  const [showManualModal, setShowManualModal] = useState(false);
   // the selected foods
   const [breakfastLogs, setBreakfastLogs] = useState([]);
   const [lunchLogs, setLunchLogs] = useState([]);
@@ -337,16 +335,8 @@ export default function AddFoodScreen() {
           }}
           onAddManual={() => {
             setShowFoodModal(false); // close picker
-            setShowManualModal(true); // OPEN manual modal
           }}
         />
-        {/* add manual */}
-        <AddFoodManualModal
-          visible={showManualModal}
-          onClose={() => setShowManualModal(false)}
-        />
-        {/* add using scan */}
-
         {/* MODAL ========================================================================================= */}
         {/*  food details modal confirmations */}
         <FoodDetailModal

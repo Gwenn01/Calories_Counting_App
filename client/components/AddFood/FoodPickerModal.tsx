@@ -23,13 +23,7 @@ interface Food {
   total_fat: number;
 }
 
-export function FoodPickerModal({
-  visible,
-  onClose,
-  onSelect,
-  onAddManual,
-  onAddByPhoto,
-}: any) {
+export function FoodPickerModal({ visible, onClose, onSelect }: any) {
   const [foods, setFoods] = useState<Food[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -78,25 +72,6 @@ export function FoodPickerModal({
               value={search}
               onChangeText={setSearch}
             />
-          </View>
-
-          {/* Quick actions */}
-          <View className="flex-row gap-3 mb-4">
-            <Pressable
-              onPress={onAddManual}
-              className="flex-1 flex-row items-center justify-center gap-2 bg-slate-900 rounded-2xl py-3"
-            >
-              <Feather name="edit-3" size={16} color="white" />
-              <Text className="text-white font-semibold">Add Manually</Text>
-            </Pressable>
-
-            <Pressable
-              onPress={onAddByPhoto}
-              className="flex-1 flex-row items-center justify-center gap-2 bg-slate-200 rounded-2xl py-3"
-            >
-              <Feather name="camera" size={16} color="#0f172a" />
-              <Text className="font-semibold text-slate-900">Scan Photo</Text>
-            </Pressable>
           </View>
 
           {/* Food list */}

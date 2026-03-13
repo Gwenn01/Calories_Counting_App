@@ -106,11 +106,11 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="history"
+        name="manage-food"
         options={{
-          title: "History",
+          title: "food",
           tabBarIcon: ({ color }) => (
-            <Feather name="clock" size={22} color={color} />
+            <Feather name="shopping-bag" size={22} color={color} />
           ),
         }}
       />
