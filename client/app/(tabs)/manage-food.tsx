@@ -6,20 +6,13 @@ import { Feather } from "@expo/vector-icons";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { AddFoodManualModal } from "@/components/ManageFood/AddFoodManualModal";
 import ManageFoodModal from "@/components/ManageFood/ManageFoodModal";
+import { useToast } from "@/components/ToastProvider";
 // apis
-import { getAllFoods } from "@/api/food";
-
-type Food = {
-  id: number;
-  name: string;
-  serving: string;
-  calories: number;
-  protein: number;
-  total_carbs: number;
-  total_fat: number;
-};
+import { getAllFoods, updateFood, deleteFood } from "@/api/food";
+import { Food } from "../../types/foods";
 
 export default function ManageFoodScreen() {
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [foods, setFoods] = useState<Food[]>([]);
   const [search, setSearch] = useState("");
@@ -42,7 +35,7 @@ export default function ManageFoodScreen() {
     };
 
     fetchFoods();
-  }, [showManualModal]);
+  }, [showManualModal, showEditModal]);
 
   // Search filter
   const filteredFoods = foods.filter((food) =>
@@ -63,14 +56,50 @@ export default function ManageFoodScreen() {
     setSelectedFood(food);
     setShowEditModal(true);
   };
-  const handleUpdateFood = (food: Food) => {
-    console.log("Update food", food);
-    setShowEditModal(false);
+  // format the data before passing to backend
+  function sanitizeFood(form: Food) {
+    const payload: any = {};
+
+    for (const key in form) {
+      const value = form[key as keyof Food];
+      // keep string fields
+      if (key === "name" || key === "serving") {
+        payload[key] = value || "";
+        continue;
+      }
+      // convert numeric fields
+      payload[key] = value === "" ? 0 : Number(value);
+    }
+
+    return payload;
+  }
+  const handleUpdateFood = async (id: number, food: Food) => {
+    try {
+      setShowEditModal(false);
+      setLoading(true);
+      const payload = sanitizeFood(food);
+      await updateFood(id, payload);
+      showToast("Success!", "Food updated successfully", "success");
+    } catch (error) {
+      console.log(error);
+      showToast("Error", "Error deleting food", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteFood = (id: number) => {
-    console.log("Delete food", id);
-    setShowEditModal(false);
+  const handleDeleteFood = async (id: number) => {
+    try {
+      setShowEditModal(false);
+      setLoading(true);
+      await deleteFood(id);
+      showToast("Success!", "Food deleted successfully", "success");
+    } catch (error) {
+      console.log("Error deleting food:", error);
+      showToast("Error", "Error deleting food", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderFoodItem = ({ item }: { item: Food }) => (

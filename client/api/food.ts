@@ -14,3 +14,13 @@ export const getOneFoods = async (id: number) => {
   const res = await api.get(`api/foods/${id}/`);
   return res.data;
 };
+
+export const updateFood = async (id: number, food: any) => {
+  const res = await api.put(`api/foods/${id}/`, food);
+  return res.data;
+};
+
+export const deleteFood = async (id: number) => {
+  const res = await api.delete(`api/foods/${id}/`);
+  return res.data;
+};

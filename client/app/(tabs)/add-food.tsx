@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Modal, View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 // components
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { useToast } from "@/components/ToastProvider";

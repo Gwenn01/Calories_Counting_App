@@ -46,5 +46,5 @@ class FoodDetail(APIView):
     def delete(self, request, pk):
         food = self.get_object(pk)
         food.delete()
-        return Response({"message": "Food deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Food deleted successfully"}, status=status.HTTP_200_OK)
     
