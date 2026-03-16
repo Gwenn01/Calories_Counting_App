@@ -2,8 +2,8 @@ import axios from "axios";
 import { getToken, removeToken } from "@/utils/token";
 
 export const api = axios.create({
-  //baseURL: "https://caloriescountingappserverdeployment.onrender.com/",
-  baseURL: "http://192.168.1.34:8000/",
+  baseURL: "https://caloriescountingappserverdeployment.onrender.com/",
+  //baseURL: "http://192.168.1.34:8000/",
   headers: {
     "Content-Type": "application/json",
   },
