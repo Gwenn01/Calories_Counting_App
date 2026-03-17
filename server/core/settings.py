@@ -18,8 +18,6 @@ load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -30,9 +28,6 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = "True"
 
 ALLOWED_HOSTS = ["*"]
-
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -92,9 +87,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
-
-
 # Database
+# this is the cloud database using postgre 
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 # DATABASES = {
 #     "default": dj_database_url.config(
@@ -102,6 +96,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 #         conn_max_age=600
 #     )
 # }
+# default sql lite for offline production
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
