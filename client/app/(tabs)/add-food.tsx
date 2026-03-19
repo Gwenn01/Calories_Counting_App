@@ -174,13 +174,13 @@ export default function AddFoodScreen() {
     <SafeAreaView className="flex-1 bg-slate-50">
       {loading && <LoadingOverlay text="Loading nutrition..." />}
       <ScrollView
+        className="px-4 pt-2"
         showsVerticalScrollIndicator={false}
-        //contentContainerClassName="p-5 pb-32"
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        {/* Header */}
+        {/* Header ==============================================================*/}
         {/* ---------- HEADER ---------- */}
-        <View className="flex-row items-center justify-between mb-6">
+        <View className="flex-row items-center justify-between mb-4">
           <Pressable
             onPress={goPrevDay}
             className="bg-white p-2.5 rounded-2xl border border-slate-100"
@@ -205,123 +205,188 @@ export default function AddFoodScreen() {
           </Pressable>
         </View>
 
-        {/* Calories Remaining Card */}
-        <View className="bg-white rounded-[28px] p-5 mb-7 border border-slate-100">
-          <Text className="text-sm font-extrabold text-slate-500 mb-4">
-            Calories Remaining
-          </Text>
+        {/* Calories Remaining Card ========================================*/}
+        <View className="bg-white rounded-[32px] p-4 mb-4 shadow-sm border border-slate-100">
+          {/* Header with Icon */}
+          <View className="flex-row items-center mb-3 px-2 gap-2">
+            <View className="bg-emerald-50 p-1.5 rounded-lg border border-emerald-100">
+              <Feather name="pie-chart" size={14} color="#059669" />
+            </View>
+            <Text
+              className="text-[11px] font-black text-slate-400"
+              style={{ letterSpacing: 1.5 }}
+            >
+              DAILY SUMMARY
+            </Text>
+          </View>
 
-          <View className="flex-row items-center justify-between flex-wrap">
-            <CalorieItem label="Goal" value={goalCalories} />
-            <Text className="text-lg font-extrabold text-slate-400">−−</Text>
-            <CalorieItem label="Food" value={foodCalories} />
-            <Text className="text-lg font-extrabold text-slate-400">=</Text>
+          {/*The Split Pill Container */}
+          <View className="flex-row items-center bg-slate-50 p-1.5 rounded-[28px]">
+            {/* Left Side: Stats (Goal & Food) */}
+            <View className="flex-row flex-1 justify-evenly items-center py-2">
+              <View className="items-center">
+                <Text
+                  className="text-slate-400 text-[10px] font-bold uppercase mb-0.5"
+                  style={{ letterSpacing: 1 }}
+                >
+                  Goal
+                </Text>
+                <Text className="text-slate-800 font-extrabold text-lg">
+                  {goalCalories}
+                </Text>
+              </View>
+              {/* Subtle Vertical Divider instead of a Minus Sign */}
+              <View className="w-[1.5px] h-8 bg-slate-200 rounded-full" />
 
-            <View className="bg-slate-900 px-4 py-2.5 rounded-xl items-center">
-              <Text className="text-xl font-black text-green-500">
+              <View className="items-center">
+                <Text
+                  className="text-slate-400 text-[10px] font-bold uppercase mb-0.5"
+                  style={{ letterSpacing: 1 }}
+                >
+                  Food
+                </Text>
+                <Text className="text-slate-800 font-extrabold text-lg">
+                  {foodCalories}
+                </Text>
+              </View>
+            </View>
+            {/* Right Side: Highlight (Left) */}
+            <View className="bg-slate-900 rounded-[24px] px-6 py-3.5 items-center shadow-sm ml-2">
+              <Text
+                className="text-emerald-50 text-[10px] font-bold uppercase mb-0.5"
+                style={{ letterSpacing: 1 }}
+              >
+                REMAINING
+              </Text>
+              <Text className="text-white font-black text-xl">
                 {remainingCalories}
               </Text>
-              <Text className="text-[11px] text-slate-400">Remaining</Text>
             </View>
           </View>
         </View>
 
         {/* MEAL CARDS ========================================================================================= */}
-        {/* Breakfast */}
-        <MealCard
-          title="Breakfast"
-          calories={breakfastCalories}
-          onAdd={() => {
-            setSelectedMealType("breakfast");
-            setShowFoodModal(true);
-          }}
-        />
-
-        {breakfastLogs.map((item: any) => (
-          <FoodRow
-            key={item.id}
-            item={item}
-            onPress={(id: number) => {
-              handleDetailsFood(id);
-            }}
-            onLongPress={(id: number) => {
-              setSelectedLogId(id);
-              setShowDeleteModal(true);
+        {/* Breakfast Section */}
+        <View className="bg-white rounded-[32px] border border-slate-100 shadow-sm mb-3 overflow-hidden">
+          {/* The Header */}
+          <MealCard
+            title="Breakfast"
+            calories={breakfastCalories}
+            onAdd={() => {
+              setSelectedMealType("breakfast");
+              setShowFoodModal(true);
             }}
           />
-        ))}
 
-        {/* Lunch */}
-        <MealCard
-          title="Lunch"
-          calories={lunchCalories}
-          onAdd={() => {
-            setSelectedMealType("lunch");
-            setShowFoodModal(true);
-          }}
-        />
+          {/* The Items */}
+          {breakfastLogs.length > 0 && (
+            <View className="bg-slate-50/30">
+              {breakfastLogs.map((item: any, index: number) => (
+                <FoodRow
+                  key={item.id}
+                  item={item}
+                  // Pass a prop to know if it's the last item so we can remove the bottom border
+                  isLast={index === breakfastLogs.length - 1}
+                  onPress={(id: number) => handleDetailsFood(id)}
+                  onLongPress={(id: number) => {
+                    setSelectedLogId(id);
+                    setShowDeleteModal(true);
+                  }}
+                />
+              ))}
+            </View>
+          )}
+        </View>
 
-        {lunchLogs.map((item: any) => (
-          <FoodRow
-            key={item.id}
-            item={item}
-            onPress={(id: number) => {
-              handleDetailsFood(id);
-            }}
-            onLongPress={(id: number) => {
-              setSelectedLogId(id);
-              setShowDeleteModal(true);
-            }}
-          />
-        ))}
-
-        {/* Dinner */}
-        <MealCard
-          title="Dinner"
-          calories={dinnerCalories}
-          onAdd={() => {
-            setSelectedMealType("dinner");
-            setShowFoodModal(true);
-          }}
-        />
-
-        {dinnerLogs.map((item: any) => (
-          <FoodRow
-            key={item.id}
-            item={item}
-            onPress={(id: number) => {
-              handleDetailsFood(id);
-            }}
-            onLongPress={(id: number) => {
-              setSelectedLogId(id);
-              setShowDeleteModal(true);
+        {/* Lunch Section */}
+        <View className="bg-white rounded-[32px] border border-slate-100 shadow-sm mb-3 overflow-hidden">
+          <MealCard
+            title="Lunch"
+            calories={lunchCalories}
+            onAdd={() => {
+              setSelectedMealType("lunch");
+              setShowFoodModal(true);
             }}
           />
-        ))}
+          {lunchLogs.length > 0 && (
+            <View className="bg-slate-50/30">
+              {lunchLogs.map((item: any, index: number) => (
+                <FoodRow
+                  key={item.id}
+                  item={item}
+                  isLast={index === lunchLogs.length - 1}
+                  onPress={(id: number) => {
+                    handleDetailsFood(id);
+                  }}
+                  onLongPress={(id: number) => {
+                    setSelectedLogId(id);
+                    setShowDeleteModal(true);
+                  }}
+                />
+              ))}
+            </View>
+          )}
+        </View>
 
-        {/* Snacks */}
-        <MealCard
-          title="Snacks"
-          calories={snackCalories}
-          onAdd={() => {
-            setSelectedMealType("snack");
-            setShowFoodModal(true);
-          }}
-        />
-
-        {snackLogs.map((item: any) => (
-          <FoodRow
-            key={item.id}
-            item={item}
-            onPress={(id: number) => {
-              handleDetailsFood(id);
-            }}
-            onLongPress={(id: number) => {
-              setSelectedLogId(id);
-              setShowDeleteModal(true);
+        {/* Dinner Section */}
+        <View className="bg-white rounded-[32px] border border-slate-100 shadow-sm mb-3 overflow-hidden">
+          <MealCard
+            title="Dinner"
+            calories={dinnerCalories}
+            onAdd={() => {
+              setSelectedMealType("dinner");
+              setShowFoodModal(true);
             }}
           />
-        ))}
+          {dinnerLogs.length > 0 && (
+            <View className="bg-slate-50/30">
+              {dinnerLogs.map((item: any, index: number) => (
+                <FoodRow
+                  key={item.id}
+                  item={item}
+                  isLast={index === dinnerLogs.length - 1}
+                  onPress={(id: number) => {
+                    handleDetailsFood(id);
+                  }}
+                  onLongPress={(id: number) => {
+                    setSelectedLogId(id);
+                    setShowDeleteModal(true);
+                  }}
+                />
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Snacks Section */}
+        <View className="bg-white rounded-[32px] border border-slate-100 shadow-sm mb-3 overflow-hidden">
+          <MealCard
+            title="Snacks"
+            calories={snackCalories}
+            onAdd={() => {
+              setSelectedMealType("snack");
+              setShowFoodModal(true);
+            }}
+          />
+          {snackLogs.length > 0 && (
+            <View className="bg-slate-50/30">
+              {snackLogs.map((item: any, index: number) => (
+                <FoodRow
+                  key={item.id}
+                  item={item}
+                  isLast={index === snackLogs.length - 1}
+                  onPress={(id: number) => {
+                    handleDetailsFood(id);
+                  }}
+                  onLongPress={(id: number) => {
+                    setSelectedLogId(id);
+                    setShowDeleteModal(true);
+                  }}
+                />
+              ))}
+            </View>
+          )}
+        </View>
 
         {/* FOOD PICKER MODAL ========================================================================================= */}
         {/* modal for add foods */}

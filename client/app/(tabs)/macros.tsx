@@ -71,7 +71,7 @@ export default function NutritionScreen() {
       {loading && <LoadingOverlay text="Loading nutrition..." />}
 
       <ScrollView
-        className="px-6 pt-4"
+        className="px-4 pt-2"
         contentContainerStyle={{ paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
       >
