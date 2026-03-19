@@ -157,48 +157,119 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ---------- HEADER ---------- */}
-        <View className="flex-row items-center bg-white p-4 rounded-3xl border border-slate-100 shadow-sm mb-3">
-          {/* Avatar - Modern Squircle */}
-          <View className="w-16 h-16 rounded-2xl bg-emerald-100 items-center justify-center border border-emerald-200">
-            <Text className="text-emerald-700 text-xl font-bold">
-              {profile.name
-                ?.split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
-            </Text>
-          </View>
+        <View
+          className="rounded-[28px] p-4 mb-3"
+          style={{
+            backgroundColor: "#0f172a",
+            borderWidth: 1,
+            borderColor: "#1e293b",
+            shadowColor: "#0000",
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.4,
+            shadowRadius: 50,
+            elevation: 10,
+          }}
+        >
+          <View className="flex-row items-center gap-4">
+            {/* Avatar */}
+            <View
+              className="w-16 h-16 rounded-[20px] items-center justify-center"
+              style={{
+                backgroundColor: "#052e16",
+                borderWidth: 1.5,
+                borderColor: "#14532d",
+              }}
+            >
+              <Text
+                className="text-emerald-400 font-black"
+                style={{ fontSize: 20, letterSpacing: -0.5 }}
+              >
+                {profile.name
+                  ?.split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </Text>
+            </View>
 
-          {/* User Info */}
-          <View className="ml-4 flex-1 justify-center">
-            <Text className="text-xl font-extrabold text-slate-900 mb-0.5">
-              {profile.name}
-            </Text>
-            <Text className="text-sm font-medium text-slate-500">
-              @{profile.username_display}
-            </Text>
+            {/* Info */}
+            <View className="flex-1 justify-center">
+              <Text
+                className="text-slate-100 font-black mb-0.5"
+                style={{ fontSize: 18, letterSpacing: -0.4 }}
+              >
+                {profile.name}
+              </Text>
+              <View className="flex-row items-center gap-1.5">
+                <View
+                  className="rounded-full px-2 py-0.5"
+                  style={{
+                    backgroundColor: "#1e293b",
+                    borderWidth: 1,
+                    borderColor: "#334155",
+                  }}
+                >
+                  <Text
+                    className="text-slate-500 font-bold"
+                    style={{ fontSize: 10, letterSpacing: 0.5 }}
+                  >
+                    @{profile.username_display}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Edit Button */}
+            <Pressable
+              className="w-9 h-9 rounded-[12px] items-center justify-center"
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? "#1e293b" : "#0d1f2d",
+                borderWidth: 1,
+                borderColor: "#1e293b",
+              })}
+            >
+              <Feather name="edit-2" size={13} color="#475569" />
+            </Pressable>
           </View>
         </View>
 
         {/* ---------- BODY METRICS ---------- */}
-        <View className="bg-white rounded-[28px] p-6 mb-3 shadow-sm">
-          <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-4">
-            BODY METRICS
-          </Text>
-
-          <View className="flex-row justify-between">
-            <MetricItem label="Age" value={`${profile.age}`} />
-            <MetricItem label="Weight" value={`${profile.weight} kg`} />
-            <MetricItem label="Height" value={`${profile.height} cm`} />
+        {/* Body Metrics Card */}
+        <View
+          className="rounded-[28px] p-5 mb-3 bg-white"
+          style={{
+            borderWidth: 1,
+            borderColor: "#f1f5f9",
+            shadowColor: "#94a3b8",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.12,
+            shadowRadius: 16,
+            elevation: 4,
+          }}
+        >
+          {/* Header */}
+          <View className="flex-row items-center gap-2 mb-4">
+            <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+              BODY METRICS
+            </Text>
           </View>
-          <View className="flex-row justify-between">
-            <MetricItem label="gender" value={`${profile.gender}`} />
+
+          {/* Row 1 */}
+          <View className="flex-row mb-2 mx-[-4px]">
+            <MetricItem metricKey="age" value={`${profile.age} yrs`} />
+            <MetricItem metricKey="weight" value={`${profile.weight} kg`} />
+            <MetricItem metricKey="height" value={`${profile.height} cm`} />
+          </View>
+
+          {/* Row 2 */}
+          <View className="flex-row mx-[-4px]">
+            <MetricItem metricKey="gender" value={`${profile.gender}`} />
             <MetricItem
-              label="activity_level"
+              metricKey="activity_level"
               value={`${profile.activity_level}`}
             />
-            <MetricItem label="goal" value={`${profile.goal}`} />
+            <MetricItem metricKey="goal" value={`${profile.goal}`} />
           </View>
         </View>
 
@@ -208,36 +279,35 @@ export default function ProfileScreen() {
             MACRONUTRIENT GOALS
           </Text>
 
-          <View className="flex-row justify-between">
+          <View className="flex-row mx-[-4px]">
             <MacroItem
+              metricKey="calories"
+              label="Calories"
+              value={profile.target_calories}
+              unit="kcal"
+            />
+            <MacroItem
+              metricKey="protein"
               label="Protein"
-              value={`${profile.target_protein}g`}
-              color="text-blue-600"
+              value={profile.target_protein}
+              unit="g"
             />
             <MacroItem
+              metricKey="carbs"
               label="Carbs"
-              value={`${profile.target_carbs}g`}
-              color="text-amber-600"
+              value={profile.target_carbs}
+              unit="g"
             />
             <MacroItem
+              metricKey="fats"
               label="Fats"
-              value={`${profile.target_fats}g`}
-              color="text-rose-600"
+              value={profile.target_fats}
+              unit="g"
             />
           </View>
         </View>
 
-        {/* ---------- CALORIE GOAL ---------- */}
-        <View className="bg-slate-900 rounded-[28px] p-6 mb-3">
-          <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase">
-            DAILY CALORIE GOAL
-          </Text>
-
-          <Text className="text-4xl font-black text-white mt-1.5">
-            {profile.target_calories} kcal
-          </Text>
-        </View>
-
+        {/* ---------- STREAK SECTION ---------- */}
         {/* STREAK SECTION Added relative and overflow-hidden to contain the decorative background circle */}
         <View className="bg-black rounded-[32px] p-7 shadow-xl shadow-emerald-900/20 relative overflow-hidden mb-3">
           {/* Subtle decorative background shape for a premium app feel */}
