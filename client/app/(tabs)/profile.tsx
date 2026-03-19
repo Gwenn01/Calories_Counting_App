@@ -136,28 +136,32 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ---------- HEADER ---------- */}
-        <View className="items-center mb-8">
-          <View className="w-[80px] h-[80px] rounded-full bg-emerald-500 items-center justify-center mb-3">
-            <Text className="text-white text-2xl font-black">
+        <View className="flex-row items-center bg-white p-4 rounded-3xl border border-slate-100 shadow-sm mb-3">
+          {/* Avatar - Modern Squircle */}
+          <View className="w-16 h-16 rounded-2xl bg-emerald-100 items-center justify-center border border-emerald-200">
+            <Text className="text-emerald-700 text-xl font-bold">
               {profile.name
                 ?.split(" ")
-                .map((n: string) => n[0])
+                .map((n) => n[0])
                 .join("")
-                .slice(0, 2)}
+                .slice(0, 2)
+                .toUpperCase()}
             </Text>
           </View>
 
-          <Text className="text-[22px] font-extrabold text-slate-900">
-            {profile.name}
-          </Text>
-
-          <Text className="text-sm text-slate-500 mt-1">
-            @{profile.username_display}
-          </Text>
+          {/* User Info */}
+          <View className="ml-4 flex-1 justify-center">
+            <Text className="text-xl font-extrabold text-slate-900 mb-0.5">
+              {profile.name}
+            </Text>
+            <Text className="text-sm font-medium text-slate-500">
+              @{profile.username_display}
+            </Text>
+          </View>
         </View>
 
         {/* ---------- BODY METRICS ---------- */}
-        <View className="bg-white rounded-[28px] p-6 mb-6 shadow-sm">
+        <View className="bg-white rounded-[28px] p-6 mb-3 shadow-sm">
           <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-4">
             BODY METRICS
           </Text>
@@ -178,7 +182,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* ---------- MACRO GOALS ---------- */}
-        <View className="bg-white rounded-[28px] p-6 mb-6 shadow-sm">
+        <View className="bg-white rounded-[28px] p-6 mb-3 shadow-sm">
           <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-4">
             MACRONUTRIENT GOALS
           </Text>
@@ -201,8 +205,9 @@ export default function ProfileScreen() {
             />
           </View>
         </View>
+
         {/* ---------- CALORIE GOAL ---------- */}
-        <View className="bg-slate-900 rounded-[28px] p-6 mb-6">
+        <View className="bg-slate-900 rounded-[28px] p-6 mb-3">
           <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase">
             DAILY CALORIE GOAL
           </Text>
@@ -211,8 +216,9 @@ export default function ProfileScreen() {
             {profile.target_calories} kcal
           </Text>
         </View>
+
         {/* STREAK SECTION Added relative and overflow-hidden to contain the decorative background circle */}
-        <View className="bg-black rounded-[32px] p-7 shadow-xl shadow-emerald-900/20 relative overflow-hidden mb-10">
+        <View className="bg-black rounded-[32px] p-7 shadow-xl shadow-emerald-900/20 relative overflow-hidden mb-3">
           {/* Subtle decorative background shape for a premium app feel */}
           <View className="absolute -top-12 -right-10 w-40 h-40 bg-emerald-800 rounded-full opacity-40" />
 
@@ -253,7 +259,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* ---------- SETTINGS ---------- */}
-        <View className="bg-white rounded-[28px] overflow-hidden shadow-sm mb-8">
+        <View className="bg-white rounded-[28px] overflow-hidden shadow-sm mb-3">
           <SettingsRow
             icon="edit-3"
             label="Edit Profile"
@@ -272,10 +278,15 @@ export default function ProfileScreen() {
         {/* ---------- SIGN OUT ---------- */}
         <Pressable
           onPress={handleSignOut}
-          className="flex-row items-center justify-center gap-3 py-4 rounded-2xl bg-red-50 border border-red-200"
+          className="flex-row items-center justify-between px-5 py-4 bg-white rounded-2xl border border-slate-100 shadow-sm"
         >
-          <Feather name="log-out" size={20} color="#ef4444" />
-          <Text className="text-red-600 font-semibold text-base">Sign out</Text>
+          <View className="flex-row items-center gap-3">
+            <View className="bg-red-50 p-2 rounded-xl">
+              <Feather name="log-out" size={18} color="#ef4444" />
+            </View>
+            <Text className="text-slate-900 font-bold text-base">Sign Out</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color="#cbd5e1" />
         </Pressable>
       </ScrollView>
     </SafeAreaView>
