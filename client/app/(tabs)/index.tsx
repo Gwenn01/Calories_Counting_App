@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { fetchTodayOverview } from "@/api/overview";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { PieChart } from "react-native-gifted-charts";
@@ -42,12 +43,19 @@ export default function TodayScreen() {
       </SafeAreaView>
     );
   }
+  // header data
+  const today = new Date();
+  const dayName = today.toLocaleDateString("en-US", { weekday: "long" });
+  const dateStr = today.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+  });
 
   /* ---------- DATA PREP ---------- */
   const calorieProgress =
     (overview.current_calories / overview.calories_goal) * 100 || 0;
 
-  // 2. Prepare Chart Data (Convert grams to calories for accuracy)
+  //  Prepare Chart Data (Convert grams to calories for accuracy)
   const proteinCal = (overview.current_protein || 0) * 4;
   const carbsCal = (overview.current_carbs || 0) * 4;
   const fatsCal = (overview.current_fats || 0) * 9;
@@ -102,31 +110,44 @@ export default function TodayScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         {/* Header */}
-        <View className="flex-row justify-between items-center mb-6 mt-2">
-          {/* Left: Title */}
-          <View>
-            <Text className="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-1">
-              Summary
+        <View className="flex-row justify-between items-center pt-1 pb-2">
+          {/* Left: Title Block */}
+          <View className="items-start">
+            <Text
+              className="text-[10px] font-semibold text-neutral-400 uppercase"
+              style={{ letterSpacing: 2 }}
+            >
+              TODAY {dateStr}
             </Text>
-            <Text className="text-3xl font-black text-neutral-900">Today</Text>
+            <View className="flex-row items-center gap-1.5">
+              <Text
+                className="text-2xl font-black text-neutral-900"
+                style={{ letterSpacing: -0.5 }}
+              >
+                {dayName}
+              </Text>
+              <View className="w-2 h-2 rounded-full bg-emerald-400 mb-0.5" />
+            </View>
           </View>
 
-          {/* Right: Logo + Calendar */}
-          <View className="flex-row items-center gap-3">
-            {/* App Logo
-            <View className="bg-white p-2 rounded-full border border-neutral-100 shadow-sm">
-              <Image
-                source={require("@/assets/image/logo.jpg")}
-                className="w-7 h-7"
-                resizeMode="contain"
-              />
-            </View>
-              */}
-            {/* Calendar Button */}
-            <View className="bg-white p-3 rounded-full border border-neutral-100 shadow-sm">
-              <Feather name="calendar" size={20} color="#525252" />
-            </View>
-          </View>
+          {/* Right: Calendar button only */}
+          <TouchableOpacity activeOpacity={0.8}>
+            <LinearGradient
+              colors={["#18181b", "#3f3f46"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              className="flex-row items-center gap-1 px-4 h-11 rounded-2xl"
+              style={{
+                shadowColor: "#18181b",
+                shadowOpacity: 0.25,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 4 },
+              }}
+            >
+              <Feather name="calendar" size={16} color="#fff" />
+              <Text className="text-white text-sm font-semibold">Schedule</Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
 
         {/* Calories Card */}
