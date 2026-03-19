@@ -8,6 +8,7 @@ import { fetchMacrosByDate } from "@/api/macros";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { NUTRIENTS } from "@/constants/nutrients";
 import { MacroData } from "@/types/macros";
+import { PieChart } from "react-native-gifted-charts";
 
 /* ---------------- DATE HELPERS ---------------- */
 const formatDate = (date: Date) =>
@@ -51,11 +52,90 @@ export default function NutritionScreen() {
       loadDataByDate();
     }, []),
   );
-
+  // day data ============================================
   const dayKey = toKey(currentDate);
-  const dayData = dataByDate.find((d) => d.date === dayKey);
+  const emptyDay: MacroData = {
+    id: 0,
+    date: "",
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fats: 0,
+    fiber: 0,
+    sugar: 0,
+    saturated_fat: 0,
+    monounsaturated_fat: 0,
+    polyunsaturated_fat: 0,
+    trans_fat: 0,
+    cholesterol: 0,
+    sodium: 0,
+    vitamin_a: 0,
+    vitamin_c: 0,
+    vitamin_d: 0,
+    vitamin_e: 0,
+    vitamin_k: 0,
+    vitamin_b1: 0,
+    vitamin_b2: 0,
+    vitamin_b3: 0,
+    vitamin_b6: 0,
+    vitamin_b9: 0,
+    vitamin_b12: 0,
+    calcium: 0,
+    iron: 0,
+    magnesium: 0,
+    phosphorus: 0,
+    potassium: 0,
+    zinc: 0,
+    copper: 0,
+    manganese: 0,
+  };
+  const dayData: MacroData =
+    dataByDate.find((d) => d.date === dayKey) ?? emptyDay;
+
   const toNumber = (value: string | number | undefined) =>
     typeof value === "number" ? value : Number(value) || 0;
+  // pi chart data =================================================================
+  const proteinCal = (dayData.protein || 0) * 4;
+  const carbsCal = (dayData.carbs || 0) * 4;
+  const fatsCal = (dayData.fats || 0) * 9;
+  const totalLogged = proteinCal + carbsCal + fatsCal || 1; // Prevent divide by zero
+  const pieData = [
+    { value: proteinCal, color: "#6366f1", text: "" }, // Indigo
+    { value: carbsCal, color: "#0ea5e9", text: "" }, // Sky
+    { value: fatsCal, color: "#f43f5e", text: "" }, // Rose
+  ];
+  // If no food logged yet, show a grey placeholder ring
+  const isEmpty = totalLogged === 1;
+  const displayData = isEmpty ? [{ value: 100, color: "#e2e8f0" }] : pieData;
+  const macros = [
+    {
+      label: "Protein",
+      value: dayData.protein,
+      //goal: dayData.protein_goal,
+      unit: "g",
+      color: "#6366f1", // Hex for chart legend
+      bg: "bg-indigo-500", // Tailwind for Macro Card
+      track: "bg-indigo-100",
+    },
+    {
+      label: "Carbs",
+      value: dayData.carbs,
+      //goal: dayData.carbs_goal,
+      unit: "g",
+      color: "#0ea5e9",
+      bg: "bg-sky-500",
+      track: "bg-sky-100",
+    },
+    {
+      label: "Fats",
+      value: dayData.fats,
+      //goal: dayData.fats_goal,
+      unit: "g",
+      color: "#f43f5e",
+      bg: "bg-rose-500",
+      track: "bg-rose-100",
+    },
+  ];
 
   /* ---------- ERROR ---------- */
   if (error) {
@@ -88,6 +168,9 @@ export default function NutritionScreen() {
             <Text className="text-xs font-bold tracking-[2px] uppercase text-slate-400">
               Nutrition
             </Text>
+            <Text className="text-sm font-semibold text-slate-500">
+              {currentDate.toLocaleDateString("en-US", { weekday: "long" })}
+            </Text>
             <Text className="text-xl font-black text-slate-900">
               {formatDate(currentDate)}
             </Text>
@@ -110,7 +193,7 @@ export default function NutritionScreen() {
           </View>
         )}
 
-        {/* ---------- NUTRIENTS ---------- */}
+        {/* NUTRIENTS ========================================================= */}
         {dayData && (
           <MotiView
             from={{ opacity: 0, translateY: 12 }}
@@ -175,7 +258,80 @@ export default function NutritionScreen() {
               </View>
             </View>
 
-            {/* --- MICRONUTRIENTS LIST --- */}
+            {/* CHART SECTION ============================================================*/}
+            <View className="bg-white rounded-[24px] px-5 py-4 mb-6 border border-slate-100">
+              <Text className="text-sm font-bold text-slate-800 mb-4">
+                Macro Split
+              </Text>
+
+              <View className="flex-row items-center gap-4">
+                {/* Donut */}
+                <View className="items-center justify-center">
+                  <PieChart
+                    data={displayData}
+                    donut
+                    radius={46}
+                    innerRadius={34}
+                    showText={false}
+                  />
+                  <View className="absolute items-center justify-center">
+                    <Feather
+                      name="pie-chart"
+                      size={14}
+                      color={isEmpty ? "#cbd5e1" : "#64748b"}
+                    />
+                  </View>
+                </View>
+
+                {/* Macro pills */}
+                <View className="flex-1 gap-2">
+                  {macros.map((m, i) => {
+                    const currentVal = pieData[i].value;
+                    const percentage = isEmpty
+                      ? 0
+                      : Math.round((currentVal / totalLogged) * 100);
+
+                    return (
+                      <View
+                        key={i}
+                        className="flex-row items-center justify-between"
+                      >
+                        {/* Left: dot + label */}
+                        <View className="flex-row items-center gap-2">
+                          <View
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: m.color }}
+                          />
+                          <Text className="text-xs text-slate-500 font-semibold">
+                            {m.label}
+                          </Text>
+                        </View>
+                        {/* Right: value + percent badge */}
+                        <View className="flex-row items-center gap-2">
+                          <Text className="text-xs text-slate-400">
+                            {toNumber(m.value)}g
+                          </Text>
+                          {/* Percent badge */}
+                          <View
+                            className="px-2 py-0.5 rounded-full"
+                            style={{ backgroundColor: m.color + "20" }} // 12% opacity
+                          >
+                            <Text
+                              className="text-[11px] font-bold"
+                              style={{ color: m.color }}
+                            >
+                              {percentage}%
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            </View>
+
+            {/* --- MICRONUTRIENTS LIST ======================================================== */}
             <Text
               className="text-xs font-bold text-slate-400 mb-3"
               style={{ letterSpacing: 1.5 }}

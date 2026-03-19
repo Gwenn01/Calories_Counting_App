@@ -12,6 +12,7 @@ from .serializers import UserProfileSerializer
 from .services import UserProfileService
 
 # Create your views here.
+# views of userprofile =================================
 class UserProfileList(APIView):
     permission_classes = [AllowAny]
     def get(self, request):
@@ -56,9 +57,7 @@ class UserProfileDetail(APIView):
     def delete(self, request):
         user_profile = self.get_object()
         user_profile.delete()
-        return Response({"Message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-    
-        
+        return Response({"Message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)    
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -69,16 +68,8 @@ class LogoutView(APIView):
             {"message": "Logged out successfully"},
             status=status.HTTP_200_OK
         )
-  
-        
-class UserOverviewView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        data = UserProfileService.calculate_remaining_macros(request.user)
-        return Response(data, status=status.HTTP_200_OK)
-    
-    
+   
+# auto generate when sign up ================================  
 class GenerateMacrosView(APIView):
     permission_classes = [AllowAny]
 
@@ -86,8 +77,7 @@ class GenerateMacrosView(APIView):
         total_calories = request.data.get('total_calories')
         data = UserProfileService.generate_macros_base_calories(total_calories)
         return Response(data, status=status.HTTP_200_OK)
-    
-    
+   
 class GenerateDailyCaloriesView(APIView):
     permission_classes = [AllowAny]
 
@@ -96,3 +86,11 @@ class GenerateDailyCaloriesView(APIView):
         daily_calories = UserProfileService.calculate_daily_calories(
             data['age'], data['weight'], data['height'], data['gender'], data['activity_level'], data['goal'])
         return Response({'daily_calories': daily_calories}, status=status.HTTP_200_OK)
+    
+# overview =================================================
+class UserOverviewView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = UserProfileService.calculate_remaining_macros(request.user)
+        return Response(data, status=status.HTTP_200_OK)

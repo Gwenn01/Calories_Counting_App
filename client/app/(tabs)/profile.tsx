@@ -43,23 +43,7 @@ export default function ProfileScreen() {
   // streak
   const [streak, setStreak] = useState(0);
 
-  useEffect(() => {
-    const fetchStreak = async () => {
-      try {
-        setLoading(true);
-        const res = await getStreak();
-        setStreak(res.data);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStreak();
-  }, []);
-
-  // fetch profile data
+  // fetch profile data ===================================================
   const fetchProfileData = async () => {
     try {
       setLoading(true);
@@ -76,9 +60,26 @@ export default function ProfileScreen() {
   useEffect(() => {
     fetchProfileData();
   }, []);
-  // functions
+  // fetch streak ===========================================
+  useEffect(() => {
+    const fetchStreak = async () => {
+      try {
+        setLoading(true);
+        const res = await getStreak();
+        setStreak(res.data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStreak();
+  }, []);
+  // functions ===============================================
   const handleSaveProfile = async (data: any) => {
     try {
+      setLoading(true);
       await editProfile(data); // PUT request
       setProfile(data);
       setShowEditProfile(false);
@@ -86,6 +87,8 @@ export default function ProfileScreen() {
     } catch (error) {
       showToast("Error", "Server error", "error");
       console.log("Failed to update profile");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -122,14 +125,32 @@ export default function ProfileScreen() {
       },
     ]);
   };
+  // if there is an error ==========================================================
   if (!profile) {
-    return <LoadingOverlay text="Loading profile..." />;
-  }
+    <SafeAreaView className="flex-1 items-center justify-center bg-neutral-50">
+      <Text className="text-neutral-500 text-sm">
+        Something went wrong. Please try again.
+      </Text>
 
+      <Pressable
+        onPress={handleSignOut}
+        className="flex-row items-center justify-between px-5 py-4 bg-white rounded-2xl border border-slate-100 shadow-sm"
+      >
+        <View className="flex-row items-center gap-3">
+          <View className="bg-red-50 p-2 rounded-xl">
+            <Feather name="log-out" size={18} color="#ef4444" />
+          </View>
+          <Text className="text-slate-900 font-bold text-base">Sign Out</Text>
+        </View>
+        <Feather name="chevron-right" size={20} color="#cbd5e1" />
+      </Pressable>
+    </SafeAreaView>;
+  }
+  // main tsx ========================================================
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       {/* GLOBAL LOADING */}
-      {loading && <LoadingOverlay text="Creating account..." />}
+      {loading && <LoadingOverlay text="Fetching Profile Data..." />}
       <ScrollView
         className="p-6"
         contentContainerStyle={{ paddingBottom: 120 }} // space for tabs

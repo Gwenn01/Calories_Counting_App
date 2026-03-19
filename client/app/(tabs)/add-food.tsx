@@ -192,6 +192,9 @@ export default function AddFoodScreen() {
             <Text className="text-xs font-bold tracking-[2px] uppercase text-slate-400">
               Today Food
             </Text>
+            <Text className="text-sm font-semibold text-slate-500">
+              {currentDate.toLocaleDateString("en-US", { weekday: "long" })}
+            </Text>
             <Text className="text-xl font-black text-slate-900">
               {formatDate(currentDate)}
             </Text>

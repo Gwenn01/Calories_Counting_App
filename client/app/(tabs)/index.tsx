@@ -7,13 +7,24 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { fetchTodayOverview } from "@/api/overview";
 import LoadingOverlay from "@/components/LoadingOverplay";
-import { PieChart } from "react-native-gifted-charts";
+// components
+import { CaloriesCard } from "@/components/Overview/CaloriesCard";
+import { StepsCard } from "@/components/Overview/StepCard";
+import { SleepCard } from "@/components/Overview/SleepCard";
 
 export default function TodayScreen() {
   const [overview, setOverview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // header data =====================================
+  const today = new Date();
+  const dayName = today.toLocaleDateString("en-US", { weekday: "long" });
+  const dateStr = today.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+  });
 
+  // functions ===========================================
   const loadOverview = async () => {
     setLoading(true);
     setError(null);
@@ -43,34 +54,11 @@ export default function TodayScreen() {
       </SafeAreaView>
     );
   }
-  // header data
-  const today = new Date();
-  const dayName = today.toLocaleDateString("en-US", { weekday: "long" });
-  const dateStr = today.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-  });
 
-  /* ---------- DATA PREP ---------- */
-  const calorieProgress =
-    (overview.current_calories / overview.calories_goal) * 100 || 0;
-
-  //  Prepare Chart Data (Convert grams to calories for accuracy)
-  const proteinCal = (overview.current_protein || 0) * 4;
-  const carbsCal = (overview.current_carbs || 0) * 4;
-  const fatsCal = (overview.current_fats || 0) * 9;
-  const totalLogged = proteinCal + carbsCal + fatsCal || 1; // Prevent divide by zero
-
-  const pieData = [
-    { value: proteinCal, color: "#6366f1", text: "" }, // Indigo
-    { value: carbsCal, color: "#0ea5e9", text: "" }, // Sky
-    { value: fatsCal, color: "#f43f5e", text: "" }, // Rose
-  ];
-
-  // If no food logged yet, show a grey placeholder ring
-  const isEmpty = totalLogged === 1;
-  const displayData = isEmpty ? [{ value: 100, color: "#e2e8f0" }] : pieData;
-
+  // calories data ===================================
+  const currentCalories = overview.current_calories || 0;
+  const caloriesGoal = overview.calories_goal || 0;
+  const caloriesRemaining = overview.calories_remaining || 0;
   const macros = [
     {
       label: "Protein",
@@ -109,7 +97,7 @@ export default function TodayScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        {/* Header */}
+        {/* Header ================================================================ */}
         <View className="flex-row justify-between items-center pt-1 pb-2">
           {/* Left: Title Block */}
           <View className="items-start">
@@ -129,7 +117,6 @@ export default function TodayScreen() {
               <View className="w-2 h-2 rounded-full bg-emerald-400 mb-0.5" />
             </View>
           </View>
-
           {/* Right: Calendar button only */}
           <TouchableOpacity activeOpacity={0.8}>
             <LinearGradient
@@ -149,151 +136,37 @@ export default function TodayScreen() {
             </LinearGradient>
           </TouchableOpacity>
         </View>
-
-        {/* Calories Card */}
-        <View className="bg-slate-900 rounded-[36px] p-7 mb-6 shadow-xl shadow-slate-300/40">
-          <View className="flex-row justify-between items-start">
-            <View>
-              <Text className="text-emerald-400 font-bold text-xs uppercase mb-2 tracking-widest">
-                Calories Consumed
-              </Text>
-              <View className="flex-row items-baseline">
-                <Text className="text-6xl font-black text-white tracking-tighter">
-                  {overview.current_calories}
-                </Text>
-                <Text className="text-lg font-medium text-slate-500 ml-2">
-                  / {overview.calories_goal}
-                </Text>
-              </View>
-            </View>
-            <View className="bg-slate-800 h-12 w-12 rounded-full items-center justify-center border border-slate-700">
-              <Feather name="zap" size={24} color="#34d399" />
-            </View>
-          </View>
-
-          <View className="mt-6">
-            <View className="h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50">
-              <View
-                className="h-full bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"
-                style={{ width: `${calorieProgress}%` }}
-              />
-            </View>
-            <Text className="mt-4 text-center text-slate-400 text-sm font-medium">
-              <Text className="text-white font-bold">
-                {overview.calories_remaining}
-              </Text>{" "}
-              kcal remaining
-            </Text>
-          </View>
-        </View>
-
-        {/* Macros Grid */}
-        <Text className="text-lg font-bold text-neutral-800 mb-4 tracking-tight">
-          Macronutrients
-        </Text>
-
-        <View className="flex-row gap-3 mb-8">
-          {macros.map((macro) => {
-            const progress = (macro.value / macro.goal) * 100 || 0;
-
-            return (
-              <View
-                key={macro.label}
-                className="flex-1 bg-white p-4 rounded-[24px] border border-neutral-100 shadow-sm"
-              >
-                <Text className="text-[10px] font-bold text-neutral-400 uppercase mb-2 tracking-wide">
-                  {macro.label}
-                </Text>
-
-                <View className="mb-2">
-                  <Text className="text-2xl font-black text-neutral-800 tracking-tighter">
-                    {macro.value}
-                  </Text>
-                  <Text className="text-[10px] text-neutral-400 font-bold">
-                    / {macro.goal}
-                    {macro.unit}
-                  </Text>
-                </View>
-
-                <View
-                  className={`w-full h-1.5 ${macro.track} rounded-full overflow-hidden`}
-                >
-                  <View
-                    className={`h-full ${macro.bg}`}
-                    style={{ width: `${progress}%` }}
-                  />
-                </View>
-              </View>
-            );
-          })}
-        </View>
-
-        {/* --- 3. NEW CHART SECTION --- */}
-        <View className="bg-white rounded-[28px] p-6 mb-6 border border-slate-100 shadow-sm">
-          <View className="flex-row justify-between items-center mb-6">
-            <Text className="text-lg font-bold text-slate-800">
-              Macro Split
-            </Text>
-            {/* Optional Badge */}
-            <View className="bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
-              <Text className="text-[10px] font-bold text-slate-400 uppercase">
-                Ratio
-              </Text>
-            </View>
-          </View>
-
-          <View className="flex-row items-center justify-center">
-            {/* The Ring Chart */}
-            <View className="items-center justify-center relative">
-              <PieChart
-                data={displayData}
-                donut
-                radius={60}
-                innerRadius={45}
-                showText={false}
-                sectionAutoFocus
-              />
-              {/* Icon in middle of donut */}
-              <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center pointer-events-none">
-                <Feather
-                  name="pie-chart"
-                  size={20}
-                  color={isEmpty ? "#cbd5e1" : "#64748b"}
-                />
-              </View>
-            </View>
-
-            {/* Legend */}
-            <View className="ml-8 justify-center space-y-3">
-              {macros.map((m, i) => {
-                // Calculate percentage for legend
-                // We use the 'pieData' array specifically to match the cal logic
-                const currentVal = pieData[i].value;
-                const percentage = isEmpty
-                  ? 0
-                  : Math.round((currentVal / totalLogged) * 100);
-
-                return (
-                  <View key={i} className="flex-row items-center">
-                    <View
-                      style={{ backgroundColor: m.color }}
-                      className="w-3 h-3 rounded-full mr-2"
-                    />
-                    <View>
-                      <Text className="text-xs text-slate-400 font-bold uppercase">
-                        {m.label}
-                      </Text>
-                      <Text className="text-sm font-bold text-slate-700">
-                        {percentage}%
-                      </Text>
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
-        </View>
-        {/* --- END CHART SECTION --- */}
+        {/* MODAL ============================================ */}
+        {/* CALORIES */}
+        <CaloriesCard
+          currentCalories={currentCalories}
+          caloriesGoal={caloriesGoal}
+          caloriesRemaining={caloriesRemaining}
+          macros={macros}
+        />
+        {/* STEP */}
+        <StepsCard
+          currentSteps={7340}
+          stepsGoal={10000}
+          stats={[
+            { label: "Distance", value: "5.4", unit: "km", progress: 73 },
+            { label: "Calories", value: "312", unit: "kcal", progress: 60 },
+            { label: "Active", value: "48", unit: "min", progress: 80 },
+          ]}
+        />
+        {/* SLEEP */}
+        <SleepCard
+          lastNight={{
+            total: { label: "Total", value: "7h 24m", progress: 77 },
+            deep: { label: "Deep", value: "2h 10m", progress: 45 },
+            rem: { label: "REM", value: "1h 48m", progress: 38 },
+          }}
+          bedtime="10:30 PM"
+          wakeTime="6:02 AM"
+          onSessionEnd={(seconds) =>
+            console.log("Slept for", seconds, "seconds")
+          }
+        />
       </ScrollView>
     </SafeAreaView>
   );
