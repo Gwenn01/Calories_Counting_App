@@ -115,23 +115,104 @@ export default function NutritionScreen() {
           <MotiView
             from={{ opacity: 0, translateY: 12 }}
             animate={{ opacity: 1, translateY: 0 }}
-            className="bg-white rounded-3xl border border-slate-100 p-6"
+            className="bg-white rounded-[32px] border border-slate-100 p-5 shadow-sm mb-6"
           >
-            <Text className="text-sm font-bold tracking-wide text-slate-400 mb-4">
-              MACROS & MICRONUTRIENTS
+            <Text
+              className="text-xs font-bold text-slate-400 mb-4"
+              style={{ letterSpacing: 1.5 }}
+            >
+              DAILY MACROS
             </Text>
 
-            {NUTRIENTS.map((n) => (
-              <View
-                key={n.key}
-                className="flex-row justify-between py-3 border-b border-slate-100 last:border-b-0"
-              >
-                <Text className="text-slate-700 font-semibold">{n.label}</Text>
-                <Text className="text-slate-900 font-bold">
-                  {Math.round(toNumber(dayData[n.key]))} {n.unit}
+            {/* --- HIGHLIGHTED MACROS (The Big 3) --- */}
+            <View className="flex-row justify-between gap-3 mb-6">
+              {/* Protein Card - Violet */}
+              <View className="flex-1 bg-violet-50 rounded-2xl p-4 items-center border border-violet-100">
+                <Feather
+                  name="target"
+                  size={20}
+                  color="#7c3aed" // violet-600
+                  className="mb-2"
+                />
+                <Text className="text-violet-900 font-black text-xl">
+                  {Math.round(toNumber(dayData.protein))}g
+                </Text>
+                <Text className="text-violet-600 font-semibold text-[10px] uppercase mt-1">
+                  Protein
                 </Text>
               </View>
-            ))}
+
+              {/* Carbs Card - Blue */}
+              <View className="flex-1 bg-blue-50 rounded-2xl p-4 items-center border border-blue-100">
+                <Feather
+                  name="zap"
+                  size={20}
+                  color="#2563eb" // blue-600
+                  className="mb-2"
+                />
+                <Text className="text-blue-900 font-black text-xl">
+                  {Math.round(toNumber(dayData.carbs))}g
+                </Text>
+                <Text className="text-blue-600 font-semibold text-[10px] uppercase mt-1">
+                  Carbs
+                </Text>
+              </View>
+
+              {/* Fat Card - Red */}
+              <View className="flex-1 bg-red-50 rounded-2xl p-4 items-center border border-red-100">
+                <Feather
+                  name="droplet"
+                  size={20}
+                  color="#dc2626" // red-600
+                  className="mb-2"
+                />
+                <Text className="text-red-900 font-black text-xl">
+                  {Math.round(toNumber(dayData.fats))}g
+                </Text>
+                <Text className="text-red-600 font-semibold text-[10px] uppercase mt-1">
+                  Fat
+                </Text>
+              </View>
+            </View>
+
+            {/* --- MICRONUTRIENTS LIST --- */}
+            <Text
+              className="text-xs font-bold text-slate-400 mb-3"
+              style={{ letterSpacing: 1.5 }}
+            >
+              MICRONUTRIENTS
+            </Text>
+
+            <View className="bg-slate-50 rounded-2xl p-2 border border-slate-100">
+              {NUTRIENTS
+                // Filter out the Big 3 so they don't repeat in the bottom list
+                // Note: Update these strings to match the exact keys in your NUTRIENTS array!
+                .filter(
+                  (n) =>
+                    !["protein", "carbs", "fat"].includes(n.key.toLowerCase()),
+                )
+                .map((n) => (
+                  <View
+                    key={n.key}
+                    className="flex-row items-center justify-between py-3 px-3 border-b border-slate-200/60 last:border-b-0"
+                  >
+                    <View className="flex-row items-center gap-3">
+                      {/* Minimalist dot instead of overwhelming icons for every single micro */}
+                      <View className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                      <Text className="text-slate-600 font-semibold">
+                        {n.label}
+                      </Text>
+                    </View>
+
+                    <Text className="text-slate-900 font-bold">
+                      {Math.round(toNumber(dayData[n.key]))}{" "}
+                      <Text className="text-slate-400 font-medium text-xs">
+                        {n.unit}
+                      </Text>
+                    </Text>
+                  </View>
+                ))}
+            </View>
           </MotiView>
         )}
       </ScrollView>
