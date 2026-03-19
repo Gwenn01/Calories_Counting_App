@@ -12,6 +12,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { getAllFoods } from "../../api/food";
+import { KeyboardAvoidingView, Platform } from "react-native";
 
 interface Food {
   id: number;
@@ -52,61 +53,68 @@ export function FoodPickerModal({ visible, onClose, onSelect }: any) {
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/40 justify-end">
-        {loading && <LoadingOverlay text="Loading foods..." />}
-        <View className="bg-white rounded-t-3xl px-5 pt-5 pb-8 max-h-[85%]">
-          {/* Header */}
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-lg font-extrabold">Add Food</Text>
-            <Pressable onPress={onClose}>
-              <Feather name="x" size={22} />
-            </Pressable>
-          </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+        <View className="flex-1 bg-black/40 justify-end">
+          {loading && <LoadingOverlay text="Loading foods..." />}
+          <View className="bg-white rounded-t-3xl px-5 pt-5 pb-8 max-h-[85%]">
+            {/* Header */}
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-lg font-extrabold">Add Food</Text>
+              <Pressable onPress={onClose}>
+                <Feather name="x" size={22} />
+              </Pressable>
+            </View>
 
-          {/* Search (UI only, backend later) */}
-          <View className="flex-row items-center bg-slate-100 rounded-2xl px-4 mb-4">
-            <Feather name="search" size={16} color="#64748b" />
-            <TextInput
-              placeholder="Search food (e.g. rice, chicken)"
-              className="flex-1 py-3 px-3 text-base"
-              value={search}
-              onChangeText={setSearch}
+            {/* Search */}
+            <View className="flex-row items-center bg-slate-100 rounded-2xl px-4 mb-4">
+              <Feather name="search" size={16} color="#64748b" />
+              <TextInput
+                placeholder="Search food (e.g. rice, chicken)"
+                className="flex-1 py-3 px-3 text-base"
+                value={search}
+                onChangeText={setSearch}
+              />
+            </View>
+
+            {/* Food list */}
+            <FlatList
+              data={filteredFoods}
+              keyExtractor={(item) => item.id.toString()}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled" // 👈 lets taps reach list items while keyboard is open
+              renderItem={({ item }) => (
+                <Pressable
+                  onPress={() => onSelect(item)}
+                  className="py-4 border-b border-slate-100"
+                >
+                  <View className="flex-row justify-between items-center">
+                    <View>
+                      <Text className="text-base font-semibold">
+                        {item.name}
+                      </Text>
+                      <Text className="text-xs text-slate-500">
+                        {item.serving}
+                      </Text>
+                    </View>
+                    <View className="items-end">
+                      <Text className="text-sm font-bold">
+                        {item.calories} kcal
+                      </Text>
+                      <Text className="text-xs text-slate-400">
+                        P {item.protein}g · C {item.total_carbs}g · F{" "}
+                        {item.total_fat}g
+                      </Text>
+                    </View>
+                  </View>
+                </Pressable>
+              )}
             />
           </View>
-
-          {/* Food list */}
-          <FlatList
-            data={filteredFoods}
-            keyExtractor={(item) => item.id.toString()}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <Pressable
-                onPress={() => onSelect(item)}
-                className="py-4 border-b border-slate-100"
-              >
-                <View className="flex-row justify-between items-center">
-                  <View>
-                    <Text className="text-base font-semibold">{item.name}</Text>
-                    <Text className="text-xs text-slate-500">
-                      {item.serving}
-                    </Text>
-                  </View>
-
-                  <View className="items-end">
-                    <Text className="text-sm font-bold">
-                      {item.calories} kcal
-                    </Text>
-                    <Text className="text-xs text-slate-400">
-                      P {item.protein}g · C {item.total_carbs}g · F{" "}
-                      {item.total_fat}g
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
-            )}
-          />
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

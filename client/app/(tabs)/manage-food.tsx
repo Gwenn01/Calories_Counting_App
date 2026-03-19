@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, Pressable, FlatList, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 // components
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { AddFoodManualModal } from "@/components/ManageFood/AddFoodManualModal";
@@ -37,26 +37,28 @@ export default function ManageFoodScreen() {
     fetchFoods();
   }, [showManualModal, showEditModal]);
 
-  // Search filter
+  // Search filter ================================================================
   const filteredFoods = foods.filter((food) =>
     food.name.toLowerCase().includes(search.toLowerCase()),
   );
 
-  // Actions
+  // Actions ======================================================================
   const onAddManual = () => {
     setShowManualModal(true);
   };
-
   const onAddByPhoto = () => {
     console.log("Scan food photo");
   };
+  const onScanBarcode = () => {
+    console.log("Scan food barcode");
+  };
 
-  // manage food function
+  // manage food function ========================================================
   const onSelectFood = (food: Food) => {
     setSelectedFood(food);
     setShowEditModal(true);
   };
-  // format the data before passing to backend
+  // format the data before passing to backend ===================================
   function sanitizeFood(form: Food) {
     const payload: any = {};
 
@@ -168,22 +170,41 @@ export default function ManageFoodScreen() {
 
             {/* Actions */}
             <View className="flex-row gap-3 mb-6">
+              {/* Create Food */}
               <Pressable
                 onPress={onAddManual}
-                className="flex-1 flex-row items-center justify-center gap-2 bg-slate-900 rounded-2xl py-3"
+                className="flex-1 items-center justify-center bg-slate-900 rounded-2xl py-4"
               >
-                <Feather name="edit-3" size={16} color="white" />
-
-                <Text className="text-white font-semibold">Create Food</Text>
+                <Feather name="edit-3" size={18} color="white" />
+                <Text className="text-white text-xs font-semibold mt-1">
+                  Create
+                </Text>
               </Pressable>
 
+              {/* Scan Photo */}
               <Pressable
                 onPress={onAddByPhoto}
-                className="flex-1 flex-row items-center justify-center gap-2 bg-slate-200 rounded-2xl py-3"
+                className="flex-1 items-center justify-center bg-slate-200 rounded-2xl py-4"
               >
-                <Feather name="camera" size={16} color="#0f172a" />
+                <Feather name="camera" size={18} color="#0f172a" />
+                <Text className="text-slate-900 text-xs font-semibold mt-1">
+                  Photo
+                </Text>
+              </Pressable>
 
-                <Text className="font-semibold text-slate-900">Scan Photo</Text>
+              {/* Scan Barcode */}
+              <Pressable
+                onPress={onScanBarcode}
+                className="flex-1 items-center justify-center bg-slate-200 rounded-2xl py-4"
+              >
+                <MaterialCommunityIcons
+                  name="barcode-scan"
+                  size={20}
+                  color="#0f172a"
+                />
+                <Text className="text-slate-900 text-xs font-semibold mt-1">
+                  Barcode
+                </Text>
               </Pressable>
             </View>
           </>
