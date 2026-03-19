@@ -1,9 +1,7 @@
 import {
   View,
   Text,
-  TextInput,
   Pressable,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -27,7 +25,6 @@ export default function SignInScreen() {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -54,50 +51,49 @@ export default function SignInScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 relative">
-      {/* GLOBAL TOAST */}
-      <Toast position="top" />
+    //  KeyboardAvoidingView is now the outermost container
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      {/* SafeAreaView is now INSIDE, with flex-1 and no bg conflict */}
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }}>
+        <Toast position="top" />
+        {loading && <LoadingOverlay text="Login....." />}
 
-      {/* GLOBAL LOADING */}
-      {loading && <LoadingOverlay text="Login....." />}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-        className="flex-1"
-      >
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingTop: 80, paddingBottom: 40 }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            paddingHorizontal: 24,
+            paddingVertical: 32,
+          }}
           showsVerticalScrollIndicator={false}
-          className="px-6"
         >
           <MotiView
             from={{ opacity: 0, translateY: 20 }}
             animate={{ opacity: 1, translateY: 0 }}
             className="bg-white rounded-3xl p-6 border border-slate-100"
           >
-            {/* ---------- HEADER ---------- */}
+            {/* Header */}
             <View className="items-center mb-8">
-              {/* LOGO REPLACEMENT */}
               <View className="mb-6 shadow-xl shadow-emerald-200">
                 <Image
-                  source={require("@/assets/image/logo.jpg")} // 2. Check this path matches exactly
-                  className="w-24 h-24 rounded-3xl" // 3. Size and round corners
+                  source={require("@/assets/image/logo.jpg")}
+                  className="w-24 h-24 rounded-3xl"
                   resizeMode="contain"
                 />
               </View>
-
-              {/* Title */}
               <Text className="text-3xl font-bold text-slate-900 tracking-tight">
                 Welcome Back
               </Text>
-
-              {/* Subtitle */}
               <Text className="text-slate-400 mt-2 text-center text-base font-medium">
                 Sign in to continue tracking your calories
               </Text>
             </View>
-            {/* ---------- USERNAME ---------- */}
+
+            {/* Username */}
             <FloatingInput
               label="Username"
               value={username}
@@ -108,6 +104,7 @@ export default function SignInScreen() {
               success={username.length > 3}
             />
 
+            {/* Password */}
             <FloatingInput
               label="Password"
               value={password}
@@ -130,7 +127,7 @@ export default function SignInScreen() {
               returnKeyType="done"
             />
 
-            {/* ---------- BUTTON ---------- */}
+            {/* Button */}
             <Pressable
               onPress={handleSignIn}
               className="bg-emerald-500 rounded-2xl py-4 items-center"
@@ -140,14 +137,15 @@ export default function SignInScreen() {
               </Text>
             </Pressable>
           </MotiView>
+
+          {/* Create Account */}
           <View className="flex-row items-center justify-center mt-8 gap-x-2">
             <Text className="text-slate-400 font-medium text-sm">
               New here?
             </Text>
-
             <Pressable
               onPress={() => router.push("/(auth)/sign-up")}
-              className="bg-indigo-50 px-4 py-2 rounded-full active:bg-indigo-100 transition-colors"
+              className="bg-indigo-50 px-4 py-2 rounded-full active:bg-indigo-100"
             >
               <Text className="text-indigo-600 font-bold text-sm">
                 Create Account
@@ -155,7 +153,7 @@ export default function SignInScreen() {
             </Pressable>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }

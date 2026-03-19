@@ -180,7 +180,7 @@ export default function SignUpScreen() {
             label="Password"
             value={password}
             onChange={setPassword}
-            secure
+            secure={!showPassword}
             leftIcon={<Feather name="lock" size={18} color="#64748b" />}
             rightIcon={
               <Feather
@@ -190,6 +190,11 @@ export default function SignUpScreen() {
               />
             }
             onRightPress={() => setShowPassword(!showPassword)}
+            error={
+              password.length > 0 && password.length < 6
+                ? "Password too short"
+                : ""
+            }
             returnKeyType="done"
           />
 
