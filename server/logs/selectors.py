@@ -37,9 +37,21 @@ class LogSelectors:
             "food_calories": 0,
             "remaining": 0,
             "breakfast_calories": 0,
+            "breakfast_protein": 0,
+            "breakfast_carbs": 0,
+            "breakfast_fats": 0,
             "lunch_calories": 0,
+            "lunch_protein": 0,
+            "lunch_carbs": 0,
+            "lunch_fats": 0,
             "dinner_calories": 0,
+            "dinner_protein": 0,
+            "dinner_carbs": 0,
+            "dinner_fats": 0,
             "snack_calories": 0,
+            "snack_protein": 0,
+            "snack_carbs": 0,
+            "snack_fats": 0,
         }
         user_profile = get_object_or_404(UserProfile, user=user)
         logs = (
@@ -49,7 +61,13 @@ class LogSelectors:
         )
         for log in logs:
             calories = log.food.calories * log.quantity
+            protein = log.food.protein * log.quantity
+            carbs = log.food.total_carbs * log.quantity
+            fat = log.food.total_fat * log.quantity
             data[f"{log.meal_type}_calories"] += calories
+            data[f"{log.meal_type}_protein"] += protein
+            data[f"{log.meal_type}_carbs"] += carbs
+            data[f"{log.meal_type}_fats"] += fat
             data["food_calories"] += calories
 
         data["goal_calories"] = user_profile.target_calories

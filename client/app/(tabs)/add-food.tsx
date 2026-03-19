@@ -48,10 +48,23 @@ export default function AddFoodScreen() {
   const [goalCalories, setGoalCalories] = useState(0);
   const [foodCalories, setFoodCalories] = useState(0);
   const [remainingCalories, setRemainingCalories] = useState(0);
+  // meal card
   const [breakfastCalories, setBreakfastCalories] = useState(0);
+  const [breakfastProtein, setBreakfastProtein] = useState(0);
+  const [breakfastCarbs, setBreakfastCarbs] = useState(0);
+  const [breakfastFats, setBreakfastFats] = useState(0);
   const [lunchCalories, setLunchCalories] = useState(0);
+  const [lunchProtein, setLunchProtein] = useState(0);
+  const [lunchCarbs, setLunchCarbs] = useState(0);
+  const [lunchFats, setLunchFats] = useState(0);
   const [dinnerCalories, setDinnerCalories] = useState(0);
+  const [dinnerProtein, setDinnerProtein] = useState(0);
+  const [dinnerCarbs, setDinnerCarbs] = useState(0);
+  const [dinnerFats, setDinnerFats] = useState(0);
   const [snackCalories, setSnackCalories] = useState(0);
+  const [snackProtein, setSnackProtein] = useState(0);
+  const [snackCarbs, setSnackCarbs] = useState(0);
+  const [snackFats, setSnackFats] = useState(0);
 
   // for long press and press detail and remove logs
   // details foods
@@ -104,9 +117,21 @@ export default function AddFoodScreen() {
       setFoodCalories(total.food_calories);
       setRemainingCalories(total.remaining);
       setBreakfastCalories(total.breakfast_calories);
+      setBreakfastProtein(total.breakfast_protein);
+      setBreakfastCarbs(total.breakfast_carbs);
+      setBreakfastFats(total.breakfast_fats);
       setLunchCalories(total.lunch_calories);
+      setLunchProtein(total.lunch_protein);
+      setLunchCarbs(total.lunch_carbs);
+      setLunchFats(total.lunch_fats);
       setDinnerCalories(total.dinner_calories);
+      setDinnerProtein(total.dinner_protein);
+      setDinnerCarbs(total.dinner_carbs);
+      setDinnerFats(total.dinner_fats);
       setSnackCalories(total.snack_calories);
+      setSnackProtein(total.snack_protein);
+      setSnackCarbs(total.snack_carbs);
+      setSnackFats(total.snack_fats);
     } catch (error) {
       console.error("Failed to fetch total:", error);
     } finally {
@@ -394,6 +419,9 @@ export default function AddFoodScreen() {
           <MealCard
             title="Breakfast"
             calories={breakfastCalories}
+            protein={breakfastProtein}
+            carbs={breakfastCarbs}
+            fats={breakfastFats}
             onAdd={() => {
               setSelectedMealType("breakfast");
               setShowFoodModal(true);
@@ -425,6 +453,9 @@ export default function AddFoodScreen() {
           <MealCard
             title="Lunch"
             calories={lunchCalories}
+            protein={lunchProtein}
+            carbs={lunchCarbs}
+            fats={lunchFats}
             onAdd={() => {
               setSelectedMealType("lunch");
               setShowFoodModal(true);
@@ -455,6 +486,9 @@ export default function AddFoodScreen() {
           <MealCard
             title="Dinner"
             calories={dinnerCalories}
+            protein={dinnerProtein}
+            carbs={dinnerCarbs}
+            fats={dinnerFats}
             onAdd={() => {
               setSelectedMealType("dinner");
               setShowFoodModal(true);
@@ -485,6 +519,9 @@ export default function AddFoodScreen() {
           <MealCard
             title="Snacks"
             calories={snackCalories}
+            protein={snackProtein}
+            carbs={snackCarbs}
+            fats={snackFats}
             onAdd={() => {
               setSelectedMealType("snack");
               setShowFoodModal(true);
