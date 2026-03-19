@@ -7,6 +7,7 @@ from .models import Food
 from .serializers import FoodSerializer
 
 # Create your views here.
+# CREATE MANUAL FOOD =======================================================
 class FoodList(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -25,7 +26,8 @@ class FoodList(APIView):
             serializer.save()
             return Response({"message": "Food created successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+# EDIT AND DELETE FOOD =========================================================== 
 class FoodDetail(APIView):
     def get_object(self, pk):
         return get_object_or_404(Food, pk=pk)
