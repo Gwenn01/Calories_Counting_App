@@ -20,12 +20,146 @@ const formatDate = (date: Date) =>
 
 const toKey = (date: Date) => date.toISOString().slice(0, 10);
 
+// data icon
+// Map each nutrient key to an icon + accent color
+const NUTRIENT_META: Record<
+  string,
+  { icon: string; color: string; bg: string; border: string }
+> = {
+  vitamin_c: {
+    icon: "sun",
+    color: "#38bdf8",
+    bg: "#0c2a4a",
+    border: "#1e3a5f",
+  },
+  vitamin_a: {
+    icon: "eye",
+    color: "#fbbf24",
+    bg: "#2e1f0a",
+    border: "#3a2a1e",
+  },
+  vitamin_d: {
+    icon: "sun",
+    color: "#fde68a",
+    bg: "#2e280a",
+    border: "#3a341e",
+  },
+  vitamin_e: {
+    icon: "shield",
+    color: "#4ade80",
+    bg: "#0a2e1a",
+    border: "#1e3a2d",
+  },
+  vitamin_k: {
+    icon: "shield",
+    color: "#a78bfa",
+    bg: "#1a0a2e",
+    border: "#2a1e3a",
+  },
+  vitamin_b1: {
+    icon: "zap",
+    color: "#fb923c",
+    bg: "#2e1a0a",
+    border: "#3a2a1e",
+  },
+  vitamin_b2: {
+    icon: "zap",
+    color: "#fb923c",
+    bg: "#2e1a0a",
+    border: "#3a2a1e",
+  },
+  vitamin_b3: {
+    icon: "zap",
+    color: "#fb923c",
+    bg: "#2e1a0a",
+    border: "#3a2a1e",
+  },
+  vitamin_b6: {
+    icon: "zap",
+    color: "#fb923c",
+    bg: "#2e1a0a",
+    border: "#3a2a1e",
+  },
+  vitamin_b9: {
+    icon: "zap",
+    color: "#fb923c",
+    bg: "#2e1a0a",
+    border: "#3a2a1e",
+  },
+  vitamin_b12: {
+    icon: "zap",
+    color: "#fb923c",
+    bg: "#2e1a0a",
+    border: "#3a2a1e",
+  },
+  calcium: {
+    icon: "shield",
+    color: "#4ade80",
+    bg: "#1a2e0a",
+    border: "#2d3a1e",
+  },
+  iron: {
+    icon: "activity",
+    color: "#fb923c",
+    bg: "#2e1a0a",
+    border: "#3a2a1e",
+  },
+  magnesium: {
+    icon: "zap",
+    color: "#a78bfa",
+    bg: "#1a0a2e",
+    border: "#2a1e3a",
+  },
+  phosphorus: {
+    icon: "circle",
+    color: "#38bdf8",
+    bg: "#0c2a4a",
+    border: "#1e3a5f",
+  },
+  potassium: {
+    icon: "shield",
+    color: "#34d399",
+    bg: "#0a2e1a",
+    border: "#1e3a2d",
+  },
+  zinc: { icon: "cpu", color: "#818cf8", bg: "#0f172a", border: "#1e2a5f" },
+  copper: { icon: "cpu", color: "#f97316", bg: "#2e1a0a", border: "#3a2a1e" },
+  manganese: {
+    icon: "cpu",
+    color: "#e879f9",
+    bg: "#2a0a2e",
+    border: "#3a1e3a",
+  },
+  sodium: { icon: "heart", color: "#f87171", bg: "#2e0a0a", border: "#3a1e1e" },
+  cholesterol: {
+    icon: "heart",
+    color: "#f43f5e",
+    bg: "#2e0a14",
+    border: "#3a1e24",
+  },
+  fiber: { icon: "layers", color: "#86efac", bg: "#0a2e14", border: "#1e3a24" },
+  sugar: {
+    icon: "droplet",
+    color: "#fca5a5",
+    bg: "#2e0a0a",
+    border: "#3a1e1e",
+  },
+};
+
+const FALLBACK_META = {
+  icon: "circle",
+  color: "#64748b",
+  bg: "#1e293b",
+  border: "#334155",
+};
+
 /* ---------------- SCREEN ---------------- */
 export default function NutritionScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [dataByDate, setDataByDate] = useState<MacroData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isCurrentDay = currentDate.toDateString() === new Date().toDateString();
 
   const goPrevDay = () =>
     setCurrentDate((d) => new Date(d.getTime() - 86400000));
@@ -91,9 +225,14 @@ export default function NutritionScreen() {
   };
   const dayData: MacroData =
     dataByDate.find((d) => d.date === dayKey) ?? emptyDay;
-
   const toNumber = (value: string | number | undefined) =>
     typeof value === "number" ? value : Number(value) || 0;
+
+  const getNutrient = (key: string): number => {
+    const val = (dayData as Record<string, unknown>)[key];
+    return typeof val === "number" ? val : Number(val) || 0;
+  };
+
   // pi chart data =================================================================
   const proteinCal = (dayData.protein || 0) * 4;
   const carbsCal = (dayData.carbs || 0) * 4;
@@ -156,35 +295,58 @@ export default function NutritionScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ---------- HEADER ---------- */}
-        <View className="flex-row items-center justify-between mb-6">
+        <View className="flex-row items-center justify-between mb-4 bg-white rounded-[20px] px-4 py-4 border border-slate-100">
+          {/* Prev */}
           <Pressable
             onPress={goPrevDay}
-            className="bg-white p-2.5 rounded-2xl border border-slate-100"
+            className="w-10 h-10 rounded-[14px] bg-slate-900 border border-slate-100 items-center justify-center"
           >
-            <Feather name="chevron-left" size={22} color="#0f172a" />
+            <Feather name="chevron-left" size={18} color="#fff" />
           </Pressable>
 
-          <View className="items-center">
-            <Text className="text-xs font-bold tracking-[2px] uppercase text-slate-400">
-              Nutrition
-            </Text>
-            <Text className="text-sm font-semibold text-slate-500">
+          {/* Center */}
+          <View className="flex-1 items-center px-3 gap-0.5">
+            {/* Label + calendar icon */}
+            <View className="flex-row items-center gap-1.5 mb-0.5">
+              <Feather name="clipboard" size={11} color="#94a3b8" />
+              <Text className="text-[10px] font-bold tracking-[2px] uppercase text-slate-400">
+                Nutrition
+              </Text>
+            </View>
+
+            {/* Day name */}
+            <Text className="text-[11px] font-semibold text-slate-400">
               {currentDate.toLocaleDateString("en-US", { weekday: "long" })}
             </Text>
-            <Text className="text-xl font-black text-slate-900">
+
+            {/* Full date */}
+            <Text
+              className="text-xl font-black text-slate-900"
+              style={{ letterSpacing: -0.5 }}
+            >
               {formatDate(currentDate)}
             </Text>
+
+            {/* Today badge */}
+            {isCurrentDay && (
+              <View className="mt-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-0.5">
+                <Text className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
+                  Today
+                </Text>
+              </View>
+            )}
           </View>
 
+          {/* Next */}
           <Pressable
             onPress={goNextDay}
-            className="bg-white p-2.5 rounded-2xl border border-slate-100"
+            className="w-10 h-10 rounded-[14px] bg-slate-900 items-center justify-center"
           >
-            <Feather name="chevron-right" size={22} color="#0f172a" />
+            <Feather name="chevron-right" size={18} color="#fff" />
           </Pressable>
         </View>
 
-        {/* ---------- NO DATA ---------- */}
+        {/*  NO DATA ======================================================= */}
         {!loading && !dayData && (
           <View className="bg-white border border-slate-100 rounded-3xl p-6">
             <Text className="text-slate-400 font-semibold text-center">
@@ -332,42 +494,79 @@ export default function NutritionScreen() {
             </View>
 
             {/* --- MICRONUTRIENTS LIST ======================================================== */}
+            {/* MICRONUTRIENTS */}
             <Text
-              className="text-xs font-bold text-slate-400 mb-3"
+              className="text-xs font-bold text-slate-500 mb-3"
               style={{ letterSpacing: 1.5 }}
             >
               MICRONUTRIENTS
             </Text>
 
-            <View className="bg-slate-50 rounded-2xl p-2 border border-slate-100">
-              {NUTRIENTS
-                // Filter out the Big 3 so they don't repeat in the bottom list
-                // Note: Update these strings to match the exact keys in your NUTRIENTS array!
-                .filter(
-                  (n) =>
-                    !["protein", "carbs", "fat"].includes(n.key.toLowerCase()),
-                )
-                .map((n) => (
+            <View className="flex-row flex-wrap gap-1">
+              {NUTRIENTS.filter(
+                (n) =>
+                  !["protein", "carbs", "fat"].includes(n.key.toLowerCase()),
+              ).map((n) => {
+                const meta = NUTRIENT_META[n.key] ?? FALLBACK_META;
+                const value = Math.round(getNutrient(n.key));
+
+                return (
                   <View
                     key={n.key}
-                    className="flex-row items-center justify-between py-3 px-3 border-b border-slate-200/60 last:border-b-0"
+                    className="rounded-[16px] bg-slate-900  p-3"
+                    style={{
+                      borderWidth: 0.5,
+                      borderColor: meta.border,
+                      width: "48%", // 2 columns
+                    }}
                   >
-                    <View className="flex-row items-center gap-3">
-                      {/* Minimalist dot instead of overwhelming icons for every single micro */}
-                      <View className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-                      <Text className="text-slate-600 font-semibold">
+                    {/* Icon + label row */}
+                    <View className="flex-row items-center gap-2 mb-2">
+                      <View
+                        className="w-6 h-6 rounded-[8px] items-center justify-center"
+                        style={{ backgroundColor: meta.bg }}
+                      >
+                        <Feather
+                          name={meta.icon as any}
+                          size={12}
+                          color={meta.color}
+                        />
+                      </View>
+                      <Text
+                        className="text-[5px] font-bold text-slate-500 uppercase"
+                        style={{ letterSpacing: 1 }}
+                        numberOfLines={1}
+                      >
                         {n.label}
                       </Text>
                     </View>
 
-                    <Text className="text-slate-900 font-bold">
-                      {Math.round(toNumber(dayData[n.key]))}{" "}
-                      <Text className="text-slate-400 font-medium text-xs">
+                    {/* Value */}
+                    <View className="flex-row items-baseline gap-1">
+                      <Text
+                        className="text-xl font-black text-white"
+                        style={{ letterSpacing: -0.5 }}
+                      >
+                        {value}
+                      </Text>
+                      <Text className="text-[10px] font-semibold text-slate-600">
                         {n.unit}
                       </Text>
-                    </Text>
+                    </View>
+
+                    {/* Mini progress bar */}
+                    <View className="h-0.5 bg-slate-900 rounded-full overflow-hidden mt-2">
+                      <View
+                        className="h-full rounded-full"
+                        style={{
+                          backgroundColor: meta.color,
+                          width: `${Math.min((value / 100) * 100, 100)}%`,
+                        }}
+                      />
+                    </View>
                   </View>
-                ))}
+                );
+              })}
             </View>
           </MotiView>
         )}

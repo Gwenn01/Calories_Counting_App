@@ -36,6 +36,7 @@ export default function AddFoodScreen() {
   const [selectedMealType, setSelectedMealType] = useState<
     "breakfast" | "lunch" | "dinner" | "snack"
   >("breakfast");
+  const isCurrentDay = currentDate.toDateString() === new Date().toDateString();
   // add food model
   const [showFoodModal, setShowFoodModal] = useState(false);
   // the selected foods
@@ -180,90 +181,208 @@ export default function AddFoodScreen() {
       >
         {/* Header ==============================================================*/}
         {/* ---------- HEADER ---------- */}
-        <View className="flex-row items-center justify-between mb-4">
+
+        <View className="flex-row items-center justify-between mb-4 bg-white rounded-[20px] px-4 py-4 border border-slate-100">
+          {/* Prev */}
           <Pressable
             onPress={goPrevDay}
-            className="bg-white p-2.5 rounded-2xl border border-slate-100"
+            className="w-10 h-10 rounded-[14px] bg-slate-900  border border-slate-100 items-center justify-center"
           >
-            <Feather name="chevron-left" size={22} color="#0f172a" />
+            <Feather name="chevron-left" size={18} color="#fff" />
           </Pressable>
 
-          <View className="items-center">
-            <Text className="text-xs font-bold tracking-[2px] uppercase text-slate-400">
-              Today Food
-            </Text>
-            <Text className="text-sm font-semibold text-slate-500">
+          {/* Center */}
+          <View className="flex-1 items-center px-3 gap-0.5">
+            {/* Label + calendar icon */}
+            <View className="flex-row items-center gap-1.5 mb-0.5">
+              <Feather name="calendar" size={11} color="#94a3b8" />
+              <Text className="text-[10px] font-bold tracking-[2px] uppercase text-slate-400">
+                Food Log
+              </Text>
+            </View>
+
+            {/* Day name */}
+            <Text className="text-[11px] font-semibold text-slate-400">
               {currentDate.toLocaleDateString("en-US", { weekday: "long" })}
             </Text>
-            <Text className="text-xl font-black text-slate-900">
+
+            {/* Full date */}
+            <Text
+              className="text-xl font-black text-slate-900"
+              style={{ letterSpacing: -0.5 }}
+            >
               {formatDate(currentDate)}
             </Text>
+
+            {/* Today badge */}
+            {isCurrentDay && (
+              <View className="mt-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-0.5">
+                <Text className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
+                  Today
+                </Text>
+              </View>
+            )}
           </View>
 
+          {/* Next */}
           <Pressable
             onPress={goNextDay}
-            className="bg-white p-2.5 rounded-2xl border border-slate-100"
+            className="w-10 h-10 rounded-[14px] bg-slate-900 items-center justify-center"
           >
-            <Feather name="chevron-right" size={22} color="#0f172a" />
+            <Feather name="chevron-right" size={18} color="#fff" />
           </Pressable>
         </View>
 
         {/* Calories Remaining Card ========================================*/}
-        <View className="bg-white rounded-[32px] p-4 mb-4 shadow-sm border border-slate-100">
-          {/* Header with Icon */}
-          <View className="flex-row items-center mb-3 px-2 gap-2">
-            <View className="bg-emerald-50 p-1.5 rounded-lg border border-emerald-100">
-              <Feather name="pie-chart" size={14} color="#059669" />
+        <View
+          className="rounded-[28px] p-5 mb-4"
+          style={{
+            backgroundColor: "#0f172a",
+            borderWidth: 1,
+            borderColor: "#1e293b",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.4,
+            shadowRadius: 24,
+            elevation: 12,
+          }}
+        >
+          {/* Header */}
+          <View className="flex-row items-center mb-4 gap-2">
+            <View
+              className="p-1.5 rounded-xl"
+              style={{
+                backgroundColor: "#052e16",
+                borderWidth: 1,
+                borderColor: "#14532d",
+              }}
+            >
+              <Feather name="pie-chart" size={13} color="#4ade80" />
             </View>
             <Text
-              className="text-[11px] font-black text-slate-400"
-              style={{ letterSpacing: 1.5 }}
+              className="text-[10px] font-black text-slate-500"
+              style={{ letterSpacing: 2 }}
             >
               DAILY SUMMARY
             </Text>
           </View>
 
-          {/*The Split Pill Container */}
-          <View className="flex-row items-center bg-slate-50 p-1.5 rounded-[28px]">
-            {/* Left Side: Stats (Goal & Food) */}
-            <View className="flex-row flex-1 justify-evenly items-center py-2">
-              <View className="items-center">
-                <Text
-                  className="text-slate-400 text-[10px] font-bold uppercase mb-0.5"
-                  style={{ letterSpacing: 1 }}
-                >
-                  Goal
-                </Text>
-                <Text className="text-slate-800 font-extrabold text-lg">
-                  {goalCalories}
-                </Text>
-              </View>
-              {/* Subtle Vertical Divider instead of a Minus Sign */}
-              <View className="w-[1.5px] h-8 bg-slate-200 rounded-full" />
-
-              <View className="items-center">
-                <Text
-                  className="text-slate-400 text-[10px] font-bold uppercase mb-0.5"
-                  style={{ letterSpacing: 1 }}
-                >
-                  Food
-                </Text>
-                <Text className="text-slate-800 font-extrabold text-lg">
-                  {foodCalories}
-                </Text>
-              </View>
-            </View>
-            {/* Right Side: Highlight (Left) */}
-            <View className="bg-slate-900 rounded-[24px] px-6 py-3.5 items-center shadow-sm ml-2">
+          {/* Stats Row */}
+          <View
+            className="flex-row items-stretch rounded-[20px] overflow-hidden"
+            style={{
+              backgroundColor: "#0d1f2d",
+              borderWidth: 1,
+              borderColor: "#1e293b",
+            }}
+          >
+            {/* Goal */}
+            <View className="flex-1 items-center py-4 px-3">
               <Text
-                className="text-emerald-50 text-[10px] font-bold uppercase mb-0.5"
-                style={{ letterSpacing: 1 }}
+                className="text-[9px] font-black text-slate-600 mb-1.5 uppercase"
+                style={{ letterSpacing: 1.5 }}
               >
-                REMAINING
+                Goal
               </Text>
-              <Text className="text-white font-black text-xl">
+              <Text
+                className="font-black text-slate-200"
+                style={{ fontSize: 22, letterSpacing: -0.5 }}
+              >
+                {goalCalories}
+              </Text>
+              <Text className="text-[9px] text-slate-600 font-semibold mt-0.5">
+                kcal
+              </Text>
+            </View>
+
+            {/* Vertical Divider */}
+            <View
+              className="w-[1px] my-3"
+              style={{ backgroundColor: "#1e293b" }}
+            />
+
+            {/* Food */}
+            <View className="flex-1 items-center py-4 px-3">
+              <Text
+                className="text-[9px] font-black text-slate-600 mb-1.5 uppercase"
+                style={{ letterSpacing: 1.5 }}
+              >
+                Food
+              </Text>
+              <Text
+                className="font-black text-slate-200"
+                style={{ fontSize: 22, letterSpacing: -0.5 }}
+              >
+                {foodCalories}
+              </Text>
+              <Text className="text-[9px] text-slate-600 font-semibold mt-0.5">
+                kcal
+              </Text>
+            </View>
+
+            {/* Vertical Divider */}
+            <View
+              className="w-[1px] my-3"
+              style={{ backgroundColor: "#1e293b" }}
+            />
+
+            {/* Remaining — highlighted */}
+            <View
+              className="flex-1 items-center justify-center py-4 px-3 rounded-[20px]"
+              style={{
+                backgroundColor: "#052e16",
+                borderWidth: 1,
+                borderColor: "#14532d",
+                margin: 4,
+              }}
+            >
+              <Text
+                className="text-[9px] font-black text-emerald-700 mb-1.5 uppercase"
+                style={{ letterSpacing: 1.5 }}
+              >
+                Left
+              </Text>
+              <Text
+                className="font-black text-emerald-400"
+                style={{ fontSize: 22, letterSpacing: -0.5 }}
+              >
                 {remainingCalories}
               </Text>
+              <Text className="text-[9px] text-emerald-800 font-semibold mt-0.5">
+                kcal
+              </Text>
+            </View>
+          </View>
+
+          {/* Bottom progress bar */}
+          <View className="mt-4 px-1">
+            <View className="flex-row justify-between mb-1.5">
+              <Text
+                className="text-[9px] text-slate-600 font-bold uppercase"
+                style={{ letterSpacing: 1 }}
+              >
+                Progress
+              </Text>
+              <Text className="text-[9px] text-slate-500 font-bold">
+                {Math.min(Math.round((foodCalories / goalCalories) * 100), 100)}
+                %
+              </Text>
+            </View>
+            <View
+              className="h-1 rounded-full overflow-hidden"
+              style={{ backgroundColor: "#1e293b" }}
+            >
+              <View
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.min((foodCalories / goalCalories) * 100, 100)}%`,
+                  backgroundColor: "#4ade80",
+                  shadowColor: "#4ade80",
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.8,
+                  shadowRadius: 4,
+                }}
+              />
             </View>
           </View>
         </View>
