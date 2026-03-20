@@ -100,3 +100,46 @@ export interface ChatMessage {
   role: "user" | "bot";
   text: string;
 }
+
+// food scan ============================================
+export interface NutritionData {
+  name: string;
+  serving: string;
+  calories: number;
+  water: number;
+  total_fat: number;
+  saturated_fat: number;
+  monounsaturated_fat: number;
+  polyunsaturated_fat: number;
+  cholesterol: number;
+  total_carbs: number;
+  starch: number;
+  sugars: number;
+  fiber: number;
+  protein: number;
+  vitamin_a: number;
+  vitamin_c: number;
+  vitamin_e: number;
+  vitamin_k: number;
+  thiamin_b1: number;
+  riboflavin_b2: number;
+  niacin_b3: number;
+  vitamin_b6: number;
+  folate_b9: number;
+  calcium: number;
+  iron: number;
+  magnesium: number;
+  phosphorus: number;
+  potassium: number;
+  sodium: number;
+  zinc: number;
+  copper: number;
+  manganese: number;
+}
+
+export interface DetectedFood {
+  id: string;
+  label: string; // e.g. "White Cooked Rice"
+  weight: string; // e.g. "100g"
+  nutrition: NutritionData;
+}
