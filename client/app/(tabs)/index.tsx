@@ -17,6 +17,8 @@ export default function TodayScreen() {
   const [overview, setOverview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [keyCal, setkeyCal] = useState(0);
+  const [keySteps, setKeySteps] = useState(1);
   // header data =====================================
   const today = new Date();
   const dayName = today.toLocaleDateString("en-US", { weekday: "long" });
@@ -33,6 +35,8 @@ export default function TodayScreen() {
     try {
       const data = await fetchTodayOverview();
       setOverview(data);
+      setkeyCal((c) => c + 1);
+      setKeySteps((c) => c + 1);
     } catch {
       setError("Failed to load overview");
     } finally {
@@ -152,6 +156,7 @@ export default function TodayScreen() {
         {/* MODAL ============================================ */}
         {/* CALORIES */}
         <CaloriesCard
+          key={keyCal}
           currentCalories={currentCalories}
           caloriesGoal={caloriesGoal}
           caloriesRemaining={caloriesRemaining}
@@ -159,6 +164,7 @@ export default function TodayScreen() {
         />
         {/* STEP */}
         <StepsCard
+          key={keySteps}
           currentSteps={7340}
           stepsGoal={10000}
           stats={[
@@ -168,7 +174,8 @@ export default function TodayScreen() {
           ]}
         />
         {/* SLEEP */}
-        <SleepCard
+        {/* <SleepCard
+          key={fetchCount}
           lastNight={{
             total: { label: "Total", value: "7h 24m", progress: 77 },
             deep: { label: "Deep", value: "2h 10m", progress: 45 },
@@ -179,7 +186,7 @@ export default function TodayScreen() {
           onSessionEnd={(seconds) =>
             console.log("Slept for", seconds, "seconds")
           }
-        />
+        /> */}
       </ScrollView>
     </SafeAreaView>
   );
