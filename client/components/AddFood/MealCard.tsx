@@ -59,14 +59,14 @@ export default function MealCard({
     <View
       className="rounded-[24px] p-4 mb-3"
       style={{
-        backgroundColor: "#0f172a",
+        backgroundColor: "#ffffff",
         borderWidth: 1,
-        borderColor: "#1e293b",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.3,
-        shadowRadius: 16,
-        elevation: 8,
+        borderColor: "#e2e8f0",
+        shadowColor: "#94a3b8",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
+        elevation: 4,
       }}
     >
       {/* Top Row: Icon + Title + Add Button */}
@@ -87,13 +87,13 @@ export default function MealCard({
           {/* Title + Calories */}
           <View>
             <Text
-              className="font-black text-slate-100"
+              className="font-black text-slate-800"
               style={{ fontSize: 16, letterSpacing: -0.3 }}
             >
               {title}
             </Text>
             <Text
-              className="font-semibold text-slate-500"
+              className="font-semibold text-slate-400"
               style={{ fontSize: 11, letterSpacing: 0.3 }}
             >
               {isEmpty ? "Nothing logged yet" : `${calories} kcal`}
@@ -122,7 +122,7 @@ export default function MealCard({
       </View>
 
       {/* Divider */}
-      <View className="h-[1px] mb-3" style={{ backgroundColor: "#1e293b" }} />
+      <View className="h-[1px] mb-3" style={{ backgroundColor: "#f1f5f9" }} />
 
       {/* Macro Pills Row */}
       <View className="flex-row gap-2">
@@ -131,42 +131,46 @@ export default function MealCard({
           return (
             <View
               key={key}
-              className="flex-1 rounded-[14px] p-2.5 items-center"
+              className="flex-1 rounded-[12px] py-2 px-1.5 items-center"
               style={{
-                backgroundColor: "#0d1f2d",
+                backgroundColor: "#f8fafc",
                 borderWidth: 1,
-                borderColor: "#1e293b",
+                borderColor: "#e2e8f0",
               }}
             >
-              <Text
-                className="font-black"
-                style={{ fontSize: 15, color, letterSpacing: -0.3 }}
-              >
-                {val}
+              {/* Value + unit inline */}
+              <View className="flex-row items-baseline">
                 <Text
-                  style={{ fontSize: 9, color: "#475569", fontWeight: "600" }}
+                  className="font-black"
+                  style={{ fontSize: 13, color, letterSpacing: -0.3 }}
+                >
+                  {val}
+                </Text>
+                <Text
+                  style={{ fontSize: 8, color: "#94a3b8", fontWeight: "600" }}
                 >
                   g
                 </Text>
-              </Text>
+              </View>
+
               <Text
-                className="font-bold text-slate-600 mt-0.5"
-                style={{ fontSize: 9, letterSpacing: 1 }}
+                className="font-bold text-slate-400 mt-0.5"
+                style={{ fontSize: 8, letterSpacing: 0.8 }}
               >
                 {label.toUpperCase()}
               </Text>
 
               {/* Micro bar */}
               <View
-                className="h-0.5 rounded-full overflow-hidden mt-2 w-full"
-                style={{ backgroundColor: "#1e293b" }}
+                className="h-0.5 rounded-full overflow-hidden mt-1.5 w-full"
+                style={{ backgroundColor: "#e2e8f0" }}
               >
                 <View
                   className="h-full rounded-full"
                   style={{
                     width: `${Math.min((val / 50) * 100, 100)}%`,
                     backgroundColor: color,
-                    opacity: 0.7,
+                    opacity: 0.6,
                   }}
                 />
               </View>
