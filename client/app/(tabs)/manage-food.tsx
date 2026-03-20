@@ -3,6 +3,8 @@ import { View, Text, Pressable, FlatList, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 // components
+import { FoodItem } from "@/components/ManageFood/FoodItem";
+import { FoodListHeader } from "@/components/ManageFood/FoodListHeader";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { AddFoodManualModal } from "@/components/ManageFood/AddFoodManualModal";
 import ManageFoodModal from "@/components/ManageFood/ManageFoodModal";
@@ -15,6 +17,7 @@ export default function ManageFoodScreen() {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [foods, setFoods] = useState<Food[]>([]);
+  const [totalFoods, setTotalFoods] = useState(0);
   const [search, setSearch] = useState("");
   const [showManualModal, setShowManualModal] = useState(false);
   // manage food
@@ -27,6 +30,7 @@ export default function ManageFoodScreen() {
         setLoading(true);
         const data = await getAllFoods();
         setFoods(data);
+        setTotalFoods(data.length);
       } catch (error) {
         console.log("Error fetching foods:", error);
       } finally {
@@ -45,6 +49,9 @@ export default function ManageFoodScreen() {
   // Actions ======================================================================
   const onAddManual = () => {
     setShowManualModal(true);
+  };
+  const onFoodBot = () => {
+    console.log("Food bot");
   };
   const onAddByPhoto = () => {
     console.log("Scan food photo");
@@ -104,122 +111,39 @@ export default function ManageFoodScreen() {
     }
   };
 
-  const renderFoodItem = ({ item }: { item: Food }) => (
-    <Pressable
-      onPress={() => onSelectFood(item)}
-      className="bg-white rounded-2xl p-4 mb-3 border border-slate-100"
-    >
-      <View className="flex-row justify-between items-center">
-        <View>
-          <Text className="text-base font-semibold text-slate-900">
-            {item.name}
-          </Text>
-
-          <Text className="text-xs text-slate-500 mt-1">{item.serving}</Text>
-        </View>
-
-        <View className="items-end">
-          <Text className="text-sm font-bold text-slate-900">
-            {item.calories} kcal
-          </Text>
-
-          <Text className="text-xs text-slate-400">
-            P {item.protein}g · C {item.total_carbs}g · F {item.total_fat}g
-          </Text>
-        </View>
-      </View>
-    </Pressable>
-  );
-
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       {loading && <LoadingOverlay text="Loading foods..." />}
 
+      {/* HEADER FIElD ========================================== */}
       <FlatList
         data={filteredFoods}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingBottom: 120,
-        }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 120 }}
         ListHeaderComponent={
-          <>
-            {/* Header */}
-            <View className="mt-4 mb-6">
-              <Text className="text-[30px] font-extrabold text-slate-900">
-                Manage Food
-              </Text>
-
-              <Text className="text-slate-500 mt-1">
-                Create and manage your food database
-              </Text>
-            </View>
-
-            {/* Search */}
-            <View className="flex-row items-center bg-white rounded-2xl px-4 py-3 mb-4 border border-slate-100">
-              <Feather name="search" size={18} color="#64748b" />
-
-              <TextInput
-                placeholder="Search food..."
-                value={search}
-                onChangeText={setSearch}
-                className="flex-1 ml-2 text-slate-900"
-              />
-            </View>
-
-            {/* Actions */}
-            <View className="flex-row gap-3 mb-6">
-              {/* Create Food */}
-              <Pressable
-                onPress={onAddManual}
-                className="flex-1 items-center justify-center bg-slate-900 rounded-2xl py-4"
-              >
-                <Feather name="edit-3" size={18} color="white" />
-                <Text className="text-white text-xs font-semibold mt-1">
-                  Create
-                </Text>
-              </Pressable>
-
-              {/* Scan Photo */}
-              <Pressable
-                onPress={onAddByPhoto}
-                className="flex-1 items-center justify-center bg-slate-200 rounded-2xl py-4"
-              >
-                <Feather name="camera" size={18} color="#0f172a" />
-                <Text className="text-slate-900 text-xs font-semibold mt-1">
-                  Photo
-                </Text>
-              </Pressable>
-
-              {/* Scan Barcode */}
-              <Pressable
-                onPress={onScanBarcode}
-                className="flex-1 items-center justify-center bg-slate-200 rounded-2xl py-4"
-              >
-                <MaterialCommunityIcons
-                  name="barcode-scan"
-                  size={20}
-                  color="#0f172a"
-                />
-                <Text className="text-slate-900 text-xs font-semibold mt-1">
-                  Barcode
-                </Text>
-              </Pressable>
-            </View>
-          </>
+          <FoodListHeader
+            totalFoods={totalFoods}
+            search={search}
+            onSearchChange={setSearch}
+            onAddManual={onAddManual}
+            onFoodBot={onFoodBot}
+            onScanBarcode={onScanBarcode}
+            onAddByPhoto={onAddByPhoto}
+          />
         }
-        renderItem={renderFoodItem}
+        renderItem={({ item }) => (
+          <FoodItem item={item} onPress={onSelectFood} />
+        )}
         ListEmptyComponent={
           <View className="items-center mt-24">
             <Feather name="inbox" size={40} color="#94a3b8" />
-
             <Text className="text-slate-400 mt-3">No foods found</Text>
           </View>
         }
       />
 
-      {/* Add Food Modal ===============================*/}
+      {/* MODAL SECTION ADD FOOD ===============================*/}
       <AddFoodManualModal
         visible={showManualModal}
         onClose={() => setShowManualModal(false)}
