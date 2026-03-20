@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
-import { View, Text, Pressable, FlatList, TextInput } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 // components
+import { useToast } from "@/components/ToastProvider";
 import { FoodItem } from "@/components/ManageFood/FoodItem";
 import { FoodListHeader } from "@/components/ManageFood/FoodListHeader";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { AddFoodManualModal } from "@/components/ManageFood/AddFoodManualModal";
 import ManageFoodModal from "@/components/ManageFood/ManageFoodModal";
-import { useToast } from "@/components/ToastProvider";
+import { FoodBotModal } from "@/components/ManageFood/FoodBotModal";
 // apis
 import { getAllFoods, updateFood, deleteFood } from "@/api/food";
 import { Food } from "../../types/foods";
@@ -20,6 +21,7 @@ export default function ManageFoodScreen() {
   const [totalFoods, setTotalFoods] = useState(0);
   const [search, setSearch] = useState("");
   const [showManualModal, setShowManualModal] = useState(false);
+  const [showFoodBot, setShowFoodBot] = useState(false);
   // manage food
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -51,7 +53,7 @@ export default function ManageFoodScreen() {
     setShowManualModal(true);
   };
   const onFoodBot = () => {
-    console.log("Food bot");
+    setShowFoodBot(true);
   };
   const onAddByPhoto = () => {
     console.log("Scan food photo");
@@ -60,7 +62,7 @@ export default function ManageFoodScreen() {
     console.log("Scan food barcode");
   };
 
-  // manage food function ========================================================
+  // MAIN function ========================================================
   const onSelectFood = (food: Food) => {
     setSelectedFood(food);
     setShowEditModal(true);
@@ -82,6 +84,7 @@ export default function ManageFoodScreen() {
 
     return payload;
   }
+  // FOOD UPDATE AND DELETE FUNCTIONS ==================================================
   const handleUpdateFood = async (id: number, food: Food) => {
     try {
       setShowEditModal(false);
@@ -154,6 +157,10 @@ export default function ManageFoodScreen() {
         onClose={() => setShowEditModal(false)}
         onUpdate={handleUpdateFood}
         onDelete={handleDeleteFood}
+      />
+      <FoodBotModal
+        visible={showFoodBot}
+        onClose={() => setShowFoodBot(false)}
       />
     </SafeAreaView>
   );
