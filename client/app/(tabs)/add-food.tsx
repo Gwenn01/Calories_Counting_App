@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import type { FoodItem } from "@/types/foods";
 // components
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { useToast } from "@/components/ToastProvider";
@@ -9,9 +10,8 @@ import { FoodPickerModal } from "@/components/AddFood/FoodPickerModal";
 import FoodDetailModal from "@/components/AddFood/FoodDetailModal";
 import DeleteFoodModal from "@/components/AddFood/DeleteFoodModal";
 import FoodRow from "@/components/AddFood/FoodRow";
-import CalorieItem from "@/components/AddFood/CalorieItem";
 import MealCard from "@/components/AddFood/MealCard";
-import type { FoodItem } from "@/types/foods";
+import LogHeader from "@/components/AddFood/LogHeader";
 // apis
 import {
   createLogs,
@@ -31,12 +31,12 @@ const formatDate = (date: Date) =>
 
 export default function AddFoodScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [direction, setDirection] = useState<"left" | "right">("right");
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
   const [selectedMealType, setSelectedMealType] = useState<
     "breakfast" | "lunch" | "dinner" | "snack"
   >("breakfast");
-  const isCurrentDay = currentDate.toDateString() === new Date().toDateString();
   // add food model
   const [showFoodModal, setShowFoodModal] = useState(false);
   // the selected foods
@@ -75,18 +75,15 @@ export default function AddFoodScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   // function to explicity go to next and previous day
   // date provider
-  const goPrevDay = () =>
-    setCurrentDate((d) => {
-      const newDate = new Date(d);
-      newDate.setDate(newDate.getDate() - 1);
-      return newDate;
-    });
-  const goNextDay = () =>
-    setCurrentDate((d) => {
-      const newDate = new Date(d);
-      newDate.setDate(newDate.getDate() + 1);
-      return newDate;
-    });
+  const goPrevDay = () => {
+    setDirection("left");
+    setCurrentDate((d) => new Date(d.getTime() - 86400000));
+  };
+
+  const goNextDay = () => {
+    setDirection("right");
+    setCurrentDate((d) => new Date(d.getTime() + 86400000));
+  };
 
   // fetch the log
   const fetchLogs = async (date: Date) => {
@@ -207,56 +204,11 @@ export default function AddFoodScreen() {
         {/* Header ==============================================================*/}
         {/* ---------- HEADER ---------- */}
 
-        <View className="flex-row items-center justify-between mb-4 bg-white rounded-[20px] px-4 py-4 border border-slate-100">
-          {/* Prev */}
-          <Pressable
-            onPress={goPrevDay}
-            className="w-10 h-10 rounded-[14px] bg-slate-900  border border-slate-100 items-center justify-center"
-          >
-            <Feather name="chevron-left" size={18} color="#fff" />
-          </Pressable>
-
-          {/* Center */}
-          <View className="flex-1 items-center px-3 gap-0.5">
-            {/* Label + calendar icon */}
-            <View className="flex-row items-center gap-1.5 mb-0.5">
-              <Feather name="calendar" size={11} color="#94a3b8" />
-              <Text className="text-[10px] font-bold tracking-[2px] uppercase text-slate-400">
-                Food Log
-              </Text>
-            </View>
-
-            {/* Day name */}
-            <Text className="text-[11px] font-semibold text-slate-400">
-              {currentDate.toLocaleDateString("en-US", { weekday: "long" })}
-            </Text>
-
-            {/* Full date */}
-            <Text
-              className="text-xl font-black text-slate-900"
-              style={{ letterSpacing: -0.5 }}
-            >
-              {formatDate(currentDate)}
-            </Text>
-
-            {/* Today badge */}
-            {isCurrentDay && (
-              <View className="mt-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-0.5">
-                <Text className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
-                  Today
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Next */}
-          <Pressable
-            onPress={goNextDay}
-            className="w-10 h-10 rounded-[14px] bg-slate-900 items-center justify-center"
-          >
-            <Feather name="chevron-right" size={18} color="#fff" />
-          </Pressable>
-        </View>
+        <LogHeader
+          currentDate={currentDate}
+          onPrev={goPrevDay}
+          onNext={goNextDay}
+        />
 
         {/* Calories Remaining Card ========================================*/}
         <View
