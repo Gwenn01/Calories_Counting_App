@@ -8,15 +8,39 @@ import {
   Pressable,
 } from "react-native";
 import { useState } from "react";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { useToast } from "@/components/ToastProvider";
 import { createFood } from "../../api/food";
 
-const SectionHeader = ({ title }: { title: string }) => (
-  <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2 mt-5">
-    {title}
-  </Text>
+// ─── Sub-components ───────────────────────────────────────────────
+
+const SectionHeader = ({
+  title,
+  icon,
+  iconBg,
+  iconColor,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  iconColor?: string;
+}) => (
+  <View className="flex-row items-center gap-2.5 mt-6 mb-3">
+    <View
+      className="w-7 h-7 rounded-lg items-center justify-center"
+      style={{ backgroundColor: iconBg }}
+    >
+      {icon}
+    </View>
+    <Text
+      className="text-slate-700"
+      style={{ fontSize: 13, fontWeight: "700", letterSpacing: 0.3 }}
+    >
+      {title}
+    </Text>
+    <View className="flex-1 h-px bg-slate-100 ml-1" />
+  </View>
 );
 
 const Field = ({
@@ -24,20 +48,26 @@ const Field = ({
   value,
   onChange,
   numeric,
+  icon,
 }: {
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
   numeric?: boolean;
+  icon?: React.ReactNode;
 }) => (
-  <TextInput
-    placeholder={placeholder}
-    value={value}
-    keyboardType={numeric ? "numeric" : "default"}
-    onChangeText={onChange}
-    placeholderTextColor="#94a3b8"
-    className="border border-slate-200 bg-slate-50 p-4 mb-2 rounded-xl text-slate-800"
-  />
+  <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-0 mb-2.5 gap-2">
+    {icon && <View className="opacity-40">{icon}</View>}
+    <TextInput
+      placeholder={placeholder}
+      value={value}
+      keyboardType={numeric ? "numeric" : "default"}
+      onChangeText={onChange}
+      placeholderTextColor="#94a3b8"
+      className="flex-1 text-slate-800 py-3.5 text-sm"
+      style={{ paddingVertical: 14 }}
+    />
+  </View>
 );
 
 const Row = ({ children }: { children: React.ReactNode }) => (
@@ -53,17 +83,20 @@ const HalfField = ({
   value: string;
   onChange: (v: string) => void;
 }) => (
-  <View className="flex-1">
+  <View className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 mb-2.5">
     <TextInput
       placeholder={placeholder}
       value={value}
       keyboardType="numeric"
       onChangeText={onChange}
       placeholderTextColor="#94a3b8"
-      className="border border-slate-200 bg-slate-50 p-4 mb-2 rounded-xl text-slate-800"
+      className="text-slate-800 text-sm"
+      style={{ paddingVertical: 14 }}
     />
   </View>
 );
+
+// ─── Main Modal ───────────────────────────────────────────────────
 
 export function AddFoodManualModal({ visible, onClose }: any) {
   const [loading, setLoading] = useState(false);
@@ -73,20 +106,16 @@ export function AddFoodManualModal({ visible, onClose }: any) {
     "serving": "",
     "calories": "",
     "water": "",
-
     "total_fat": "",
     "saturated_fat": "",
     "monounsaturated_fat": "",
     "polyunsaturated_fat": "",
     "cholesterol": "",
-
     "total_carbs": "",
     "starch": "",
     "sugars": "",
     "fiber": "",
-
     "protein": "",
-
     "vitamin_a": "",
     "vitamin_c": "",
     "vitamin_e": "",
@@ -96,7 +125,6 @@ export function AddFoodManualModal({ visible, onClose }: any) {
     "niacin_b3": "",
     "vitamin_b6": "",
     "folate_b9": "",
-
     "calcium": "",
     "iron": "",
     "magnesium": "",
@@ -107,30 +135,22 @@ export function AddFoodManualModal({ visible, onClose }: any) {
     "copper": "",
     "manganese": ""
   }`);
+
   const [form, setForm] = useState({
-    // Basic
     name: "",
     serving: "",
     calories: "",
     water: "",
-
-    // Fats
     total_fat: "",
     saturated_fat: "",
     monounsaturated_fat: "",
     polyunsaturated_fat: "",
     cholesterol: "",
-
-    // Carbs
     total_carbs: "",
     starch: "",
     sugars: "",
     fiber: "",
-
-    // Protein
     protein: "",
-
-    // Vitamins
     vitamin_a: "",
     vitamin_c: "",
     vitamin_e: "",
@@ -140,8 +160,6 @@ export function AddFoodManualModal({ visible, onClose }: any) {
     niacin_b3: "",
     vitamin_b6: "",
     folate_b9: "",
-
-    // Minerals
     calcium: "",
     iron: "",
     magnesium: "",
@@ -188,24 +206,20 @@ export function AddFoodManualModal({ visible, onClose }: any) {
     "copper",
     "manganese",
   ];
-  // handle functions
+
   const handlePasteNutrition = () => {
     try {
       const parsed = JSON.parse(pasteText);
-
       setForm((prev) => {
         const updated = { ...prev };
-
         Object.keys(parsed).forEach((key) => {
           if (key in updated) {
             const typedKey = key as keyof typeof prev;
             updated[typedKey] = String(parsed[key]);
           }
         });
-
         return updated;
       });
-
       showToast("Success", "Nutrition data imported.", "success");
     } catch (error) {
       showToast("Error", "Invalid JSON format.", "error");
@@ -219,7 +233,7 @@ export function AddFoodManualModal({ visible, onClose }: any) {
     });
     try {
       setLoading(true);
-      const newFood = await createFood(payload);
+      await createFood(payload);
       showToast("Success!", "Food Created Successfully.", "success");
       onClose();
     } catch (error) {
@@ -232,62 +246,133 @@ export function AddFoodManualModal({ visible, onClose }: any) {
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/40 justify-end">
+      <View className="flex-1 bg-black/50 justify-end">
         {loading && <LoadingOverlay text="Creating food..." />}
-        <View className="bg-white rounded-t-3xl max-h-[92%] p-5">
-          {/* Header */}
-          <View className="flex-row justify-between items-center mb-1">
-            <Text className="text-xl font-bold text-slate-800">
-              Create Food
-            </Text>
-            <Pressable onPress={onClose} className="p-1">
-              <Feather name="x" size={22} color="#64748b" />
+
+        <View
+          className="bg-white rounded-t-[32px] max-h-[93%]"
+          style={{ paddingBottom: 0 }}
+        >
+          {/* ── Handle bar ── */}
+          <View className="items-center pt-3 pb-1">
+            <View className="w-10 h-1 rounded-full bg-slate-200" />
+          </View>
+
+          {/* ── Header ── */}
+          <View className="flex-row justify-between items-center px-5 pt-3 pb-4">
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 rounded-2xl bg-emerald-500 items-center justify-center">
+                <MaterialCommunityIcons
+                  name="food-apple-outline"
+                  size={20}
+                  color="white"
+                />
+              </View>
+              <View>
+                <Text
+                  className="text-slate-900"
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "800",
+                    letterSpacing: -0.4,
+                  }}
+                >
+                  Create Food
+                </Text>
+                <Text className="text-xs text-slate-400 font-medium">
+                  Fill in nutrition details
+                </Text>
+              </View>
+            </View>
+            <Pressable
+              onPress={onClose}
+              className="w-9 h-9 rounded-full bg-slate-100 items-center justify-center"
+            >
+              <Feather name="x" size={16} color="#64748b" />
             </Pressable>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-            <View className="mb-3">
-              <Text className="text-slate-400 text-lg font-semibold">
-                Paste Nutrition JSON
-              </Text>
-            </View>
-            <View className="mb-4">
+          {/* ── Divider ── */}
+          <View className="h-px bg-slate-100 mx-5" />
+
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            className="flex-1 px-5"
+            contentContainerStyle={{ paddingBottom: 24 }}
+          >
+            {/* ── JSON Import ── */}
+            <SectionHeader
+              title="Quick Import"
+              iconBg="#f0fdf4"
+              icon={
+                <MaterialCommunityIcons
+                  name="code-json"
+                  size={14}
+                  color="#16a34a"
+                />
+              }
+            />
+
+            <View className="bg-slate-50 border border-slate-200 rounded-2xl p-3 mb-2">
               <TextInput
                 multiline
                 scrollEnabled
                 value={pasteText}
                 onChangeText={setPasteText}
-                placeholder="Paste nutrition JSON here"
+                placeholder="Paste nutrition JSON here..."
                 placeholderTextColor="#94a3b8"
-                className="border border-slate-200 bg-slate-50 rounded-xl p-3 text-sm"
-                style={{ height: 150, textAlignVertical: "top" }}
+                className="text-slate-700 text-xs font-mono"
+                style={{
+                  height: 130,
+                  textAlignVertical: "top",
+                  lineHeight: 18,
+                }}
               />
+            </View>
 
-              <Pressable
-                onPress={handlePasteNutrition}
-                className="bg-emerald-500 py-3 rounded-xl mt-2"
-              >
-                <Text className="text-white text-center font-semibold">
-                  Auto Fill Fields
-                </Text>
-              </Pressable>
-            </View>
-            {/* ── General ── */}
-            <View className="mb-0">
-              <Text className="text-slate-400 text-lg font-semibold">
-                Food Details
+            <Pressable
+              onPress={handlePasteNutrition}
+              className="flex-row items-center justify-center gap-2 bg-emerald-500 py-3.5 rounded-2xl mb-1"
+            >
+              <MaterialCommunityIcons
+                name="lightning-bolt"
+                size={16}
+                color="white"
+              />
+              <Text className="text-white text-sm font-bold">
+                Auto Fill Fields
               </Text>
-            </View>
-            <SectionHeader title="General" />
+            </Pressable>
+
+            {/* ── General ── */}
+            <SectionHeader
+              title="General"
+              iconBg="#eff6ff"
+              icon={<Feather name="info" size={13} color="#3b82f6" />}
+            />
             <Field
               placeholder="Food name"
               value={form.name}
               onChange={set("name")}
+              icon={
+                <MaterialCommunityIcons
+                  name="food-variant"
+                  size={16}
+                  color="#64748b"
+                />
+              }
             />
             <Field
               placeholder="Serving (e.g. 1 pack 300 ml)"
               value={form.serving}
               onChange={set("serving")}
+              icon={
+                <MaterialCommunityIcons
+                  name="scale"
+                  size={16}
+                  color="#64748b"
+                />
+              }
             />
             <Row>
               <HalfField
@@ -303,18 +388,42 @@ export function AddFoodManualModal({ visible, onClose }: any) {
             </Row>
 
             {/* ── Macros ── */}
-            <SectionHeader title="Macronutrients" />
+            <SectionHeader
+              title="Macronutrients"
+              iconBg="#fff7ed"
+              icon={
+                <MaterialCommunityIcons
+                  name="chart-donut"
+                  size={14}
+                  color="#f97316"
+                />
+              }
+            />
             <Field
               placeholder="Protein (g)"
               value={form.protein}
               onChange={set("protein")}
               numeric
+              icon={
+                <MaterialCommunityIcons
+                  name="arm-flex-outline"
+                  size={16}
+                  color="#64748b"
+                />
+              }
             />
             <Field
               placeholder="Total Carbs (g)"
               value={form.total_carbs}
               onChange={set("total_carbs")}
               numeric
+              icon={
+                <MaterialCommunityIcons
+                  name="grain"
+                  size={16}
+                  color="#64748b"
+                />
+              }
             />
             <Row>
               <HalfField
@@ -333,15 +442,35 @@ export function AddFoodManualModal({ visible, onClose }: any) {
               value={form.fiber}
               onChange={set("fiber")}
               numeric
+              icon={
+                <MaterialCommunityIcons name="leaf" size={16} color="#64748b" />
+              }
             />
 
             {/* ── Fats ── */}
-            <SectionHeader title="Fats" />
+            <SectionHeader
+              title="Fats"
+              iconBg="#fdf4ff"
+              icon={
+                <MaterialCommunityIcons
+                  name="water-outline"
+                  size={14}
+                  color="#a855f7"
+                />
+              }
+            />
             <Field
               placeholder="Total Fat (g)"
               value={form.total_fat}
               onChange={set("total_fat")}
               numeric
+              icon={
+                <MaterialCommunityIcons
+                  name="water"
+                  size={16}
+                  color="#64748b"
+                />
+              }
             />
             <Row>
               <HalfField
@@ -369,7 +498,13 @@ export function AddFoodManualModal({ visible, onClose }: any) {
             </Row>
 
             {/* ── Vitamins ── */}
-            <SectionHeader title="Vitamins" />
+            <SectionHeader
+              title="Vitamins"
+              iconBg="#fef9c3"
+              icon={
+                <MaterialCommunityIcons name="pill" size={14} color="#ca8a04" />
+              }
+            />
             <Row>
               <HalfField
                 placeholder="Vitamin A (µg)"
@@ -423,10 +558,21 @@ export function AddFoodManualModal({ visible, onClose }: any) {
               value={form.folate_b9}
               onChange={set("folate_b9")}
               numeric
+              icon={<Ionicons name="flask-outline" size={16} color="#64748b" />}
             />
 
             {/* ── Minerals ── */}
-            <SectionHeader title="Minerals" />
+            <SectionHeader
+              title="Minerals"
+              iconBg="#fff1f2"
+              icon={
+                <MaterialCommunityIcons
+                  name="diamond-stone"
+                  size={14}
+                  color="#f43f5e"
+                />
+              }
+            />
             <Row>
               <HalfField
                 placeholder="Calcium (mg)"
@@ -480,20 +626,31 @@ export function AddFoodManualModal({ visible, onClose }: any) {
               value={form.manganese}
               onChange={set("manganese")}
               numeric
+              icon={
+                <MaterialCommunityIcons name="atom" size={16} color="#64748b" />
+              }
             />
-
-            <View className="h-6" />
           </ScrollView>
 
-          {/* Save button */}
-          <TouchableOpacity
-            onPress={handleSubmit}
-            className="bg-black py-4 rounded-xl mt-3"
+          {/* ── Save button ── */}
+          <View
+            className="px-5 pt-3 pb-8 bg-white"
+            style={{ borderTopWidth: 0.5, borderTopColor: "#e2e8f0" }}
           >
-            <Text className="text-white text-center font-semibold text-base">
-              Save Food
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleSubmit}
+              className="flex-row items-center justify-center gap-2 bg-slate-900 py-4 rounded-2xl"
+            >
+              <MaterialCommunityIcons
+                name="check-circle-outline"
+                size={18}
+                color="white"
+              />
+              <Text className="text-white text-center font-bold text-base">
+                Save Food
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
