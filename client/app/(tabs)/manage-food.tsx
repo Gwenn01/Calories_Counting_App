@@ -10,6 +10,7 @@ import LoadingOverlay from "@/components/LoadingOverplay";
 import { AddFoodManualModal } from "@/components/ManageFood/AddFoodManualModal";
 import ManageFoodModal from "@/components/ManageFood/ManageFoodModal";
 import { FoodBotModal } from "@/components/ManageFood/FoodBotModal";
+import { BarcodeScannerModal } from "@/components/ManageFood/BarcodeScannerModal";
 // apis
 import { getAllFoods, updateFood, deleteFood } from "@/api/food";
 import { Food } from "../../types/foods";
@@ -22,6 +23,7 @@ export default function ManageFoodScreen() {
   const [search, setSearch] = useState("");
   const [showManualModal, setShowManualModal] = useState(false);
   const [showFoodBot, setShowFoodBot] = useState(false);
+  const [showBarcode, setShowBarcode] = useState(false);
   // manage food
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -55,11 +57,11 @@ export default function ManageFoodScreen() {
   const onFoodBot = () => {
     setShowFoodBot(true);
   };
+  const onScanBarcode = () => {
+    setShowBarcode(true);
+  };
   const onAddByPhoto = () => {
     console.log("Scan food photo");
-  };
-  const onScanBarcode = () => {
-    console.log("Scan food barcode");
   };
 
   // MAIN function ========================================================
@@ -161,6 +163,10 @@ export default function ManageFoodScreen() {
       <FoodBotModal
         visible={showFoodBot}
         onClose={() => setShowFoodBot(false)}
+      />
+      <BarcodeScannerModal
+        visible={showBarcode}
+        onClose={() => setShowBarcode(false)}
       />
     </SafeAreaView>
   );

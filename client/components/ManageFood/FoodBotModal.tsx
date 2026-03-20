@@ -13,48 +13,7 @@ import { useState } from "react";
 import { MaterialCommunityIcons, Feather, Ionicons } from "@expo/vector-icons";
 import { useToast } from "@/components/ToastProvider";
 import { createFood } from "../../api/food";
-
-// ─── Types ────────────────────────────────────────────────────────
-
-interface NutritionForm {
-  name: string;
-  serving: string;
-  calories: string;
-  water: string;
-  total_fat: string;
-  saturated_fat: string;
-  monounsaturated_fat: string;
-  polyunsaturated_fat: string;
-  cholesterol: string;
-  total_carbs: string;
-  starch: string;
-  sugars: string;
-  fiber: string;
-  protein: string;
-  vitamin_a: string;
-  vitamin_c: string;
-  vitamin_e: string;
-  vitamin_k: string;
-  thiamin_b1: string;
-  riboflavin_b2: string;
-  niacin_b3: string;
-  vitamin_b6: string;
-  folate_b9: string;
-  calcium: string;
-  iron: string;
-  magnesium: string;
-  phosphorus: string;
-  potassium: string;
-  sodium: string;
-  zinc: string;
-  copper: string;
-  manganese: string;
-}
-
-interface ChatMessage {
-  role: "user" | "bot";
-  text: string;
-}
+import { NutritionForm, ChatMessage } from "@/types/foods";
 
 const emptyForm: NutritionForm = {
   name: "",
@@ -215,8 +174,7 @@ const HalfField = ({
   </View>
 );
 
-// ─── Main Modal ───────────────────────────────────────────────────
-
+// ─── Main Modal ===========================================================
 interface Props {
   visible: boolean;
   onClose: () => void;

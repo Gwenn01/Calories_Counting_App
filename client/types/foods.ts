@@ -1,3 +1,4 @@
+// food item fetch
 export type FoodItem = {
   id: string;
   name: string;
@@ -7,6 +8,7 @@ export type FoodItem = {
   fat?: number;
 };
 
+// input foods
 export interface Food {
   id: number;
 
@@ -55,4 +57,46 @@ export interface Food {
   zinc: number;
   copper: number;
   manganese: number;
+}
+
+// ─── Types ────────────────────────────────────────────────────────
+// chat boot
+export interface NutritionForm {
+  name: string;
+  serving: string;
+  calories: string;
+  water: string;
+  total_fat: string;
+  saturated_fat: string;
+  monounsaturated_fat: string;
+  polyunsaturated_fat: string;
+  cholesterol: string;
+  total_carbs: string;
+  starch: string;
+  sugars: string;
+  fiber: string;
+  protein: string;
+  vitamin_a: string;
+  vitamin_c: string;
+  vitamin_e: string;
+  vitamin_k: string;
+  thiamin_b1: string;
+  riboflavin_b2: string;
+  niacin_b3: string;
+  vitamin_b6: string;
+  folate_b9: string;
+  calcium: string;
+  iron: string;
+  magnesium: string;
+  phosphorus: string;
+  potassium: string;
+  sodium: string;
+  zinc: string;
+  copper: string;
+  manganese: string;
+}
+
+export interface ChatMessage {
+  role: "user" | "bot";
+  text: string;
 }

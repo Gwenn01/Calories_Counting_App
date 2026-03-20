@@ -29,6 +29,10 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-camera",
+        { "cameraPermission": "Allow access to scan food barcodes." }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
