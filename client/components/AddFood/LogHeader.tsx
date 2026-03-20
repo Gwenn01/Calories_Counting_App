@@ -58,7 +58,7 @@ export default function LogHeader({ currentDate, onPrev, onNext }: Props) {
         className="flex-1 items-center px-3 gap-0.5"
       >
         <View className="flex-row items-center gap-1.5 mb-0.5">
-          <Feather name="clipboard" size={11} color="#94a3b8" />
+          <Feather name="file-text" size={11} color="#94a3b8" />
           <Text className="text-[10px] font-bold tracking-[2px] uppercase text-slate-400">
             Food Log
           </Text>
