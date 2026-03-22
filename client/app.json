@@ -15,10 +15,8 @@
       "usesCleartextTraffic": true,
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/image/logo.jpg",
-        "backgroundImage": "./assets/image/logo.jpg",
-        "monochromeImage": "./assets/image/logo.jpg"
+        "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
