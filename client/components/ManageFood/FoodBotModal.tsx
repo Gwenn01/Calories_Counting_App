@@ -200,29 +200,10 @@ export function FoodBotModal({ visible, onClose }: Props) {
     setThinking(true);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch(`/api/food-bot/chat/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: `You are a nutrition expert assistant. When the user describes a food item, 
-          respond with a brief friendly message followed by a JSON block with the nutrition data.
-          Always return a JSON block in this exact format (use 0 for unknown values):
-          \`\`\`json
-          {
-            "name": "", "serving": "", "calories": 0, "water": 0,
-            "total_fat": 0, "saturated_fat": 0, "monounsaturated_fat": 0,
-            "polyunsaturated_fat": 0, "cholesterol": 0,
-            "total_carbs": 0, "starch": 0, "sugars": 0, "fiber": 0,
-            "protein": 0,
-            "vitamin_a": 0, "vitamin_c": 0, "vitamin_e": 0, "vitamin_k": 0,
-            "thiamin_b1": 0, "riboflavin_b2": 0, "niacin_b3": 0,
-            "vitamin_b6": 0, "folate_b9": 0,
-            "calcium": 0, "iron": 0, "magnesium": 0, "phosphorus": 0,
-            "potassium": 0, "sodium": 0, "zinc": 0, "copper": 0, "manganese": 0
-          }
-          \`\`\``,
           messages: [
             ...messages.map((m) => ({
               role: m.role === "user" ? "user" : "assistant",
@@ -234,20 +215,14 @@ export function FoodBotModal({ visible, onClose }: Props) {
       });
 
       const data = await response.json();
-      const fullText = data.content?.[0]?.text ?? "";
 
-      // Extract friendly message (before the JSON block)
-      const friendlyText = fullText.split("```")[0].trim();
-      setMessages((prev) => [...prev, { role: "bot", text: friendlyText }]);
+      setMessages((prev) => [...prev, { role: "bot", text: data.message }]);
 
-      // Extract and parse JSON
-      const jsonMatch = fullText.match(/```json\s*([\s\S]*?)```/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[1]);
+      if (data.nutrition) {
         const updated: NutritionForm = { ...emptyForm };
-        Object.keys(parsed).forEach((key) => {
+        Object.keys(data.nutrition).forEach((key) => {
           if (key in updated) {
-            (updated as any)[key] = String(parsed[key]);
+            (updated as any)[key] = String(data.nutrition[key]);
           }
         });
         setForm(updated);
