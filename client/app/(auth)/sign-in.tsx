@@ -44,7 +44,28 @@ export default function SignInScreen() {
       router.replace("/(tabs)");
     } catch (error: any) {
       console.log("LOGIN ERROR:", error.response?.data || error.message);
-      showToast("Error", "Invalid Username or Password", "error");
+      // Network error — backend not reachable
+      if (!error.response) {
+        showToast(
+          "Connection Failed",
+          `Cannot reach server: ${error.message}`, // Shows exact error
+          "error",
+        );
+        return;
+      }
+
+      // Backend responded but rejected credentials
+      if (error.response.status === 400 || error.response.status === 401) {
+        showToast("Error", "Invalid Username or Password", "error");
+        return;
+      }
+
+      // Any other server error
+      showToast(
+        "Server Error",
+        `Status ${error.response.status}: ${error.response.data?.detail || "Something went wrong"}`,
+        "error",
+      );
     } finally {
       setLoading(false);
     }
