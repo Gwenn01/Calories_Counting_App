@@ -14,6 +14,7 @@ import { MaterialCommunityIcons, Feather, Ionicons } from "@expo/vector-icons";
 import { useToast } from "@/components/ToastProvider";
 import { createFood } from "../../api/food";
 import { NutritionForm, ChatMessage } from "@/types/foods";
+import { foodBot } from "../../api/food";
 
 const emptyForm: NutritionForm = {
   name: "",
@@ -193,40 +194,28 @@ export function FoodBotModal({ visible, onClose }: Props) {
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleAsk = async () => {
-    if (!input.trim() || thinking) return;
-    const userMessage = input.trim();
-    setInput("");
-    setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
-    setThinking(true);
-
     try {
-      const response = await fetch(`/api/food-bot/chat/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [
-            ...messages.map((m) => ({
-              role: m.role === "user" ? "user" : "assistant",
-              content: m.text,
-            })),
-            { role: "user", content: userMessage },
-          ],
-        }),
-      });
+      if (!input.trim()) return;
+      const userMessage = input.trim();
+      setInput("");
+      setThinking(true);
+      // Add user message
+      setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
 
-      const data = await response.json();
+      const data = await foodBot(userMessage);
+      // Store nutrition data for review step
+      setForm(data);
+      // Format a friendly bot reply
+      const botReply =
+        `Here's what I found for **${data.name}**!\n\n` +
+        `🍽️ Serving: ${data.serving}\n` +
+        `🔥 Calories: ${data.calories} kcal\n` +
+        `💪 Protein: ${data.protein}g\n` +
+        `🌾 Carbs: ${data.total_carbs}g\n` +
+        `🥑 Fat: ${data.total_fat}g\n\n` +
+        `Tap "Review & edit nutrition" below to see the full breakdown.`;
 
-      setMessages((prev) => [...prev, { role: "bot", text: data.message }]);
-
-      if (data.nutrition) {
-        const updated: NutritionForm = { ...emptyForm };
-        Object.keys(data.nutrition).forEach((key) => {
-          if (key in updated) {
-            (updated as any)[key] = String(data.nutrition[key]);
-          }
-        });
-        setForm(updated);
-      }
+      setMessages((prev) => [...prev, { role: "bot", text: botReply }]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -236,6 +225,8 @@ export function FoodBotModal({ visible, onClose }: Props) {
         },
       ]);
     } finally {
+      // set the review to false already
+      setStep("review");
       setThinking(false);
     }
   };

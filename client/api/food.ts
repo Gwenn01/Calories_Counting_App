@@ -26,7 +26,7 @@ export const deleteFood = async (id: number) => {
 };
 
 // food bot apis
-export const foodBot = async () => {
-  const res = await api.get("api/food-bot/");
+export const foodBot = async (foodPromt: string) => {
+  const res = await api.post("api/food-bot/");
   return res.data;
 };
