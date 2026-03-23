@@ -272,7 +272,7 @@ export function AddFoodManualModal({ visible, onClose }: any) {
 
           <View
             className="bg-white rounded-t-[32px] max-h-[93%]"
-            style={{ paddingBottom: 0 }}
+            style={{ paddingBottom: 0, flex: 1 }}
           >
             {/* ── Handle bar ── */}
             <View className="items-center pt-3 pb-1">
