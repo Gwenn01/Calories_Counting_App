@@ -274,7 +274,10 @@ export function FoodBotModal({ visible, onClose }: Props) {
         className="flex-1"
       >
         <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-[32px] max-h-[93%]">
+          <View
+            className="bg-white rounded-t-[32px] max-h-[93%]"
+            style={{ paddingBottom: 0, flex: 1 }}
+          >
             {/* ── Handle ── */}
             <View className="items-center pt-3 pb-1">
               <View className="w-10 h-1 rounded-full bg-slate-200" />

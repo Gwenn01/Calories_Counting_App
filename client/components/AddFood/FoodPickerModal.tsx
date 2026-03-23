@@ -30,7 +30,10 @@ export function FoodPickerModal({ visible, onClose, onSelect }: any) {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) {
+      setSearch("");
+      return;
+    }
     const fetchFoods = async () => {
       try {
         setLoading(true);
@@ -56,7 +59,7 @@ export function FoodPickerModal({ visible, onClose, onSelect }: any) {
       transparent
       statusBarTranslucent
     >
-      {/* ✅ KeyboardAvoidingView now correctly wraps all modal content */}
+      {/* KeyboardAvoidingView now correctly wraps all modal content */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}

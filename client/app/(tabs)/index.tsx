@@ -163,7 +163,7 @@ export default function TodayScreen() {
           macros={macros}
         />
         {/* STEP */}
-        <StepsCard
+        {/* <StepsCard
           key={keySteps}
           currentSteps={7340}
           stepsGoal={10000}
@@ -172,7 +172,7 @@ export default function TodayScreen() {
             { label: "Calories", value: "312", unit: "kcal", progress: 60 },
             { label: "Active", value: "48", unit: "min", progress: 80 },
           ]}
-        />
+        /> */}
         {/* SLEEP */}
         {/* <SleepCard
           key={fetchCount}
