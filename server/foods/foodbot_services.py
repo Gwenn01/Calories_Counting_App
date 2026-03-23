@@ -11,10 +11,6 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # =============================================================================
 # ACCURACY TECHNIQUE 1 — PRE-PROCESS THE FOOD INPUT
-# Problem: Raw user input is messy ("bigmac", "1 cup rice w/ chicken",
-# "lechon kawali approx 200g") — cleaning it before sending helps the AI
-# parse and calculate more precisely.
-# =============================================================================
 
 # Unit conversion map to standardize everything to grams/ml
 UNIT_CONVERSIONS = {
@@ -35,7 +31,6 @@ UNIT_CONVERSIONS = {
 def normalize_food_input(food: str) -> str:
     """
     ACCURACY TECHNIQUE 1: Clean and standardize food input before sending to AI.
-
     What it does:
     - Lowercases and strips whitespace
     - Expands abbreviations ("w/" → "with", "approx" → "approximately")
@@ -309,11 +304,9 @@ class FoodBotServices:
 
 # =============================================================================
 # QUICK TEST
-# =============================================================================
-
 if __name__ == "__main__":
     test_foods = [
-        "100 grams of adobong sitaw",
+        "100g chicken adobo legs part",
     ]
 
     for food in test_foods:

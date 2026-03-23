@@ -6,6 +6,7 @@ urlpatterns = [
     #path('', views.index, name='index'),
     path('foods/', views.FoodList.as_view(), name='foods-list'),
     path('foods/<int:pk>/', views.FoodDetail.as_view(), name='food-details'),
+    path('food-bot/', views.FoodBotViews.as_view(), name='food-bot'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

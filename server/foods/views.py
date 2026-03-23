@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import Food
 from .serializers import FoodSerializer
+from .foodbot_services import FoodBotServices
 
 # Create your views here.
 # CREATE MANUAL FOOD =======================================================
@@ -29,6 +30,8 @@ class FoodList(APIView):
 
 # EDIT AND DELETE FOOD =========================================================== 
 class FoodDetail(APIView):
+    permission_classes = [IsAuthenticated]
+    
     def get_object(self, pk):
         return get_object_or_404(Food, pk=pk)
 
@@ -49,4 +52,15 @@ class FoodDetail(APIView):
         food = self.get_object(pk)
         food.delete()
         return Response({"message": "Food deleted successfully"}, status=status.HTTP_200_OK)
+    
+class FoodBotViews(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+            food_prompt = request.data.get('food_prompt')
+            try:
+                result = FoodBotServices.get_nutrition_data(food_prompt)
+                return Response(result, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
