@@ -5,6 +5,9 @@ import {
   ScrollView,
   Pressable,
   TextInput,
+  Platform,
+  KeyboardAvoidingView,
+  Keyboard,
 } from "react-native";
 import { useState, useEffect } from "react";
 import { Feather, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
@@ -144,6 +147,21 @@ export default function ManageFoodModal({
   onDelete,
 }: Props) {
   const [form, setForm] = useState<Food | null>(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  // keyboard effects
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true),
+    );
+    const hide = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false),
+    );
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (selectedFood) setForm(selectedFood);
@@ -163,360 +181,377 @@ export default function ManageFoodModal({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white rounded-t-[32px] max-h-[93%]">
-          {/* ── Handle bar ── */}
-          <View className="items-center pt-3 pb-1">
-            <View className="w-10 h-1 rounded-full bg-slate-200" />
-          </View>
-
-          {/* ── Header ── */}
-          <View className="flex-row justify-between items-center px-5 pt-3 pb-4">
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-2xl bg-slate-900 items-center justify-center">
-                <MaterialCommunityIcons
-                  name="food-variant"
-                  size={19}
-                  color="white"
-                />
-              </View>
-              <View>
-                <Text
-                  className="text-slate-900"
-                  style={{
-                    fontSize: 18,
-                    fontWeight: "800",
-                    letterSpacing: -0.4,
-                  }}
-                >
-                  Edit Food
-                </Text>
-                <Text
-                  className="text-xs text-slate-400 font-medium"
-                  numberOfLines={1}
-                >
-                  {form.name || "Update nutrition details"}
-                </Text>
-              </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-[32px] max-h-[93%]">
+            {/* ── Handle bar ── */}
+            <View className="items-center pt-3 pb-1">
+              <View className="w-10 h-1 rounded-full bg-slate-200" />
             </View>
-            <Pressable
-              onPress={onClose}
-              className="w-9 h-9 rounded-full bg-slate-100 items-center justify-center"
+
+            {/* ── Header ── */}
+            <View className="flex-row justify-between items-center px-5 pt-3 pb-4">
+              <View className="flex-row items-center gap-3">
+                <View className="w-10 h-10 rounded-2xl bg-slate-900 items-center justify-center">
+                  <MaterialCommunityIcons
+                    name="food-variant"
+                    size={19}
+                    color="white"
+                  />
+                </View>
+                <View>
+                  <Text
+                    className="text-slate-900"
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "800",
+                      letterSpacing: -0.4,
+                    }}
+                  >
+                    Edit Food
+                  </Text>
+                  <Text
+                    className="text-xs text-slate-400 font-medium"
+                    numberOfLines={1}
+                  >
+                    {form.name || "Update nutrition details"}
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                onPress={onClose}
+                className="w-9 h-9 rounded-full bg-slate-100 items-center justify-center"
+              >
+                <Feather name="x" size={16} color="#64748b" />
+              </Pressable>
+            </View>
+
+            {/* ── Divider ── */}
+            <View className="h-px bg-slate-100 mx-5" />
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              className="flex-1 px-5"
+              contentContainerStyle={{ paddingBottom: 24 }}
             >
-              <Feather name="x" size={16} color="#64748b" />
-            </Pressable>
-          </View>
-
-          {/* ── Divider ── */}
-          <View className="h-px bg-slate-100 mx-5" />
-
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            className="flex-1 px-5"
-            contentContainerStyle={{ paddingBottom: 24 }}
-          >
-            {/* ── General ── */}
-            <SectionHeader
-              title="General"
-              iconBg="#eff6ff"
-              icon={<Feather name="info" size={13} color="#3b82f6" />}
-            />
-            <Field
-              label="Food Name"
-              value={form.name}
-              onChange={(v) => handleChange("name", v)}
-              icon={
-                <MaterialCommunityIcons
-                  name="food-variant"
-                  size={16}
-                  color="#64748b"
-                />
-              }
-            />
-            <Field
-              label="Serving"
-              value={form.serving}
-              onChange={(v) => handleChange("serving", v)}
-              icon={
-                <MaterialCommunityIcons
-                  name="scale"
-                  size={16}
-                  color="#64748b"
-                />
-              }
-            />
-            <Row>
-              <HalfField
-                label="Calories (kcal)"
-                value={String(form.calories)}
-                onChange={(v) => handleChange("calories", v)}
+              {/* ── General ── */}
+              <SectionHeader
+                title="General"
+                iconBg="#eff6ff"
+                icon={<Feather name="info" size={13} color="#3b82f6" />}
               />
-              <HalfField
-                label="Water (g)"
-                value={String(form.water)}
-                onChange={(v) => handleChange("water", v)}
+              <Field
+                label="Food Name"
+                value={form.name}
+                onChange={(v) => handleChange("name", v)}
+                icon={
+                  <MaterialCommunityIcons
+                    name="food-variant"
+                    size={16}
+                    color="#64748b"
+                  />
+                }
               />
-            </Row>
-
-            {/* ── Protein ── */}
-            <SectionHeader
-              title="Protein"
-              iconBg="#eff6ff"
-              icon={
-                <MaterialCommunityIcons
-                  name="arm-flex-outline"
-                  size={14}
-                  color="#3b82f6"
-                />
-              }
-            />
-            <Field
-              label="Protein (g)"
-              value={String(form.protein)}
-              onChange={(v) => handleChange("protein", v)}
-              numeric
-              icon={
-                <MaterialCommunityIcons
-                  name="arm-flex-outline"
-                  size={16}
-                  color="#64748b"
-                />
-              }
-            />
-
-            {/* ── Carbohydrates ── */}
-            <SectionHeader
-              title="Carbohydrates"
-              iconBg="#fff7ed"
-              icon={
-                <MaterialCommunityIcons
-                  name="grain"
-                  size={14}
-                  color="#f97316"
-                />
-              }
-            />
-            <Field
-              label="Total Carbs (g)"
-              value={String(form.total_carbs)}
-              onChange={(v) => handleChange("total_carbs", v)}
-              numeric
-              icon={
-                <MaterialCommunityIcons
-                  name="grain"
-                  size={16}
-                  color="#64748b"
-                />
-              }
-            />
-            <Row>
-              <HalfField
-                label="Sugars (g)"
-                value={String(form.sugars)}
-                onChange={(v) => handleChange("sugars", v)}
+              <Field
+                label="Serving"
+                value={form.serving}
+                onChange={(v) => handleChange("serving", v)}
+                icon={
+                  <MaterialCommunityIcons
+                    name="scale"
+                    size={16}
+                    color="#64748b"
+                  />
+                }
               />
-              <HalfField
-                label="Fiber (g)"
-                value={String(form.fiber)}
-                onChange={(v) => handleChange("fiber", v)}
-              />
-            </Row>
-            <Field
-              label="Starch (g)"
-              value={String(form.starch)}
-              onChange={(v) => handleChange("starch", v)}
-              numeric
-              icon={
-                <MaterialCommunityIcons name="leaf" size={16} color="#64748b" />
-              }
-            />
-
-            {/* ── Fats ── */}
-            <SectionHeader
-              title="Fats & Cholesterol"
-              iconBg="#fdf4ff"
-              icon={
-                <MaterialCommunityIcons
-                  name="water-outline"
-                  size={14}
-                  color="#a855f7"
-                />
-              }
-            />
-            <Field
-              label="Total Fat (g)"
-              value={String(form.total_fat)}
-              onChange={(v) => handleChange("total_fat", v)}
-              numeric
-              icon={
-                <MaterialCommunityIcons
-                  name="water"
-                  size={16}
-                  color="#64748b"
-                />
-              }
-            />
-            <Row>
-              <HalfField
-                label="Saturated (g)"
-                value={String(form.saturated_fat)}
-                onChange={(v) => handleChange("saturated_fat", v)}
-              />
-              <HalfField
-                label="Cholesterol (mg)"
-                value={String(form.cholesterol)}
-                onChange={(v) => handleChange("cholesterol", v)}
-              />
-            </Row>
-            <Row>
-              <HalfField
-                label="Monounsat. (g)"
-                value={String(form.monounsaturated_fat)}
-                onChange={(v) => handleChange("monounsaturated_fat", v)}
-              />
-              <HalfField
-                label="Polyunsat. (g)"
-                value={String(form.polyunsaturated_fat)}
-                onChange={(v) => handleChange("polyunsaturated_fat", v)}
-              />
-            </Row>
-            <Field
-              label="Trans Fat (g)"
-              value={String(form.trans_fat)}
-              onChange={(v) => handleChange("trans_fat", v)}
-              numeric
-              icon={
-                <MaterialCommunityIcons
-                  name="alert-circle-outline"
-                  size={16}
-                  color="#64748b"
-                />
-              }
-            />
-
-            {/* ── Vitamins ── */}
-            <SectionHeader
-              title="Vitamins"
-              iconBg="#fef9c3"
-              icon={
-                <MaterialCommunityIcons name="pill" size={14} color="#ca8a04" />
-              }
-            />
-            <Row>
-              {vitaminFields.slice(0, 2).map(([key, label]) => (
+              <Row>
                 <HalfField
-                  key={key}
-                  label={label}
-                  value={String(form[key] ?? 0)}
-                  onChange={(v) => handleChange(key, v)}
+                  label="Calories (kcal)"
+                  value={String(form.calories)}
+                  onChange={(v) => handleChange("calories", v)}
                 />
-              ))}
-            </Row>
-            <Row>
-              {vitaminFields.slice(2, 4).map(([key, label]) => (
                 <HalfField
-                  key={key}
-                  label={label}
-                  value={String(form[key] ?? 0)}
-                  onChange={(v) => handleChange(key, v)}
+                  label="Water (g)"
+                  value={String(form.water)}
+                  onChange={(v) => handleChange("water", v)}
                 />
-              ))}
-            </Row>
-            <Row>
-              {vitaminFields.slice(4, 6).map(([key, label]) => (
-                <HalfField
-                  key={key}
-                  label={label}
-                  value={String(form[key] ?? 0)}
-                  onChange={(v) => handleChange(key, v)}
-                />
-              ))}
-            </Row>
-            <Row>
-              {vitaminFields.slice(6, 8).map(([key, label]) => (
-                <HalfField
-                  key={key}
-                  label={label}
-                  value={String(form[key] ?? 0)}
-                  onChange={(v) => handleChange(key, v)}
-                />
-              ))}
-            </Row>
-            <Row>
-              {vitaminFields.slice(8, 10).map(([key, label]) => (
-                <HalfField
-                  key={key}
-                  label={label}
-                  value={String(form[key] ?? 0)}
-                  onChange={(v) => handleChange(key, v)}
-                />
-              ))}
-            </Row>
+              </Row>
 
-            {/* ── Minerals ── */}
-            <SectionHeader
-              title="Minerals"
-              iconBg="#fff1f2"
-              icon={
-                <MaterialCommunityIcons
-                  name="diamond-stone"
-                  size={14}
-                  color="#f43f5e"
+              {/* ── Protein ── */}
+              <SectionHeader
+                title="Protein"
+                iconBg="#eff6ff"
+                icon={
+                  <MaterialCommunityIcons
+                    name="arm-flex-outline"
+                    size={14}
+                    color="#3b82f6"
+                  />
+                }
+              />
+              <Field
+                label="Protein (g)"
+                value={String(form.protein)}
+                onChange={(v) => handleChange("protein", v)}
+                numeric
+                icon={
+                  <MaterialCommunityIcons
+                    name="arm-flex-outline"
+                    size={16}
+                    color="#64748b"
+                  />
+                }
+              />
+
+              {/* ── Carbohydrates ── */}
+              <SectionHeader
+                title="Carbohydrates"
+                iconBg="#fff7ed"
+                icon={
+                  <MaterialCommunityIcons
+                    name="grain"
+                    size={14}
+                    color="#f97316"
+                  />
+                }
+              />
+              <Field
+                label="Total Carbs (g)"
+                value={String(form.total_carbs)}
+                onChange={(v) => handleChange("total_carbs", v)}
+                numeric
+                icon={
+                  <MaterialCommunityIcons
+                    name="grain"
+                    size={16}
+                    color="#64748b"
+                  />
+                }
+              />
+              <Row>
+                <HalfField
+                  label="Sugars (g)"
+                  value={String(form.sugars)}
+                  onChange={(v) => handleChange("sugars", v)}
                 />
-              }
-            />
-            {Array.from(
-              { length: Math.ceil(mineralFields.length / 2) },
-              (_, i) => (
-                <Row key={i}>
-                  {mineralFields.slice(i * 2, i * 2 + 2).map(([key, label]) => (
-                    <HalfField
-                      key={key}
-                      label={`${label} (mg)`}
-                      value={String(form[key] ?? 0)}
-                      onChange={(v) => handleChange(key, v)}
+                <HalfField
+                  label="Fiber (g)"
+                  value={String(form.fiber)}
+                  onChange={(v) => handleChange("fiber", v)}
+                />
+              </Row>
+              <Field
+                label="Starch (g)"
+                value={String(form.starch)}
+                onChange={(v) => handleChange("starch", v)}
+                numeric
+                icon={
+                  <MaterialCommunityIcons
+                    name="leaf"
+                    size={16}
+                    color="#64748b"
+                  />
+                }
+              />
+
+              {/* ── Fats ── */}
+              <SectionHeader
+                title="Fats & Cholesterol"
+                iconBg="#fdf4ff"
+                icon={
+                  <MaterialCommunityIcons
+                    name="water-outline"
+                    size={14}
+                    color="#a855f7"
+                  />
+                }
+              />
+              <Field
+                label="Total Fat (g)"
+                value={String(form.total_fat)}
+                onChange={(v) => handleChange("total_fat", v)}
+                numeric
+                icon={
+                  <MaterialCommunityIcons
+                    name="water"
+                    size={16}
+                    color="#64748b"
+                  />
+                }
+              />
+              <Row>
+                <HalfField
+                  label="Saturated (g)"
+                  value={String(form.saturated_fat)}
+                  onChange={(v) => handleChange("saturated_fat", v)}
+                />
+                <HalfField
+                  label="Cholesterol (mg)"
+                  value={String(form.cholesterol)}
+                  onChange={(v) => handleChange("cholesterol", v)}
+                />
+              </Row>
+              <Row>
+                <HalfField
+                  label="Monounsat. (g)"
+                  value={String(form.monounsaturated_fat)}
+                  onChange={(v) => handleChange("monounsaturated_fat", v)}
+                />
+                <HalfField
+                  label="Polyunsat. (g)"
+                  value={String(form.polyunsaturated_fat)}
+                  onChange={(v) => handleChange("polyunsaturated_fat", v)}
+                />
+              </Row>
+              <Field
+                label="Trans Fat (g)"
+                value={String(form.trans_fat)}
+                onChange={(v) => handleChange("trans_fat", v)}
+                numeric
+                icon={
+                  <MaterialCommunityIcons
+                    name="alert-circle-outline"
+                    size={16}
+                    color="#64748b"
+                  />
+                }
+              />
+
+              {/* ── Vitamins ── */}
+              <SectionHeader
+                title="Vitamins"
+                iconBg="#fef9c3"
+                icon={
+                  <MaterialCommunityIcons
+                    name="pill"
+                    size={14}
+                    color="#ca8a04"
+                  />
+                }
+              />
+              <Row>
+                {vitaminFields.slice(0, 2).map(([key, label]) => (
+                  <HalfField
+                    key={key}
+                    label={label}
+                    value={String(form[key] ?? 0)}
+                    onChange={(v) => handleChange(key, v)}
+                  />
+                ))}
+              </Row>
+              <Row>
+                {vitaminFields.slice(2, 4).map(([key, label]) => (
+                  <HalfField
+                    key={key}
+                    label={label}
+                    value={String(form[key] ?? 0)}
+                    onChange={(v) => handleChange(key, v)}
+                  />
+                ))}
+              </Row>
+              <Row>
+                {vitaminFields.slice(4, 6).map(([key, label]) => (
+                  <HalfField
+                    key={key}
+                    label={label}
+                    value={String(form[key] ?? 0)}
+                    onChange={(v) => handleChange(key, v)}
+                  />
+                ))}
+              </Row>
+              <Row>
+                {vitaminFields.slice(6, 8).map(([key, label]) => (
+                  <HalfField
+                    key={key}
+                    label={label}
+                    value={String(form[key] ?? 0)}
+                    onChange={(v) => handleChange(key, v)}
+                  />
+                ))}
+              </Row>
+              <Row>
+                {vitaminFields.slice(8, 10).map(([key, label]) => (
+                  <HalfField
+                    key={key}
+                    label={label}
+                    value={String(form[key] ?? 0)}
+                    onChange={(v) => handleChange(key, v)}
+                  />
+                ))}
+              </Row>
+
+              {/* ── Minerals ── */}
+              <SectionHeader
+                title="Minerals"
+                iconBg="#fff1f2"
+                icon={
+                  <MaterialCommunityIcons
+                    name="diamond-stone"
+                    size={14}
+                    color="#f43f5e"
+                  />
+                }
+              />
+              {Array.from(
+                { length: Math.ceil(mineralFields.length / 2) },
+                (_, i) => (
+                  <Row key={i}>
+                    {mineralFields
+                      .slice(i * 2, i * 2 + 2)
+                      .map(([key, label]) => (
+                        <HalfField
+                          key={key}
+                          label={`${label} (mg)`}
+                          value={String(form[key] ?? 0)}
+                          onChange={(v) => handleChange(key, v)}
+                        />
+                      ))}
+                  </Row>
+                ),
+              )}
+            </ScrollView>
+
+            {/* ── Footer ── */}
+            {!keyboardVisible && (
+              <View
+                className="px-5 pt-1 pb-5 bg-white gap-2.5"
+                style={{ borderTopWidth: 0.5, borderTopColor: "#e2e8f0" }}
+              >
+                <View className="flex-row gap-2.5">
+                  {/* Save */}
+                  <Pressable
+                    onPress={handleSave}
+                    className="flex-1 flex-row items-center justify-center bg-emerald-500 py-4 rounded-2xl"
+                  >
+                    <MaterialCommunityIcons
+                      name="check-circle-outline"
+                      size={17}
+                      color="white"
                     />
-                  ))}
-                </Row>
-              ),
+                    <Text className="text-white font-bold text-sm">Save</Text>
+                  </Pressable>
+
+                  {/* Delete */}
+                  <Pressable
+                    onPress={handleDelete}
+                    className="flex-1 flex-row items-center justify-center bg-red-500 py-4 rounded-2xl"
+                  >
+                    <MaterialCommunityIcons
+                      name="trash-can-outline"
+                      size={17}
+                      color="white"
+                    />
+                    <Text className="text-white font-bold text-sm">Delete</Text>
+                  </Pressable>
+                </View>
+              </View>
             )}
-          </ScrollView>
-
-          {/* ── Footer ── */}
-          <View
-            className="px-5 pt-1 pb-5 bg-white gap-2.5"
-            style={{ borderTopWidth: 0.5, borderTopColor: "#e2e8f0" }}
-          >
-            <View className="flex-row gap-2.5">
-              {/* Save */}
-              <Pressable
-                onPress={handleSave}
-                className="flex-1 flex-row items-center justify-center bg-emerald-500 py-4 rounded-2xl"
-              >
-                <MaterialCommunityIcons
-                  name="check-circle-outline"
-                  size={17}
-                  color="white"
-                />
-                <Text className="text-white font-bold text-sm">Save</Text>
-              </Pressable>
-
-              {/* Delete */}
-              <Pressable
-                onPress={handleDelete}
-                className="flex-1 flex-row items-center justify-center bg-red-500 py-4 rounded-2xl"
-              >
-                <MaterialCommunityIcons
-                  name="trash-can-outline"
-                  size={17}
-                  color="white"
-                />
-                <Text className="text-white font-bold text-sm">Delete</Text>
-              </Pressable>
-            </View>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
