@@ -13,7 +13,7 @@ interface Props {
   protein: number;
   carbs: number;
   fats: number;
-  direction: "left" | "right"; //
+  direction: "left" | "right";
 }
 
 export default function MacroChart({ protein, carbs, fats, direction }: Props) {
@@ -23,7 +23,7 @@ export default function MacroChart({ protein, carbs, fats, direction }: Props) {
   const totalLogged = proteinCal + carbsCal + fatsCal || 1;
   const isEmpty = totalLogged === 1;
 
-  const slideFrom = direction === "right" ? 40 : -40; //
+  const slideFrom = direction === "right" ? 40 : -40;
 
   const macros: MacroItem[] = [
     { label: "Protein", value: protein, color: "#6366f1" },
@@ -40,32 +40,18 @@ export default function MacroChart({ protein, carbs, fats, direction }: Props) {
   const displayData = isEmpty ? [{ value: 100, color: "#e2e8f0" }] : pieData;
 
   return (
-    //  Card slides in from direction of navigation
+    // Single top-level animation only
     <MotiView
       from={{ opacity: 0, translateX: slideFrom }}
       animate={{ opacity: 1, translateX: 0 }}
-      transition={{ type: "spring", stiffness: 180, damping: 20 }}
+      transition={{ type: "timing", duration: 300 }}
       className="bg-white rounded-[24px] px-5 py-4 mb-6 border border-slate-100"
     >
       <Text className="text-sm font-bold text-slate-800 mb-4">Macro Split</Text>
 
       <View className="flex-row items-center gap-4">
-        {/* Donut scales in */}
-        <MotiView
-          from={{
-            opacity: 0,
-            scale: 0.6,
-            rotate: direction === "right" ? "-30deg" : "30deg",
-          }}
-          animate={{ opacity: 1, scale: 1, rotate: "0deg" }}
-          transition={{
-            type: "spring",
-            stiffness: 140,
-            damping: 14,
-            delay: 80,
-          }}
-          className="items-center justify-center"
-        >
+        {/* Donut — no nested MotiView */}
+        <View className="items-center justify-center">
           <PieChart
             data={displayData}
             donut
@@ -73,26 +59,16 @@ export default function MacroChart({ protein, carbs, fats, direction }: Props) {
             innerRadius={34}
             showText={false}
           />
-          <MotiView
-            from={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              type: "spring",
-              delay: 280,
-              stiffness: 200,
-              damping: 14,
-            }}
-            className="absolute items-center justify-center"
-          >
+          <View className="absolute items-center justify-center">
             <Feather
               name="pie-chart"
               size={14}
               color={isEmpty ? "#cbd5e1" : "#64748b"}
             />
-          </MotiView>
-        </MotiView>
+          </View>
+        </View>
 
-        {/* Legend rows stagger in from direction */}
+        {/* Legend — single MotiView per row, no nested */}
         <View className="flex-1 gap-2">
           {macros.map((m, i) => {
             const calVal = pieData[i].value;
@@ -106,23 +82,15 @@ export default function MacroChart({ protein, carbs, fats, direction }: Props) {
                 from={{ opacity: 0, translateX: slideFrom * 0.6 }}
                 animate={{ opacity: 1, translateX: 0 }}
                 transition={{
-                  type: "spring",
-                  delay: 100 + i * 70,
-                  stiffness: 180,
-                  damping: 18,
+                  type: "timing",
+                  duration: 250,
+                  delay: i * 60,
                 }}
                 className="flex-row items-center justify-between"
               >
                 <View className="flex-row items-center gap-2">
-                  <MotiView
-                    from={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{
-                      type: "spring",
-                      delay: 180 + i * 70,
-                      stiffness: 260,
-                      damping: 14,
-                    }}
+                  {/* Plain View instead of MotiView */}
+                  <View
                     className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: m.color }}
                   />
@@ -133,15 +101,8 @@ export default function MacroChart({ protein, carbs, fats, direction }: Props) {
 
                 <View className="flex-row items-center gap-2">
                   <Text className="text-xs text-slate-400">{m.value}g</Text>
-                  <MotiView
-                    from={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      type: "spring",
-                      delay: 220 + i * 70,
-                      stiffness: 220,
-                      damping: 14,
-                    }}
+                  {/* Plain View instead of MotiView */}
+                  <View
                     className="px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: m.color + "20" }}
                   >
@@ -151,7 +112,7 @@ export default function MacroChart({ protein, carbs, fats, direction }: Props) {
                     >
                       {percentage}%
                     </Text>
-                  </MotiView>
+                  </View>
                 </View>
               </MotiView>
             );

@@ -1,8 +1,7 @@
 import { View, Text, ScrollView } from "react-native";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MotiView } from "moti";
 import { fetchMacrosByDate } from "@/api/macros";
 import LoadingOverlay from "@/components/LoadingOverplay";
 import { MacroData } from "@/types/macros";
@@ -86,8 +85,12 @@ export default function NutritionScreen() {
   );
 
   const dayKey = toKey(currentDate);
-  const dayData =
-    dataByDate.find((d) => d.date === toKey(currentDate)) ?? emptyDay;
+
+  // useMemo prevents re-searching array on every render
+  const dayData = useMemo(
+    () => dataByDate.find((d) => d.date === toKey(currentDate)) ?? emptyDay,
+    [dataByDate, currentDate],
+  );
 
   if (error) {
     return (
@@ -102,9 +105,14 @@ export default function NutritionScreen() {
       {loading && <LoadingOverlay text="Loading nutrition..." />}
 
       <ScrollView
-        className="px-4 pt-2"
-        contentContainerStyle={{ paddingBottom: 140 }}
+        contentContainerStyle={{
+          paddingBottom: 140,
+          paddingHorizontal: 16,
+          paddingTop: 8,
+        }}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true} // ← unmounts off-screen views
+        scrollEventThrottle={16} // ← 60fps scroll events
       >
         <NutritionHeader
           currentDate={currentDate}
@@ -121,11 +129,8 @@ export default function NutritionScreen() {
         )}
 
         {dayData && (
-          <MotiView
-            from={{ opacity: 0, translateY: 12 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            className="bg-white rounded-[32px] border border-slate-100 p-5 shadow-sm mb-6"
-          >
+          // Replaced MotiView with plain View — no animation on scroll container
+          <View className="bg-white rounded-[32px] border border-slate-100 p-5 mb-6">
             <Text
               className="text-xs font-bold text-slate-400 mb-4"
               style={{ letterSpacing: 1.5 }}
@@ -150,7 +155,7 @@ export default function NutritionScreen() {
             />
 
             <MicronutrientGrid dayData={dayData} />
-          </MotiView>
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>

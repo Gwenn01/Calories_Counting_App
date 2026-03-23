@@ -1,5 +1,6 @@
 import { View, Text } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useMemo } from "react";
 import { NUTRIENTS } from "@/constants/nutrients";
 import { NUTRIENT_META, FALLBACK_META } from "@/constants/nutrientMeta";
 import { MacroData } from "@/types/macros";
@@ -14,8 +15,12 @@ export default function MicronutrientGrid({ dayData }: Props) {
     return typeof val === "number" ? val : Number(val) || 0;
   };
 
-  const filtered = NUTRIENTS.filter(
-    (n) => !["protein", "carbs", "fat"].includes(n.key.toLowerCase()),
+  const filtered = useMemo(
+    () =>
+      NUTRIENTS.filter(
+        (n) => !["protein", "carbs", "fat"].includes(n.key.toLowerCase()),
+      ),
+    [],
   );
 
   return (

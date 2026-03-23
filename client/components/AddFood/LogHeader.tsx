@@ -40,21 +40,12 @@ export default function LogHeader({ currentDate, onPrev, onNext }: Props) {
         <Feather name="chevron-left" size={18} color="#fff" />
       </Pressable>
 
-      {/* Animated center — slides in from the direction of navigation */}
+      {/* Fade only — no translateX */}
       <MotiView
-        key={currentDate.toISOString()} // re-triggers animation on every date change
-        from={{
-          opacity: 0,
-          translateX: direction === "right" ? 24 : -24,
-        }}
-        animate={{
-          opacity: 1,
-          translateX: 0,
-        }}
-        transition={{
-          type: "timing",
-          duration: 220,
-        }}
+        key={currentDate.toISOString()}
+        from={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ type: "timing", duration: 200 }}
         className="flex-1 items-center px-3 gap-0.5"
       >
         <View className="flex-row items-center gap-1.5 mb-0.5">
