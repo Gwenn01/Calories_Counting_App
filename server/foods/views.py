@@ -57,10 +57,13 @@ class FoodBotViews(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-            food_prompt = request.data.get('food_prompt')
-            try:
-                result = FoodBotServices.get_nutrition_data(food_prompt)
-                return Response(result, status=status.HTTP_200_OK)
-            except Exception as e:
-                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
+        food_prompt = request.data.get('food_prompt')
+        print("FOOD PROMPT:", food_prompt)  # check if prompt is received
+        try:
+            result = FoodBotServices.get_nutrition_data(food_prompt)
+            return Response(result, status=status.HTTP_200_OK)
+        except Exception as e:
+            print("ERROR:", str(e))  # <-- exact error here
+            import traceback
+            traceback.print_exc()  # full stack trace
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

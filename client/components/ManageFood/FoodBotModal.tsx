@@ -204,15 +204,22 @@ export function FoodBotModal({ visible, onClose }: Props) {
 
       const data = await foodBot(userMessage);
       // Store nutrition data for review step
-      setForm(data);
+      console.log(data);
+      const stringified = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [
+          key,
+          value !== null && value !== undefined ? String(value) : "",
+        ]),
+      );
+      setForm({ ...emptyForm, ...stringified });
       // Format a friendly bot reply
       const botReply =
         `Here's what I found for **${data.name}**!\n\n` +
-        `🍽️ Serving: ${data.serving}\n` +
-        `🔥 Calories: ${data.calories} kcal\n` +
-        `💪 Protein: ${data.protein}g\n` +
-        `🌾 Carbs: ${data.total_carbs}g\n` +
-        `🥑 Fat: ${data.total_fat}g\n\n` +
+        ` Serving: ${data.serving}\n` +
+        ` Calories: ${data.calories} kcal\n` +
+        ` Protein: ${data.protein}g\n` +
+        ` Carbs: ${data.total_carbs}g\n` +
+        ` Fat: ${data.total_fat}g\n\n` +
         `Tap "Review & edit nutrition" below to see the full breakdown.`;
 
       setMessages((prev) => [...prev, { role: "bot", text: botReply }]);
@@ -226,7 +233,6 @@ export function FoodBotModal({ visible, onClose }: Props) {
       ]);
     } finally {
       // set the review to false already
-      setStep("review");
       setThinking(false);
     }
   };
@@ -269,76 +275,98 @@ export function FoodBotModal({ visible, onClose }: Props) {
             className="bg-white rounded-t-[32px] max-h-[93%]"
             style={{ paddingBottom: 0, flex: 1 }}
           >
-            {/* ── Handle ── */}
+            {/* ── Handle =====================================================── */}
             <View className="items-center pt-3 pb-1">
               <View className="w-10 h-1 rounded-full bg-slate-200" />
             </View>
 
-            {/* ── Header ── */}
-            <View className="flex-row justify-between items-center px-5 pt-3 pb-4">
-              <View className="flex-row items-center gap-3">
-                <View className="w-10 h-10 rounded-2xl bg-emerald-500 items-center justify-center">
-                  <MaterialCommunityIcons
-                    name="robot-excited-outline"
-                    size={20}
-                    color="white"
-                  />
-                </View>
-                <View>
-                  <Text
-                    className="text-slate-900"
+            {/* ── Header ========================================================== */}
+            <View className="px-4 pt-4 pb-3">
+              <View className="flex-row items-center justify-between">
+                {/* Left — Bot Identity */}
+                <View className="flex-row items-center gap-3 flex-1">
+                  <View
+                    className="w-11 h-11 rounded-2xl bg-emerald-500 items-center justify-center shadow-sm"
                     style={{
-                      fontSize: 18,
-                      fontWeight: "800",
-                      letterSpacing: -0.4,
+                      shadowColor: "#10b981",
+                      shadowOpacity: 0.4,
+                      shadowRadius: 8,
+                      shadowOffset: { width: 0, height: 3 },
                     }}
                   >
-                    Food Bot
-                  </Text>
-                  <Text className="text-xs text-slate-400 font-medium">
-                    Describe a food to get nutrition data
-                  </Text>
+                    <MaterialCommunityIcons
+                      name="robot-excited-outline"
+                      size={22}
+                      color="white"
+                    />
+                  </View>
+
+                  <View className="flex-1">
+                    <Text
+                      className="text-slate-900 leading-tight"
+                      style={{
+                        fontSize: 17,
+                        fontWeight: "800",
+                        letterSpacing: -0.5,
+                      }}
+                    >
+                      Food Bot
+                    </Text>
+                    <Text
+                      className="text-slate-400 text-xs font-medium mt-0.5"
+                      numberOfLines={1}
+                    >
+                      Describe a food to get nutrition data
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Right — Actions */}
+                <View className="flex-row items-center gap-2 flex-shrink-0">
+                  {/* Tab Toggle */}
+                  {hasData && (
+                    <View className="flex-row bg-slate-100 rounded-xl p-1">
+                      {(["chat", "review"] as const).map((tab) => (
+                        <Pressable
+                          key={tab}
+                          onPress={() => setStep(tab)}
+                          className={`px-3 py-1.5 rounded-lg ${step === tab ? "bg-white shadow-sm" : ""}`}
+                          style={
+                            step === tab
+                              ? {
+                                  shadowColor: "#000",
+                                  shadowOpacity: 0.06,
+                                  shadowRadius: 4,
+                                  shadowOffset: { width: 0, height: 1 },
+                                }
+                              : {}
+                          }
+                        >
+                          <Text
+                            className={`text-xs font-semibold capitalize ${step === tab ? "text-slate-800" : "text-slate-400"}`}
+                          >
+                            {tab}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  )}
+
+                  {/* Close */}
+                  <Pressable
+                    onPress={handleClose}
+                    className="w-9 h-9 rounded-full bg-slate-100 items-center justify-center"
+                  >
+                    <Feather name="x" size={15} color="#94a3b8" />
+                  </Pressable>
                 </View>
               </View>
-
-              <View className="flex-row items-center gap-2">
-                {/* Tab toggle */}
-                {hasData && (
-                  <View className="flex-row bg-slate-100 rounded-xl p-1 gap-1">
-                    <Pressable
-                      onPress={() => setStep("chat")}
-                      className={`px-3 py-1.5 rounded-lg ${step === "chat" ? "bg-white" : ""}`}
-                    >
-                      <Text
-                        className={`text-xs font-semibold ${step === "chat" ? "text-slate-900" : "text-slate-400"}`}
-                      >
-                        Chat
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => setStep("review")}
-                      className={`px-3 py-1.5 rounded-lg ${step === "review" ? "bg-white" : ""}`}
-                    >
-                      <Text
-                        className={`text-xs font-semibold ${step === "review" ? "text-slate-900" : "text-slate-400"}`}
-                      >
-                        Review
-                      </Text>
-                    </Pressable>
-                  </View>
-                )}
-                <Pressable
-                  onPress={handleClose}
-                  className="w-9 h-9 rounded-full bg-slate-100 items-center justify-center"
-                >
-                  <Feather name="x" size={16} color="#64748b" />
-                </Pressable>
-              </View>
+              {/* Divider */}
+              <View className="h-px bg-slate-100 mt-3" />
             </View>
 
+            {/*CHAT STEP ══════════===================================================================== */}
             <View className="h-px bg-slate-100 mx-5" />
-
-            {/* ══════════ CHAT STEP ══════════ */}
             {step === "chat" && (
               <>
                 <ScrollView
@@ -385,7 +413,6 @@ export function FoodBotModal({ visible, onClose }: Props) {
                       </View>
                     </View>
                   )}
-
                   {/* Chat bubbles */}
                   {messages.map((msg, i) => (
                     <View
@@ -441,32 +468,65 @@ export function FoodBotModal({ visible, onClose }: Props) {
                     </View>
                   ))}
 
-                  {/* Thinking indicator */}
+                  {/* Thinking indicator ======================================================================= */}
                   {thinking && (
-                    <View className="items-start mb-3">
-                      <View className="flex-row items-center gap-1.5 mb-1">
-                        <View className="w-5 h-5 rounded-lg bg-emerald-500 items-center justify-center">
+                    <View className="items-start mb-4">
+                      {/* Bot label */}
+                      <View className="flex-row items-center gap-2 mb-2 ml-1">
+                        <View
+                          className="w-6 h-6 rounded-xl bg-emerald-500 items-center justify-center"
+                          style={{
+                            shadowColor: "#10b981",
+                            shadowOpacity: 0.5,
+                            shadowRadius: 6,
+                            shadowOffset: { width: 0, height: 2 },
+                          }}
+                        >
                           <MaterialCommunityIcons
-                            name="robot-outline"
-                            size={12}
+                            name="robot-excited-outline"
+                            size={13}
                             color="white"
                           />
                         </View>
-                        <Text className="text-xs font-semibold text-slate-400">
+                        <Text className="text-xs font-bold text-slate-400 tracking-wide uppercase">
                           Food Bot
                         </Text>
                       </View>
-                      <View className="bg-slate-100 rounded-2xl rounded-tl-sm px-4 py-3 flex-row items-center gap-2">
-                        <ActivityIndicator size="small" color="#10b981" />
-                        <Text className="text-sm text-slate-400">
-                          Analyzing nutrition...
-                        </Text>
+
+                      {/* Bubble */}
+                      <View
+                        className="bg-white rounded-2xl rounded-tl-sm px-4 py-3.5 border border-slate-100"
+                        style={{
+                          shadowColor: "#000",
+                          shadowOpacity: 0.06,
+                          shadowRadius: 10,
+                          shadowOffset: { width: 0, height: 2 },
+                          minWidth: 160,
+                        }}
+                      >
+                        <View className="flex-row items-center gap-3">
+                          <ActivityIndicator size="small" color="#10b981" />
+                          <View>
+                            <Text className="text-sm font-semibold text-slate-700">
+                              Analyzing nutrition
+                            </Text>
+                            <Text className="text-xs text-slate-400 mt-0.5">
+                              This may take a moment...
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Shimmer bar */}
+                        <View className="mt-3 gap-1.5">
+                          <View className="h-1.5 bg-slate-100 rounded-full w-full" />
+                          <View className="h-1.5 bg-slate-100 rounded-full w-3/4" />
+                        </View>
                       </View>
                     </View>
                   )}
                 </ScrollView>
 
-                {/* ── Input bar ── */}
+                {/* ── Input bar ================================================================== */}
                 <View
                   className="flex-row items-end gap-2 px-5 pt-3 pb-8 bg-white"
                   style={{ borderTopWidth: 0.5, borderTopColor: "#e2e8f0" }}
@@ -501,7 +561,7 @@ export function FoodBotModal({ visible, onClose }: Props) {
               </>
             )}
 
-            {/* ══════════ REVIEW STEP ══════════ */}
+            {/* REVIEW STEP====================================================================================*/}
             {step === "review" && (
               <>
                 <ScrollView

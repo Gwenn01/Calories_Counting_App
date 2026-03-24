@@ -63,7 +63,7 @@ export default function ManageFoodScreen() {
 
   useEffect(() => {
     fetchFoods();
-  }, [showManualModal, showEditModal]);
+  }, [showManualModal, showFoodBot, showBarcode, showBarcode, showEditModal]);
 
   // useMemo — only re-filters when foods or search changes
   const filteredFoods = useMemo(

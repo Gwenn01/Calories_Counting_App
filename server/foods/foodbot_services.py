@@ -285,12 +285,13 @@ class FoodBotServices:
                 temperature=0,                          # 0 = most deterministic
             ),
         )
-
+        print("STATUS:", response)
         raw = response.text
-
+        print("RAW RESPONSE:", raw)
         # Step 5: Parse + validate
         try:
             data = json.loads(raw)
+            print("PARSED DATA:", json.dumps(data, indent=2))
         except json.JSONDecodeError:
             # Sometimes AI adds a trailing comment — strip and retry
             cleaned = re.sub(r"//.*|/\*[\s\S]*?\*/", "", raw).strip()
