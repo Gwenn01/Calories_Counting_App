@@ -26,12 +26,15 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = "True"
+# apis 
+NUTRITIONIX_APP_ID  = os.getenv("NUTRITIONIX_APP_ID", "")
+NUTRITIONIX_APP_KEY = os.getenv("NUTRITIONIX_APP_KEY", "")
+USDA_API_KEY        = os.getenv("USDA_API_KEY", "")
 
 ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']  # Fine for personal app
 # Or simply
 CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

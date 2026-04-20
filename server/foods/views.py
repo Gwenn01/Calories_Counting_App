@@ -6,6 +6,8 @@ from rest_framework import status
 from .models import Food
 from .serializers import FoodSerializer
 from .foodbot_services import FoodBotServices
+from .barcode_services import BarcodeServices
+from core import settings
 
 # Create your views here.
 # CREATE MANUAL FOOD =======================================================
@@ -52,7 +54,8 @@ class FoodDetail(APIView):
         food = self.get_object(pk)
         food.delete()
         return Response({"message": "Food deleted successfully"}, status=status.HTTP_200_OK)
-    
+
+# FOOD BOT VIEWS ======================================================================================
 class FoodBotViews(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -67,3 +70,32 @@ class FoodBotViews(APIView):
             import traceback
             traceback.print_exc()  # full stack trace
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+# FOOD QR CODE VIEWS ======================================================================================
+class FoodBarCodeViews(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        food_barcode = request.data.get('food_barcode')
+        # Validate barcode is present
+        if not food_barcode:
+            return Response(
+                {"error": "food_barcode is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        #  Pass credentials from settings
+        result = BarcodeServices.fetch_food(
+            barcode=food_barcode,
+            nutritionix_app_id=settings.NUTRITIONIX_APP_ID,
+            nutritionix_app_key=settings.NUTRITIONIX_APP_KEY,
+            usda_api_key=settings.USDA_API_KEY,
+        )
+        if not result:
+            return Response(
+                {"error": f"Food with barcode '{food_barcode}' not found in any source."},
+                status=status.HTTP_404_NOT_FOUND  
+            )
+        return Response(result, status=status.HTTP_200_OK)
+
+
+# FOOD PICTURE SCAN VIEWS =================================================================================
