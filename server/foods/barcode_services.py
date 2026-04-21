@@ -8,13 +8,17 @@ class BarcodeServices:
 
     @staticmethod
     def fetch_from_open_food_facts(barcode: str) -> dict | None:
-        # ✅ FIX: Try "world" first (broader coverage), then "ph" as fallback
+        # FIX: Try "world" first (broader coverage), then "ph" as fallback
         for subdomain in ["world", "ph"]:
             try:
                 url = f"https://{subdomain}.openfoodfacts.org/api/v0/product/{barcode}.json"
                 logger.debug(f"[OpenFoodFacts] Trying {url}")
 
-                response = requests.get(url, timeout=10)
+                headers = {
+                    "User-Agent": "MyApp/1.0 (arnelgwenn@gmail.com)"
+                }
+
+                response = requests.get(url, headers=headers, timeout=10)
                 response.raise_for_status()
                 data = response.json()
 
@@ -26,9 +30,26 @@ class BarcodeServices:
                 n = product.get("nutriments", {})
 
                 logger.info(f"[OpenFoodFacts] Found product via '{subdomain}': {product.get('product_name', 'Unknown')}")
+                # process the name ========
+                full_name = product.get("product_name", "")
+                brand = (product.get("brands") or "").split(",")[0].strip()
+                name = (
+                    product.get("product_name")
+                    or product.get("product_name_en")
+                    or product.get("generic_name")
+                    or ""
+                ).strip()
+
+                if brand and name:
+                    if brand.lower() not in name.lower():
+                        full_name = f"{brand} {name}"
+                    else:
+                        full_name = name
+                else:
+                    full_name = name or brand or "Unknown Product"
 
                 return {
-                    "name": product.get("product_name", ""),
+                    "name": full_name,
                     "serving": product.get("serving_size", ""),
                     # Energy
                     "calories": n.get("energy-kcal_100g") or 0,
@@ -71,7 +92,7 @@ class BarcodeServices:
                     "source": "OpenFoodFacts"
                 }
 
-            # ✅ FIX: Log the actual error instead of silently swallowing it
+            # Log the actual error instead of silently swallowing it
             except requests.exceptions.HTTPError as e:
                 logger.error(f"[OpenFoodFacts] HTTP error on '{subdomain}': {e} | Status: {e.response.status_code if e.response else 'N/A'}")
                 continue
@@ -93,7 +114,7 @@ class BarcodeServices:
 
     @staticmethod
     def fetch_from_nutritionix(barcode: str, app_id: str = "", app_key: str = "") -> dict | None:
-        # ✅ FIX: Guard against missing credentials upfront — no need to make the request at all
+        # : Guard against missing credentials upfront — no need to make the request at all
         if not app_id or not app_key:
             logger.warning("[Nutritionix] Skipped: app_id or app_key not provided.")
             return None
@@ -108,7 +129,7 @@ class BarcodeServices:
 
             response = requests.get(url, headers=headers, timeout=10)
 
-            # ✅ FIX: Handle 401/404 explicitly before raise_for_status
+            #  Handle 401/404 explicitly before raise_for_status
             if response.status_code == 401:
                 logger.error("[Nutritionix] Unauthorized — check your app_id and app_key.")
                 return None
@@ -186,7 +207,7 @@ class BarcodeServices:
 
     @staticmethod
     def fetch_from_usda(barcode: str, api_key: str = "") -> dict | None:
-        # ✅ FIX: Guard against missing credentials upfront
+        #  Guard against missing credentials upfront
         if not api_key:
             logger.warning("[USDA] Skipped: api_key not provided.")
             return None
