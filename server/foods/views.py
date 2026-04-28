@@ -7,7 +7,9 @@ from .models import Food
 from .serializers import FoodSerializer
 from .foodbot_services import FoodBotServices
 from .barcode_services import BarcodeServices
+from .foodscan_services import FoodScanServices
 from core import settings
+from rest_framework.parsers import MultiPartParser, FormParser
 
 # Create your views here.
 # CREATE MANUAL FOOD =======================================================
@@ -99,3 +101,32 @@ class FoodBarCodeViews(APIView):
 
 
 # FOOD PICTURE SCAN VIEWS =================================================================================
+class FoodScanViews(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]  #  needed for file uploads
+
+    def post(self, request):
+        image_file = request.FILES.get('food_image')
+
+        if not image_file:
+            return Response(
+                {"error": "food_image is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        #  Basic size guard — reject files over 10MB
+        if image_file.size > 10 * 1024 * 1024:
+            return Response(
+                {"error": "Image too large. Maximum size is 10MB."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        result = FoodScanServices.analyze_food_image(image_file)
+
+        if not result:
+            return Response(
+                {"error": "Could not analyze the food image. Please try a clearer photo."},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        return Response(result, status=status.HTTP_200_OK)
