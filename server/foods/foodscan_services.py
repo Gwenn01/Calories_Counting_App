@@ -95,7 +95,7 @@ Rules:
 
             mime_type = FoodScanServices._get_media_type(image_file)
 
-            # ✅ FIX: Use gemini-2.0-flash — stable, supports vision, fast
+            #  FIX: Use gemini-2.0-flash — stable, supports vision, fast
             model = genai.GenerativeModel("gemini-2.0-flash")
 
             logger.debug("[FoodScan] Sending image to Gemini...")
@@ -111,7 +111,7 @@ Rules:
             raw_text = response.text.strip()
             logger.debug(f"[FoodScan] Raw response: {raw_text}")
 
-            # ✅ Strip markdown fences if Gemini wraps it anyway
+            # Strip markdown fences if Gemini wraps it anyway
             if raw_text.startswith("```"):
                 raw_text = raw_text.split("```")[1]
                 if raw_text.startswith("json"):
