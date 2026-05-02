@@ -218,12 +218,12 @@ export function BarcodeScannerModal({ visible, onClose }: Props) {
 
   const handleBarcodeScanned = async ({ data }: { data: string }) => {
     if (scanned) return;
+
     setScanned(true);
     setBarcodeValue(data);
     setStep("loading");
 
     try {
-      // Call your backend API
       const result = await foodBar(data);
 
       const updated: NutritionForm = { ...emptyForm };
@@ -233,14 +233,14 @@ export function BarcodeScannerModal({ visible, onClose }: Props) {
           (updated as any)[key] = String(result[key]);
         }
       });
+
       setForm(updated);
-      setStep("review");
+
+      // Stable transition
+      requestAnimationFrame(() => {
+        setStep("review");
+      });
     } catch (err) {
-      showToast(
-        "Not Found",
-        "No nutrition data found for this barcode.",
-        "error",
-      );
       setScanned(false);
       setStep("scan");
     }
