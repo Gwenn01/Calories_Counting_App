@@ -32,3 +32,12 @@ export const foodBot = async (foodPrompt: string) => {
   });
   return res.data;
 };
+// food bar code apis
+export const foodBar = async (foodBarcode: string) => {
+  const res = await api.post("api/food-bar-code/", {
+    food_barcode: foodBarcode,
+  });
+  return res.data;
+};
+
+// food scan pic apis

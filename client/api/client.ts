@@ -4,9 +4,9 @@ import { getToken, removeToken } from "@/utils/token";
 // apk development build: eas build --profile development --platform android
 export const api = axios.create({
   //baseURL: "http://192.168.0.228:8000/",
-  //baseURL: "http://192.168.1.34:8000/",
+  baseURL: "http://192.168.1.34:8000/",
   //baseURL: "http://192.168.1.38:8000/",
-  baseURL: "http://127.0.0.1:8000/",
+  //baseURL: "http://127.0.0.1:8000/",
   headers: {
     "Content-Type": "application/json",
   },
