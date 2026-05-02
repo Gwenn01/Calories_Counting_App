@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from google import genai
 import json
 import logging
 import os
@@ -6,7 +6,15 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+from google import genai
+import json
+import logging
+import os
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 class FoodScanServices:
