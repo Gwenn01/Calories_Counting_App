@@ -50,14 +50,10 @@ export default function LogHeader({ currentDate, onPrev, onNext }: Props) {
       >
         <View className="flex-row items-center gap-1.5 mb-0.5">
           <Feather name="file-text" size={11} color="#94a3b8" />
-          <Text className="text-[10px] font-bold tracking-[2px] uppercase text-slate-400">
-            Food Log
+          <Text className="text-[11px] font-semibold text-slate-400">
+            {currentDate.toLocaleDateString("en-US", { weekday: "long" })}
           </Text>
         </View>
-
-        <Text className="text-[11px] font-semibold text-slate-400">
-          {currentDate.toLocaleDateString("en-US", { weekday: "long" })}
-        </Text>
 
         <Text
           className="text-xl font-black text-slate-900"
