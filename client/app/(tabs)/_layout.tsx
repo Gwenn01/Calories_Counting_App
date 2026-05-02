@@ -56,11 +56,11 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="macros"
+        name="workout"
         options={{
-          title: "Macros",
+          title: "Workout",
           tabBarIcon: ({ color }) => (
-            <Feather name="pie-chart" size={22} color={color} />
+            <Feather name="activity" size={22} color={color} />
           ),
         }}
       />
