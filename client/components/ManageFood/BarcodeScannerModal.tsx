@@ -14,6 +14,7 @@ import { Feather, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { useToast } from "@/components/ToastProvider";
 import { createFood } from "../../api/food";
 import { NutritionForm } from "@/types/foods";
+import { foodBar } from "@/api/food";
 
 // ─── Replace with your actual API call ───────────────────────────
 // Your backend receives the barcode and returns a nutrition object
@@ -222,18 +223,17 @@ export function BarcodeScannerModal({ visible, onClose }: Props) {
     setStep("loading");
 
     try {
-      // 🔌 Replace with your actual backend call
-      // Expected: returns an object matching NutritionForm keys
-      //const result = await getFoodByBarcode(data);
+      // Call your backend API
+      const result = await foodBar(data);
 
-      //   const updated: NutritionForm = { ...emptyForm };
-      //   Object.keys(result).forEach((key) => {
-      //     if (key in updated) {
-      //       (updated as any)[key] = String(result[key] ?? "");
-      //     }
-      //   });
+      const updated: NutritionForm = { ...emptyForm };
 
-      //   setForm(updated);
+      Object.keys(updated).forEach((key) => {
+        if (result[key] !== undefined) {
+          (updated as any)[key] = String(result[key]);
+        }
+      });
+      setForm(updated);
       setStep("review");
     } catch (err) {
       showToast(
@@ -470,42 +470,52 @@ export function BarcodeScannerModal({ visible, onClose }: Props) {
                 contentContainerStyle={{ paddingBottom: 24 }}
               >
                 {/* Scanned barcode pill */}
-                <View className="flex-row items-center gap-2 mt-4 mb-1">
-                  <View className="flex-row items-center gap-2 bg-orange-50 border border-orange-100 rounded-full px-3 py-1.5 self-start">
+                <View className="mt-5 mb-2 gap-3 pt-5">
+                  {/* Top Row */}
+                  <View className="flex-row items-center justify-between">
+                    {/* Barcode pill */}
+                    <View className="flex-row items-center gap-2 bg-orange-50 border border-orange-100 rounded-full px-3 py-1.5">
+                      <MaterialCommunityIcons
+                        name="barcode-scan"
+                        size={13}
+                        color="#f97316"
+                      />
+                      <Text
+                        numberOfLines={1}
+                        className="text-xs font-semibold text-orange-600 max-w-[140px]"
+                      >
+                        {barcodeValue}
+                      </Text>
+                    </View>
+
+                    {/* Rescan button */}
+                    <Pressable
+                      onPress={() => {
+                        setScanned(false);
+                        setStep("scan");
+                      }}
+                      className="flex-row items-center gap-1 bg-slate-100 rounded-full px-3 py-1.5"
+                    >
+                      <Feather name="refresh-cw" size={11} color="#64748b" />
+                      <Text className="text-xs font-semibold text-slate-500">
+                        Rescan
+                      </Text>
+                    </Pressable>
+                  </View>
+
+                  {/* Info banner */}
+                  <View className="flex-row items-start gap-2 bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3">
                     <MaterialCommunityIcons
-                      name="barcode-scan"
-                      size={13}
-                      color="#f97316"
+                      name="information-outline"
+                      size={15}
+                      color="#10b981"
+                      style={{ marginTop: 2 }}
                     />
-                    <Text className="text-xs font-semibold text-orange-600">
-                      {barcodeValue}
+                    <Text className="text-xs text-emerald-700 font-medium flex-1 leading-4">
+                      Nutrition data pre-filled. Review and edit any values
+                      before saving.
                     </Text>
                   </View>
-                  <Pressable
-                    onPress={() => {
-                      setScanned(false);
-                      setStep("scan");
-                    }}
-                    className="flex-row items-center gap-1 bg-slate-100 rounded-full px-3 py-1.5 self-start"
-                  >
-                    <Feather name="refresh-cw" size={11} color="#64748b" />
-                    <Text className="text-xs font-semibold text-slate-500">
-                      Rescan
-                    </Text>
-                  </Pressable>
-                </View>
-
-                {/* Info banner */}
-                <View className="flex-row items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 mb-2">
-                  <MaterialCommunityIcons
-                    name="information-outline"
-                    size={15}
-                    color="#10b981"
-                  />
-                  <Text className="text-xs text-emerald-700 font-medium flex-1">
-                    Nutrition data pre-filled. Review and edit any values before
-                    saving.
-                  </Text>
                 </View>
 
                 {/* ── General ── */}
