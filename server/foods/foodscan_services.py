@@ -104,19 +104,30 @@ Rules:
             mime_type = FoodScanServices._get_media_type(image_file)
 
             #  FIX: Use gemini-2.0-flash — stable, supports vision, fast
-            model = genai.GenerativeModel("gemini-2.0-flash")
 
             logger.debug("[FoodScan] Sending image to Gemini...")
 
-            response = model.generate_content([
-                {
-                    "mime_type": mime_type,
-                    "data": image_bytes
-                },
-                FoodScanServices.ANALYSIS_PROMPT
-            ])
+            response = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=[
+                    {
+                        "role": "user",
+                        "parts": [
+                            {
+                                "inline_data": {
+                                    "mime_type": mime_type,
+                                    "data": image_bytes
+                                }
+                            },
+                            {
+                                "text": FoodScanServices.ANALYSIS_PROMPT
+                            }
+                        ]
+                    }
+                ]
+            )
 
-            raw_text = response.text.strip()
+            raw_text = response.candidates[0].content.parts[0].text.strip()
             logger.debug(f"[FoodScan] Raw response: {raw_text}")
 
             # Strip markdown fences if Gemini wraps it anyway
