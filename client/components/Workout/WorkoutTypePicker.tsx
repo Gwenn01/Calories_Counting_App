@@ -1,10 +1,10 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import { View, Text, Pressable, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { WorkoutType } from "@/types/workout";
+import type { WorkoutType } from "@/types/workout";
 import { WORKOUT_TYPES } from "@/constants/workout";
 
-interface Props {
+interface WorkoutTypePickerProps {
   visible: boolean;
   current: WorkoutType;
   onClose: () => void;
@@ -16,60 +16,66 @@ const WorkoutTypePicker = memo(function WorkoutTypePicker({
   current,
   onClose,
   onSelect,
-}: Props) {
+}: WorkoutTypePickerProps) {
   return (
-    <Modal visible={visible} animationType="fade" transparent>
-      {/* Overlay */}
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent
+      onRequestClose={onClose}
+    >
+      {/* Dim overlay — tapping outside closes */}
       <Pressable
-        className="flex-1 bg-black/30 items-center justify-center px-6"
+        className="flex-1 bg-black/30 items-center justify-center px-8"
         onPress={onClose}
       >
-        {/* Modal Card */}
-        <Pressable
-          onPress={() => {}}
-          className="bg-white w-full rounded-[28px] shadow-xl overflow-hidden"
-        >
-          {/* Header */}
-          <View className="px-5 pt-5 pb-3">
-            <Text className="text-base font-black text-slate-800">
-              Select Workout Type
-            </Text>
-          </View>
+        {/* Inner Pressable stops tap from bubbling to overlay */}
+        <Pressable onPress={() => {}}>
+          <View className="bg-white w-full rounded-[28px] shadow-xl overflow-hidden">
+            {/* Header */}
+            <View className="px-5 pt-5 pb-3">
+              <Text className="text-base font-black text-slate-800">
+                Workout Type
+              </Text>
+            </View>
 
-          {/* Options */}
-          {WORKOUT_TYPES.map((type, index) => {
-            const isActive = type === current;
+            {/* Options */}
+            {WORKOUT_TYPES.map((type, index) => {
+              const isActive = type === current;
+              const isLast = index === WORKOUT_TYPES.length - 1;
 
-            return (
-              <Pressable
-                key={type}
-                onPress={() => {
-                  onSelect(type);
-                  onClose();
-                }}
-                className={`flex-row items-center justify-between px-5 py-4 ${
-                  index !== WORKOUT_TYPES.length - 1
-                    ? "border-b border-slate-100"
-                    : ""
-                } ${isActive ? "bg-orange-50" : ""}`}
-              >
-                <Text
-                  className={`text-sm font-semibold ${
-                    isActive ? "text-orange-500" : "text-slate-700"
-                  }`}
+              return (
+                <Pressable
+                  key={type}
+                  onPress={() => {
+                    onSelect(type);
+                    onClose();
+                  }}
+                  className={`flex-row items-center justify-between px-5 py-3.5 active:bg-slate-50 ${
+                    !isLast ? "border-b border-slate-100" : ""
+                  } ${isActive ? "bg-orange-50" : ""}`}
                 >
-                  {type}
-                </Text>
+                  <Text
+                    className={`text-sm font-semibold ${
+                      isActive ? "text-orange-500" : "text-slate-700"
+                    }`}
+                  >
+                    {type}
+                  </Text>
 
-                {isActive && (
-                  <Ionicons name="checkmark-circle" size={18} color="#f97316" />
-                )}
-              </Pressable>
-            );
-          })}
+                  {isActive && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={18}
+                      color="#f97316"
+                    />
+                  )}
+                </Pressable>
+              );
+            })}
 
-          {/* Bottom spacing */}
-          <View className="h-2" />
+            <View className="h-2" />
+          </View>
         </Pressable>
       </Pressable>
     </Modal>
