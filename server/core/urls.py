@@ -25,5 +25,6 @@ urlpatterns = [
     path('api/', include("macros.urls")), 
     path('api/', include("logs.urls")), 
     path('api/', include("foods.urls")), 
+    path('api/', include("workout.urls")),
     # Include app URLs
 ]

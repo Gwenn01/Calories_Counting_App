@@ -31,8 +31,8 @@ class WorkoutCategory(models.TextChoices):
     FULL_BODY = "full_body", "Full Body"
     ANTERIOR  = "anterior", "Anterior"
     POSTERIOR = "posterior", "Posterior"
-    "UPPER"   = "upper", "Upper"
-    "LOWER"   = "lower", "Lower"
+    UPPER     = "upper", "Upper"
+    LOWER     = "lower", "Lower"
     CARDIO    = "cardio",    "Cardio"
     CUSTOM    = "custom",    "Custom"
 

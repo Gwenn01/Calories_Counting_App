@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'macros',
     'foods',
     'logs',
+    'workout',
     'utils'
 ]
 
