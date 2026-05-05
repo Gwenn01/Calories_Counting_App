@@ -11,6 +11,18 @@ class WorkoutProfileViewList(APIView):
     
     permission_classes = [IsAuthenticated]
     
+    def get(self, request):
+        user = request.user
+        try:
+            user.fitness_profile
+            serializer = UserFitnessProfileSerializer(user.fitness_profile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response(
+                {"message": "You don't have a workout profile"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
     def post(self, request):
         user = request.user
 
