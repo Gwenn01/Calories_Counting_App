@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { Flame } from "lucide-react-native";
 // components
 import { useAlert } from "@/components/AlertProvider";
 import { useToast } from "@/components/ToastProvider";
@@ -10,6 +11,8 @@ import LoadingOverlay from "@/components/LoadingOverplay";
 import { SettingsRow } from "../../components/Profile/SettingsRow";
 import MacroItem from "@/components/Profile/MacroItem";
 import MetricItem from "@/components/Profile/MetricItem";
+import WorkoutProfileCard from "@/components/Profile/WorkoutProfileCard";
+import FitnessProfileModal from "@/components/Profile/FitnessProfileModal";
 import EditProfileModal from "@/components/Profile/EditProfileModal";
 // token
 import { removeToken } from "@/utils/token";
@@ -17,7 +20,14 @@ import { Platform } from "react-native";
 import { logoutUser } from "@/api/auth";
 // apis
 import { fetchProfile, editProfile } from "@/api/profile";
+import {
+  createWorkoutProfile,
+  updateWorkoutProfile,
+  fetchWorkoutProfile,
+} from "@/api/workout";
 import { getStreak } from "@/api/history";
+// types
+import { FitnessProfile } from "@/types/workout";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -42,13 +52,20 @@ export default function ProfileScreen() {
   const [showEditProfile, setShowEditProfile] = useState(false);
   // streak
   const [streak, setStreak] = useState(0);
+  // workout profile
+  const [showModal, setShowModal] = useState(false);
+  const [workoutProfile, setWorkoutProfile] = useState<FitnessProfile | null>(
+    null,
+  );
 
   // fetch profile data ===================================================
   const fetchProfileData = async () => {
     try {
       setLoading(true);
       const profileData = await fetchProfile();
+      const workoutProfileData = await fetchWorkoutProfile();
       setProfile(profileData);
+      setWorkoutProfile(workoutProfileData);
     } catch (err) {
       console.error(err);
       showToast("error", "Error fetching profile data");
@@ -89,6 +106,28 @@ export default function ProfileScreen() {
       console.log("Failed to update profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // workout profile
+  const handleSubmit = async (data: FitnessProfile) => {
+    try {
+      let res;
+
+      if (profile) {
+        // UPDATE
+        res = await updateWorkoutProfile(data);
+      } else {
+        // CREATE
+        res = await createWorkoutProfile(data);
+      }
+
+      const profileData = res.data ?? res;
+
+      setProfile(profileData);
+      setShowModal(false);
+    } catch (err) {
+      console.error("Profile error:", err);
     }
   };
 
@@ -308,22 +347,25 @@ export default function ProfileScreen() {
         </View>
 
         {/* ---------- STREAK SECTION ---------- */}
-        {/* STREAK SECTION Added relative and overflow-hidden to contain the decorative background circle */}
-        <View className="bg-black rounded-[32px] p-7 shadow-xl shadow-emerald-900/20 relative overflow-hidden mb-3">
+        {/* Added relative and overflow-hidden to contain the decorative background circle */}
+        <View className="bg-white rounded-[32px] p-7 shadow-sm border border-gray-100 relative overflow-hidden mb-3">
           {/* Subtle decorative background shape for a premium app feel */}
-          <View className="absolute -top-12 -right-10 w-40 h-40 bg-emerald-800 rounded-full opacity-40" />
+          <View className="absolute -top-12 -right-10 w-40 h-40 bg-green-400 rounded-full opacity-[0.08]" />
 
           {/* Content wrapper with z-10 so it sits above the decorative circle */}
           <View className="relative z-10">
             {/* Card Header & Badge */}
             <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-xs font-bold tracking-[2px] text-white uppercase">
+              <Text className="text-xs font-bold tracking-[2px] text-gray-400 uppercase">
                 Total Days Logged
               </Text>
+
               {/* Gamification Badge */}
               {streak > 0 && (
-                <View className="bg-orange-500/20 px-2.5 py-1 rounded-full flex-row items-center">
-                  <Text className="text-xs font-bold text-orange-400">
+                <View className="bg-orange-50 px-2.5 py-1.5 rounded-full flex-row items-center border border-orange-100 gap-1">
+                  {/* Note: Import Flame from lucide-react-native if you haven't already */}
+                  <Flame size={12} color="#f97316" />
+                  <Text className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">
                     Streak
                   </Text>
                 </View>
@@ -332,22 +374,37 @@ export default function ProfileScreen() {
 
             {/* Large Number Callout */}
             <View className="flex-row items-baseline mt-2 mb-1">
-              <Text className="text-[64px] font-black text-white tracking-tighter mr-3 leading-none">
+              <Text className="text-[64px] font-black text-gray-900 tracking-tighter mr-3 leading-none">
                 {streak}
               </Text>
-              <Text className="text-xl font-bold text-white">days</Text>
+              <Text className="text-xl font-bold text-gray-400">days</Text>
             </View>
 
             {/* Divider */}
-            <View className="h-[1px] bg-white my-5" />
+            <View className="h-[1px] bg-gray-100 my-5" />
 
             {/* Footer Text */}
-            <Text className="text-sm font-medium text-white leading-relaxed pr-4">
+            <Text className="text-sm font-medium text-gray-500 leading-relaxed pr-4">
               Start logging meals to unlock insights about your eating habits.
               Keep the momentum going!
             </Text>
           </View>
         </View>
+        {/* ---------- WORKOUT PROFILE ---------- */}
+        {workoutProfile && (
+          <WorkoutProfileCard
+            profile={workoutProfile}
+            onOpenModal={() => setShowModal(true)}
+          />
+        )}
+
+        {/* MODAL */}
+        <FitnessProfileModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          onSubmit={handleSubmit}
+          initialData={workoutProfile}
+        />
 
         {/* ---------- SETTINGS ---------- */}
         <View className="bg-white rounded-[28px] overflow-hidden shadow-sm mb-3">
