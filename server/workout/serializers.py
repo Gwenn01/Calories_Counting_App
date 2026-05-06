@@ -43,7 +43,47 @@ class UserFitnessProfileSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "updated_at"]
+        
+        
+# ─────────────────────────────────────────────────────────────────
+# TEMPLATE
+# ─────────────────────────────────────────────────────────────────
+class TemplateExerciseSerializer(serializers.ModelSerializer):
+    exercise = ExerciseSerializer(read_only=True)
 
+    exercise_id = serializers.PrimaryKeyRelatedField(
+        queryset=Exercise.objects.all(),
+        source="exercise",
+        write_only=True
+    )
+
+    template = serializers.PrimaryKeyRelatedField(
+        queryset=WorkoutTemplate.objects.all()
+    )
+
+    class Meta:
+        model = TemplateExercise
+        fields = [
+            "id",
+            "template",
+            "exercise", "exercise_id",
+            "order",
+            "default_sets", "default_reps",
+            "default_weight", "default_rest",
+            "superset_group", "notes",
+        ]
+
+class WorkoutTemplateSerializer(serializers.ModelSerializer):
+    template_exercises = TemplateExerciseSerializer(many=True, read_only=True)
+
+    class Meta:
+        model  = WorkoutTemplate
+        fields = [
+            "id", "name", "category", "description",
+            "is_public", "estimated_duration",
+            "template_exercises", "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
 
 # ─────────────────────────────────────────────────────────────────
 # SET
@@ -74,7 +114,6 @@ class SetCreateSerializer(serializers.ModelSerializer):
             "is_warmup", "is_dropset",
         ]
         read_only_fields = ["id"]
-
 
 # ─────────────────────────────────────────────────────────────────
 # WORKOUT EXERCISE
@@ -157,39 +196,6 @@ class WorkoutSessionCreateSerializer(serializers.ModelSerializer):
         model  = WorkoutSession
         fields = ["id", "date", "category", "template", "bodyweight", "weight_unit", "notes"]
         read_only_fields = ["id"]
-
-
-# ─────────────────────────────────────────────────────────────────
-# TEMPLATE
-# ─────────────────────────────────────────────────────────────────
-
-class TemplateExerciseSerializer(serializers.ModelSerializer):
-    exercise    = ExerciseSerializer(read_only=True)
-    exercise_id = serializers.PrimaryKeyRelatedField(
-        queryset=Exercise.objects.all(), source="exercise", write_only=True
-    )
-
-    class Meta:
-        model  = TemplateExercise
-        fields = [
-            "id", "exercise", "exercise_id", "order",
-            "default_sets", "default_reps", "default_weight",
-            "default_rest", "superset_group", "notes",
-        ]
-        read_only_fields = ["id"]
-
-
-class WorkoutTemplateSerializer(serializers.ModelSerializer):
-    template_exercises = TemplateExerciseSerializer(many=True, read_only=True)
-
-    class Meta:
-        model  = WorkoutTemplate
-        fields = [
-            "id", "name", "category", "description",
-            "is_public", "estimated_duration",
-            "template_exercises", "created_at",
-        ]
-        read_only_fields = ["id", "created_at"]
 
 
 # ─────────────────────────────────────────────────────────────────

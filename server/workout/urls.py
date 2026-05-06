@@ -9,4 +9,7 @@ urlpatterns = [
     path('workout/exercise/', views.ExerciseViewList.as_view(), name='excercise-list'),
     path('workout/exercise/<str:muscle>/', views.ExerciseMuscleViewList.as_view(), name='excercise-muscle-list'),
     path('workout/exercise-program/<str:program>/', views.ExerciseProgramViewList.as_view(), name='excercise-program-list'),
+    #template 
+    path('workout/template/', views.WorkoutTemplateViewList.as_view(), name='workout-template-list'),
+    path('workout/exercise-template/', views.TemplateExerciseViewList.as_view(), name='template-exercise-list'),
 ]

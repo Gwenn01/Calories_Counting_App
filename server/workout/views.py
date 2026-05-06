@@ -5,11 +5,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import  (
-    Exercise
+    Exercise,
+    WorkoutTemplate
 )
 from .serializers import (
     UserFitnessProfileSerializer,
-    ExerciseSerializer
+    ExerciseSerializer,
+    WorkoutTemplateSerializer,
+    TemplateExerciseSerializer
 )
 
 # WORKOUT PROFILE ===================================================================================
@@ -94,3 +97,29 @@ class ExerciseProgramViewList(APIView):
         )
         serializer = ExerciseSerializer(exercises, many=True)
         return Response(serializer.data, status=200)
+    
+# TEMPLATE WORKOUT =========================================================
+class WorkoutTemplateViewList(APIView):
+     permission_classes = [IsAuthenticated]
+     
+     def get(self, request):
+        templates = WorkoutTemplate.objects.filter(user=request.user)
+        serializer = WorkoutTemplateSerializer(templates, many=True)
+        return Response(serializer.data, status=200)
+     
+     def post(self, request):
+        serializer = WorkoutTemplateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+    
+class TemplateExerciseViewList(APIView):
+     permission_classes = [IsAuthenticated]
+
+     def post(self, request):
+        serializer = TemplateExerciseSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
