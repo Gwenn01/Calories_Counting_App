@@ -1,0 +1,2057 @@
+"""
+management/commands/seed_exercises.py
+
+Seeds the complete global exercise library (146 exercises).
+Covers all muscle groups × all equipment types.
+
+Run with:
+    python manage.py seed_exercises
+
+Safe to re-run — uses get_or_create on name.
+Existing exercises get their descriptions updated if improved.
+"""
+
+from django.core.management.base import BaseCommand
+from workout.models import (
+    Exercise,
+    MuscleGroup,
+    EquipmentType,
+    ExerciseType,
+    DifficultyLevel,
+)
+
+ALL_EXERCISES = [
+
+    # ══════════════════════════════════════════════════════════════
+    # CHEST
+    # ══════════════════════════════════════════════════════════════
+
+    # ── Barbell ───────────────────────────────────────────────────
+    {
+        "name": "Barbell Bench Press",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "shoulders"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Lie flat on a bench. Grip the bar just outside shoulder width. "
+            "Lower the bar to your mid-chest with control, "
+            "then press back up to full extension."
+        ),
+        "tips": (
+            "Keep shoulder blades pinched and retracted. "
+            "Drive feet into the floor. "
+            "Avoid bouncing the bar off your chest."
+        ),
+    },
+    {
+        "name": "Incline Barbell Bench Press",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "shoulders"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Set the bench to 30–45°. "
+            "Press the bar from the upper chest upward. "
+            "Control the descent."
+        ),
+        "tips": "Angle emphasizes the upper chest. Avoid flaring elbows too wide.",
+    },
+    {
+        "name": "Decline Barbell Bench Press",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Set bench to a 15–30° decline. "
+            "Lower bar to lower chest and press up."
+        ),
+        "tips": "Targets the lower chest. Ensure feet are secured before starting.",
+    },
+
+    # ── Dumbbell ──────────────────────────────────────────────────
+    {
+        "name": "Dumbbell Bench Press",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "shoulders"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Lie flat on bench with a dumbbell in each hand at chest level. "
+            "Press up and together, then lower with control."
+        ),
+        "tips": "Greater range of motion than barbell. Keep a neutral wrist throughout.",
+    },
+    {
+        "name": "Incline Dumbbell Press",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "shoulders"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Set bench to 30–45°. "
+            "Press dumbbells from shoulder height upward and together."
+        ),
+        "tips": "Focus on squeezing the upper chest at the top.",
+    },
+    {
+        "name": "Dumbbell Fly",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Lie flat with arms extended above chest, slight bend in elbows. "
+            "Lower arms out wide in an arc, then bring them back together."
+        ),
+        "tips": "Keep elbows slightly bent throughout. Feel the stretch in your chest at the bottom.",
+    },
+
+    # ── Cable ─────────────────────────────────────────────────────
+    {
+        "name": "Cable Chest Fly",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Set cables to chest height. "
+            "Stand in the middle, pull handles together in a hugging motion."
+        ),
+        "tips": "Constant tension throughout the movement. Squeeze at the peak contraction.",
+    },
+    {
+        "name": "High-to-Low Cable Fly",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Set cables high. "
+            "Pull handles downward and together in front of your lower chest."
+        ),
+        "tips": "Targets the lower chest. Lean slightly forward for better angle.",
+    },
+
+    # ── Bodyweight ────────────────────────────────────────────────
+    {
+        "name": "Push-Up",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "core", "shoulders"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Start in a plank with hands slightly outside shoulder width. "
+            "Lower chest to the floor, then push back up."
+        ),
+        "tips": "Keep body in a straight line. Don't let your hips sag or pike up.",
+    },
+    {
+        "name": "Decline Push-Up",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "shoulders"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Place feet on an elevated surface. "
+            "Perform a push-up with hands on the floor."
+        ),
+        "tips": "Elevating feet shifts focus to the upper chest.",
+    },
+    {
+        "name": "Chest Dip",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "shoulders"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Lean forward on parallel bars. "
+            "Lower until elbows reach 90°, then press back up."
+        ),
+        "tips": "Lean forward to emphasize chest over triceps.",
+    },
+
+    # ── Machine ───────────────────────────────────────────────────
+    {
+        "name": "Machine Chest Press",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "shoulders"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in machine, adjust seat so handles are at chest level. "
+            "Press handles forward to full extension."
+        ),
+        "tips": "Good for beginners or as a burnout finisher. Controlled negative.",
+    },
+    {
+        "name": "Pec Deck Machine",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit upright. Place forearms on pads. "
+            "Bring pads together in front of chest."
+        ),
+        "tips": "Isolates the chest. Great as a finishing exercise.",
+    },
+    {
+        "name": "Smith Machine Bench Press",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "shoulders"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Lie on a flat bench inside the Smith machine. "
+            "Unrack the bar by rotating it. "
+            "Lower to mid-chest under control, "
+            "then press back up to full extension and re-rack."
+        ),
+        "tips": (
+            "The fixed bar path removes the need to balance, making it beginner-friendly. "
+            "Use a slight arch and keep shoulder blades retracted."
+        ),
+    },
+    {
+        "name": "Smith Machine Incline Press",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "shoulders"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Set bench to 30–45° inside Smith machine. "
+            "Press bar from upper-chest level upward. Lower with control."
+        ),
+        "tips": "Great for isolating the upper chest without needing a spotter.",
+    },
+    {
+        "name": "Chest Press Machine (Converging)",
+        "muscle_group": MuscleGroup.CHEST,
+        "secondary_muscles": ["triceps", "shoulders"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit upright with back against pad. "
+            "Grab handles at chest height. "
+            "Press forward until arms are extended, then return with control."
+        ),
+        "tips": (
+            "Converging arms mimic the natural pressing arc. "
+            "Squeeze chest hard at full extension."
+        ),
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # BACK
+    # ══════════════════════════════════════════════════════════════
+
+    # ── Barbell ───────────────────────────────────────────────────
+    {
+        "name": "Deadlift",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["glutes", "hamstrings", "core", "forearms"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.ADVANCED,
+        "instructions": (
+            "Stand with feet hip-width apart, bar over mid-foot. "
+            "Hinge at hips, grip the bar. "
+            "Drive through heels and extend hips and knees simultaneously to stand tall."
+        ),
+        "tips": (
+            "Keep bar close to the body at all times. "
+            "Neutral spine is critical. Brace your core before pulling."
+        ),
+    },
+    {
+        "name": "Romanian Deadlift",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["hamstrings", "glutes"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Hold bar at hip level. "
+            "Push hips back while lowering bar along thighs. "
+            "Feel a stretch in hamstrings. Drive hips forward to return."
+        ),
+        "tips": "Soft bend in knees. Don't round the lower back.",
+    },
+    {
+        "name": "Bent-Over Barbell Row",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps", "rear delts", "core"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Hinge forward to about 45°. "
+            "Pull bar toward lower chest/upper abdomen. "
+            "Squeeze shoulder blades at top."
+        ),
+        "tips": "Keep back flat. Don't use momentum. Lead with elbows.",
+    },
+    {
+        "name": "Pendlay Row",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps", "core"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Bar starts on floor each rep. Torso parallel to ground. "
+            "Explosively row bar to lower chest. Return to floor with control."
+        ),
+        "tips": "More strict than a regular row. Builds explosive back strength.",
+    },
+    {
+        "name": "T-Bar Row",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps", "rear delts"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Straddle the bar, grip the handle. "
+            "Hinge to roughly 45°. Row the bar to chest."
+        ),
+        "tips": "Keep chest pressed against pad if using machine variant.",
+    },
+
+    # ── Dumbbell ──────────────────────────────────────────────────
+    {
+        "name": "Single-Arm Dumbbell Row",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps", "rear delts"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Place one hand and knee on bench. "
+            "Row dumbbell to hip with opposite arm, keeping back flat."
+        ),
+        "tips": "Drive elbow back, not up. Full stretch at bottom.",
+    },
+
+    # ── Cable ─────────────────────────────────────────────────────
+    {
+        "name": "Lat Pulldown",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps"],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Grip bar wide, sit down with thighs under pads. "
+            "Pull bar to upper chest while leaning slightly back."
+        ),
+        "tips": "Drive elbows down and back. Avoid using momentum.",
+    },
+    {
+        "name": "Seated Cable Row",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps", "rear delts"],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit at cable row station. "
+            "Pull handle to your abdomen while keeping back upright and chest out."
+        ),
+        "tips": "Don't lean too far back. Squeeze shoulder blades together at the end.",
+    },
+    {
+        "name": "Cable Straight-Arm Pulldown",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Stand facing high cable. Arms extended, "
+            "pull rope/bar down to hips in an arc keeping arms straight."
+        ),
+        "tips": "Isolates the lats. Great as a lat activation exercise.",
+    },
+    {
+        "name": "Face Pull",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["rear delts", "rotator cuff"],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Set cable to eye level with rope attachment. "
+            "Pull toward your face, flaring elbows out."
+        ),
+        "tips": "Essential for shoulder health. Keep upper arms parallel to floor.",
+    },
+
+    # ── Bodyweight ────────────────────────────────────────────────
+    {
+        "name": "Pull-Up",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps", "core"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Hang from bar with overhand grip slightly outside shoulder width. "
+            "Pull chest to bar, then lower with control."
+        ),
+        "tips": "Full range of motion — start from dead hang. Avoid kipping.",
+    },
+    {
+        "name": "Chin-Up",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Hang with underhand grip, shoulder width. "
+            "Pull chin above bar, lower with control."
+        ),
+        "tips": "Underhand grip increases bicep involvement.",
+    },
+
+    # ── Machine ───────────────────────────────────────────────────
+    {
+        "name": "Hyperextension (Back Extension)",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["glutes", "hamstrings"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Lie face down on the machine. "
+            "Lower torso toward floor, then raise back to parallel."
+        ),
+        "tips": "Squeeze glutes at the top. Can add weight for progression.",
+    },
+    {
+        "name": "Chest-Supported Row Machine",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps", "rear delts"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Lie chest-down on the inclined pad. "
+            "Grip the handles and row them back toward your torso. "
+            "Squeeze shoulder blades together at the top, then lower."
+        ),
+        "tips": (
+            "Chest support eliminates lower-back strain — ideal when fatigued or injured. "
+            "Full stretch at the bottom for max range of motion."
+        ),
+    },
+    {
+        "name": "Lat Pulldown Machine (Plate-Loaded)",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit with thighs secured under pads. "
+            "Pull bar or handles down to upper chest while leaning slightly back."
+        ),
+        "tips": "Drive elbows down and back. Avoid shrugging at the top.",
+    },
+    {
+        "name": "Seated Row Machine (Plate-Loaded)",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps", "rear delts"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit upright with chest against the pad. "
+            "Pull handles toward your torso. "
+            "Squeeze shoulder blades. Return with control."
+        ),
+        "tips": "Chest pad removes cheating. Focus on the back, not the arms.",
+    },
+    {
+        "name": "Reverse Fly Machine",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["rear delts", "rhomboids"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit facing the pad. Grip handles with palms facing each other. "
+            "Open arms wide in a reverse fly motion. Return slowly."
+        ),
+        "tips": (
+            "Targets rear delts and upper back. "
+            "Keep slight bend in elbows throughout. Don't use momentum."
+        ),
+    },
+    {
+        "name": "Smith Machine Bent-Over Row",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps", "core"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Stand over the Smith bar, hinge to about 45°. "
+            "Pull bar up to lower chest. Lower with control."
+        ),
+        "tips": "Fixed bar path makes form easier to maintain when learning.",
+    },
+    {
+        "name": "Iso-Lateral Row Machine",
+        "muscle_group": MuscleGroup.BACK,
+        "secondary_muscles": ["biceps"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit facing the machine. Row each arm independently or together. "
+            "Pull handles toward hips, squeezing the lat."
+        ),
+        "tips": (
+            "Unilateral arms allow each side to work independently, "
+            "reducing strength imbalances."
+        ),
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # SHOULDERS
+    # ══════════════════════════════════════════════════════════════
+
+    # ── Barbell ───────────────────────────────────────────────────
+    {
+        "name": "Overhead Press (Barbell)",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": ["triceps", "core"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Stand with bar at collarbone level. "
+            "Press straight up overhead to full elbow extension. Lower with control."
+        ),
+        "tips": "Brace core tight. Don't hyperextend lower back. Keep bar path vertical.",
+    },
+    {
+        "name": "Upright Row",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": ["biceps", "traps"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Hold bar with narrow overhand grip. "
+            "Pull bar straight up to chin, leading with elbows."
+        ),
+        "tips": "Wide grip reduces impingement risk. Avoid if you have shoulder issues.",
+    },
+    {
+        "name": "Barbell Shrug",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Hold barbell at hip level. "
+            "Shrug shoulders straight up toward ears. Hold briefly, then lower."
+        ),
+        "tips": "Targets the upper traps. Don't roll shoulders.",
+    },
+
+    # ── Dumbbell ──────────────────────────────────────────────────
+    {
+        "name": "Seated Dumbbell Shoulder Press",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": ["triceps"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit on a bench with back support. "
+            "Hold dumbbells at ear level. Press overhead."
+        ),
+        "tips": "Back support reduces lower back strain.",
+    },
+    {
+        "name": "Dumbbell Lateral Raise",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Stand with dumbbells at sides. "
+            "Raise arms out to the side to shoulder height with slight bend in elbows."
+        ),
+        "tips": "Lead with elbows, not hands. Avoid shrugging. Use lighter weight.",
+    },
+    {
+        "name": "Front Raise",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Hold dumbbells in front of thighs. "
+            "Raise both arms forward to shoulder height."
+        ),
+        "tips": "Targets anterior deltoid. Don't lean back.",
+    },
+    {
+        "name": "Arnold Press",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": ["triceps"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Start with dumbbells in front at chin, palms facing you. "
+            "Rotate palms outward as you press up."
+        ),
+        "tips": "Hits all three delt heads. Slower tempo for best results.",
+    },
+
+    # ── Cable ─────────────────────────────────────────────────────
+    {
+        "name": "Cable Lateral Raise",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Set cable to lowest point. "
+            "Raise arm out to the side to shoulder height."
+        ),
+        "tips": "Cable provides constant tension unlike dumbbells.",
+    },
+
+    # ── Machine ───────────────────────────────────────────────────
+    {
+        "name": "Machine Shoulder Press",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": ["triceps"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in machine, adjust handles to shoulder height. "
+            "Press up to full extension."
+        ),
+        "tips": "Safer for beginners or when fatigued.",
+    },
+    {
+        "name": "Lateral Raise Machine",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in machine with elbows on the pads. "
+            "Raise arms out to the side to shoulder height. Lower slowly."
+        ),
+        "tips": (
+            "Constant tension unlike dumbbells. "
+            "Excellent for side delt isolation without grip fatigue."
+        ),
+    },
+    {
+        "name": "Smith Machine Overhead Press",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": ["triceps"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Set bar to shoulder height inside Smith machine. "
+            "Press overhead to full extension. Lower under control."
+        ),
+        "tips": "Useful when learning overhead pressing mechanics safely.",
+    },
+    {
+        "name": "Rear Delt Machine",
+        "muscle_group": MuscleGroup.SHOULDERS,
+        "secondary_muscles": ["traps", "rhomboids"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Adjust the pec deck to rear-delt mode. Sit facing the pad. "
+            "Pull arms back in a wide arc. Return with control."
+        ),
+        "tips": "Same machine as pec deck, reversed. Squeeze at full extension.",
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # BICEPS
+    # ══════════════════════════════════════════════════════════════
+
+    {
+        "name": "Barbell Curl",
+        "muscle_group": MuscleGroup.BICEPS,
+        "secondary_muscles": ["forearms"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Stand with bar at hip level, underhand grip. "
+            "Curl bar to shoulder height. Lower with control."
+        ),
+        "tips": "Keep elbows fixed at sides. Avoid swinging.",
+    },
+    {
+        "name": "EZ-Bar Curl",
+        "muscle_group": MuscleGroup.BICEPS,
+        "secondary_muscles": ["forearms"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Use EZ-bar with semi-supinated grip. Curl to shoulder height.",
+        "tips": "Easier on the wrists than straight barbell.",
+    },
+    {
+        "name": "Dumbbell Bicep Curl",
+        "muscle_group": MuscleGroup.BICEPS,
+        "secondary_muscles": ["forearms"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Hold dumbbells at sides, supinate wrists as you curl up. "
+            "Alternate or both together."
+        ),
+        "tips": "Supination (rotating palm up) maximizes bicep activation.",
+    },
+    {
+        "name": "Hammer Curl",
+        "muscle_group": MuscleGroup.BICEPS,
+        "secondary_muscles": ["forearms", "brachialis"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Hold dumbbells with neutral grip (palms facing each other). "
+            "Curl up without rotating wrist."
+        ),
+        "tips": "Targets brachialis and brachioradialis. Builds arm thickness.",
+    },
+    {
+        "name": "Incline Dumbbell Curl",
+        "muscle_group": MuscleGroup.BICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Lie back on an incline bench, arms hanging straight. "
+            "Curl dumbbells up."
+        ),
+        "tips": "Stretched starting position increases range of motion and long head activation.",
+    },
+    {
+        "name": "Concentration Curl",
+        "muscle_group": MuscleGroup.BICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit on bench, elbow braced against inner thigh. "
+            "Curl dumbbell upward."
+        ),
+        "tips": "Isolates the bicep. Great for peak contraction.",
+    },
+    {
+        "name": "Cable Curl",
+        "muscle_group": MuscleGroup.BICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Stand facing low cable. Curl bar or rope to shoulder height.",
+        "tips": "Constant tension through full range of motion.",
+    },
+    {
+        "name": "Preacher Curl",
+        "muscle_group": MuscleGroup.BICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Rest upper arms on preacher pad. Curl bar or dumbbell upward.",
+        "tips": "Eliminates cheating. Emphasizes short head of bicep.",
+    },
+    {
+        "name": "Machine Bicep Curl",
+        "muscle_group": MuscleGroup.BICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit at the bicep curl machine. Place upper arms on the pad. "
+            "Curl handles toward your chin. Lower fully."
+        ),
+        "tips": "Supported arms eliminate cheating. Full extension at the bottom for full range.",
+    },
+    {
+        "name": "Cable Preacher Curl",
+        "muscle_group": MuscleGroup.BICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Attach bar or rope to low cable. Rest upper arms on preacher pad. "
+            "Curl to chin height. Lower fully."
+        ),
+        "tips": "Cable maintains tension at the bottom unlike free-weight preacher curls.",
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # TRICEPS
+    # ══════════════════════════════════════════════════════════════
+
+    {
+        "name": "Close-Grip Bench Press",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": ["chest", "shoulders"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Lie on bench. Grip bar with hands shoulder-width or slightly inside. "
+            "Lower bar to chest, press back up."
+        ),
+        "tips": "Keep elbows tucked to sides to maximize tricep engagement.",
+    },
+    {
+        "name": "Skull Crusher",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Lie on bench. Hold EZ-bar above chest with straight arms. "
+            "Lower toward forehead by bending elbows, then extend."
+        ),
+        "tips": "Go slow on the negative. Use EZ-bar to reduce wrist strain.",
+    },
+    {
+        "name": "Overhead Tricep Extension (Dumbbell)",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Hold one dumbbell with both hands overhead. "
+            "Lower behind head by bending elbows, then extend back up."
+        ),
+        "tips": "Stretches the long head of tricep. Don't flare elbows.",
+    },
+    {
+        "name": "Tricep Pushdown (Cable)",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Set cable to high position with bar or rope. "
+            "Push handle down to full elbow extension. Control the return."
+        ),
+        "tips": "Keep elbows locked at sides. Full extension at bottom.",
+    },
+    {
+        "name": "Overhead Tricep Extension (Cable)",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Face away from low cable. "
+            "Hold rope overhead and extend arms forward."
+        ),
+        "tips": "Long head stretch under tension.",
+    },
+    {
+        "name": "Tricep Dip",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": ["chest", "shoulders"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Grip parallel bars, body upright. "
+            "Lower until elbows hit 90°, then press back up."
+        ),
+        "tips": "Stay more upright to hit triceps more than chest.",
+    },
+    {
+        "name": "Bench Dip",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Place hands on bench edge behind you, feet on floor. "
+            "Lower body by bending elbows, then push back up."
+        ),
+        "tips": "Beginner-friendly. Add weight on lap for progression.",
+    },
+    {
+        "name": "Diamond Push-Up",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": ["chest"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Form a diamond shape with hands directly under chest. Perform push-up."
+        ),
+        "tips": "Maximizes tricep and inner chest activation.",
+    },
+    {
+        "name": "Tricep Extension Machine",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in the machine, upper arms on pad. "
+            "Extend arms fully downward. Return slowly."
+        ),
+        "tips": "Elbows stay on the pad the entire time. Don't flare out.",
+    },
+    {
+        "name": "Smith Machine Close-Grip Press",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": ["chest"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Lie on bench inside Smith machine. "
+            "Grip bar shoulder-width or slightly narrower. "
+            "Lower bar to lower chest with elbows tucked. Press back up."
+        ),
+        "tips": "Safer than barbell for heavy tricep work without a spotter.",
+    },
+    {
+        "name": "Assisted Tricep Dip Machine",
+        "muscle_group": MuscleGroup.TRICEPS,
+        "secondary_muscles": ["chest", "shoulders"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Kneel or stand on the counterweight platform. Grip handles. "
+            "Lower until elbows reach 90°. Press back up."
+        ),
+        "tips": (
+            "Counterweight reduces bodyweight, making dips accessible for beginners. "
+            "Progress by reducing assistance over time."
+        ),
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # FOREARMS
+    # ══════════════════════════════════════════════════════════════
+
+    {
+        "name": "Wrist Curl",
+        "muscle_group": MuscleGroup.FOREARMS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Sit with forearms resting on thighs, palms up. Curl wrists upward.",
+        "tips": "Full range of motion. Don't rush the movement.",
+    },
+    {
+        "name": "Reverse Wrist Curl",
+        "muscle_group": MuscleGroup.FOREARMS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Sit with forearms on thighs, palms down. Curl wrists upward.",
+        "tips": "Targets extensor muscles on the back of the forearm.",
+    },
+    {
+        "name": "Farmer's Walk",
+        "muscle_group": MuscleGroup.FOREARMS,
+        "secondary_muscles": ["core", "traps", "glutes"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Hold heavy dumbbells at sides. "
+            "Walk a set distance or time maintaining upright posture."
+        ),
+        "tips": "Builds grip strength and overall conditioning. Keep core tight.",
+    },
+    {
+        "name": "Dead Hang",
+        "muscle_group": MuscleGroup.FOREARMS,
+        "secondary_muscles": ["back", "core"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Hang from a pull-up bar with straight arms. Hold for time.",
+        "tips": "Excellent for grip and shoulder health. Progress duration over time.",
+    },
+    {
+        "name": "Forearm Flexion Machine",
+        "muscle_group": MuscleGroup.FOREARMS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit at the machine with forearms on the pad. "
+            "Curl wrists upward against resistance. Lower with control."
+        ),
+        "tips": "Isolates wrist flexors. Slow tempo for full development.",
+    },
+    {
+        "name": "Grip Strengthener Machine",
+        "muscle_group": MuscleGroup.FOREARMS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Grip the machine handle. "
+            "Squeeze fully, hold for a second, release slowly."
+        ),
+        "tips": "Directly trains grip strength. Essential for pulling exercises.",
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # CORE
+    # ══════════════════════════════════════════════════════════════
+
+    {
+        "name": "Plank",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": ["shoulders", "glutes"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Hold a push-up position on forearms. "
+            "Keep body in a straight line. Hold for time."
+        ),
+        "tips": "Don't let hips sag or rise. Breathe steadily.",
+    },
+    {
+        "name": "Side Plank",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": ["glutes"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Support body on one forearm and the side of your foot. Keep body straight."
+        ),
+        "tips": "Targets the obliques. Don't let hips drop.",
+    },
+    {
+        "name": "Crunch",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Lie on back, knees bent. Curl shoulders toward knees. Lower with control.",
+        "tips": "Short range of motion. Focus on contracting the abs.",
+    },
+    {
+        "name": "Bicycle Crunch",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Lie on back, hands behind head. "
+            "Alternate bringing opposite elbow to knee in a pedaling motion."
+        ),
+        "tips": "Controlled rotation. Don't pull on the neck.",
+    },
+    {
+        "name": "Leg Raise",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": ["hip flexors"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Lie flat. Raise straight legs to 90°. Lower slowly without touching the floor.",
+        "tips": "Press lower back into floor to protect it.",
+    },
+    {
+        "name": "Hanging Leg Raise",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": ["hip flexors", "forearms"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": "Hang from pull-up bar. Raise legs to 90° or higher. Lower with control.",
+        "tips": "Avoid swinging. Can progress to toes-to-bar.",
+    },
+    {
+        "name": "Russian Twist",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Sit with feet off floor, lean back slightly. Rotate torso side to side.",
+        "tips": "Add weight for progression. Keep feet elevated for more difficulty.",
+    },
+    {
+        "name": "Dead Bug",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Lie on back, arms up, knees at 90°. "
+            "Extend opposite arm and leg simultaneously while pressing back into floor."
+        ),
+        "tips": "Excellent for core stability. Move slowly and controlled.",
+    },
+    {
+        "name": "Ab Wheel Rollout",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": ["shoulders", "lats"],
+        "equipment": EquipmentType.OTHER,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.ADVANCED,
+        "instructions": (
+            "Kneel holding ab wheel. "
+            "Roll forward until body is parallel to floor. Roll back using core."
+        ),
+        "tips": "Very challenging. Start with partial range of motion.",
+    },
+    {
+        "name": "Cable Crunch",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Kneel at cable machine with rope overhead. Crunch elbows toward knees.",
+        "tips": "Allows progressive overload for abs unlike bodyweight crunches.",
+    },
+    {
+        "name": "Ab Crunch Machine",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in machine with arms over the pads. "
+            "Crunch torso forward toward thighs. Return with control."
+        ),
+        "tips": (
+            "Allows weighted progressive overload for abs — "
+            "superior to bodyweight crunches for hypertrophy. Exhale on the crunch."
+        ),
+    },
+    {
+        "name": "Rotary Torso Machine",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in the machine. Cross arms over the chest pad. "
+            "Rotate torso to one side against resistance. Return and repeat on the other side."
+        ),
+        "tips": (
+            "Isolates the obliques with resistance. "
+            "Use slow controlled rotation. Keep hips locked in place."
+        ),
+    },
+    {
+        "name": "Back Extension Machine",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": ["glutes", "hamstrings"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in machine with feet secured and pad across thighs. "
+            "Hinge forward, then extend back to upright or slightly past."
+        ),
+        "tips": "Strengthens erector spinae. Don't hyperextend at the top.",
+    },
+    {
+        "name": "Roman Chair Sit-Up",
+        "muscle_group": MuscleGroup.CORE,
+        "secondary_muscles": ["hip flexors"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Secure feet under the Roman chair pads. "
+            "Lower torso back, then crunch back up."
+        ),
+        "tips": "Can hold a plate at chest for added resistance.",
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # QUADS
+    # ══════════════════════════════════════════════════════════════
+
+    {
+        "name": "Barbell Back Squat",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes", "hamstrings", "core"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Bar on upper traps. Feet shoulder-width. "
+            "Squat until thighs are parallel to floor. Drive through heels to stand."
+        ),
+        "tips": "Knees track over toes. Keep chest up. Brace core before descending.",
+    },
+    {
+        "name": "Front Squat",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["core", "glutes"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.ADVANCED,
+        "instructions": (
+            "Bar rests on front delts. Elbows high. "
+            "Squat to depth, maintaining upright torso."
+        ),
+        "tips": "Requires wrist flexibility. More quad-dominant than back squat.",
+    },
+    {
+        "name": "Goblet Squat",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes", "core"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Hold dumbbell vertically at chest. Squat down between your arms.",
+        "tips": "Great for teaching squat mechanics. Upright torso naturally achieved.",
+    },
+    {
+        "name": "Bulgarian Split Squat",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes", "hamstrings"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Rear foot elevated on bench. Lower front knee toward ground. "
+            "Push back up through front heel."
+        ),
+        "tips": "Excellent single-leg strength builder. Keep torso upright.",
+    },
+    {
+        "name": "Walking Lunge",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes", "hamstrings"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Step forward into a lunge, lower back knee to floor. "
+            "Bring rear foot forward and repeat."
+        ),
+        "tips": "Keep torso upright. Large step for glutes, smaller for quads.",
+    },
+    {
+        "name": "Step-Up",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Hold dumbbells. Step onto a bench or box. "
+            "Bring trailing foot up. Step back down."
+        ),
+        "tips": "Drive through the heel of the stepping foot.",
+    },
+    {
+        "name": "Leg Press",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes", "hamstrings"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in machine, feet on plate shoulder-width. "
+            "Push plate up, lower until knees at 90°."
+        ),
+        "tips": "Don't lock out knees. Foot placement changes muscle emphasis.",
+    },
+    {
+        "name": "Leg Extension",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Sit in leg extension machine. Extend knees fully. Lower with control.",
+        "tips": "Quad isolation. Control the negative for maximum activation.",
+    },
+    {
+        "name": "Hack Squat",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Position on hack squat machine. Lower to 90° or below. Push through heels."
+        ),
+        "tips": "Lower foot placement increases quad focus.",
+    },
+    {
+        "name": "Smith Machine Squat",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes", "hamstrings", "core"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Position bar on upper traps inside Smith machine. Feet slightly forward of bar. "
+            "Squat to parallel. Drive through heels to stand."
+        ),
+        "tips": "Fixed bar path makes this beginner-friendly. Place feet forward to reduce knee shear.",
+    },
+    {
+        "name": "Pendulum Squat Machine",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Stand on the machine platform. Load weight on the carriage. "
+            "Squat to depth, then drive back up."
+        ),
+        "tips": (
+            "More natural squat arc than a standard hack squat. "
+            "Excellent quad emphasis with low spinal load."
+        ),
+    },
+    {
+        "name": "V-Squat Machine",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes", "hamstrings"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Stand on the V-squat platform with back against pad. "
+            "Lower into a squat and drive back up."
+        ),
+        "tips": "Useful when barbell squatting is not possible due to injury.",
+    },
+    {
+        "name": "Iso-Lateral Leg Press",
+        "muscle_group": MuscleGroup.QUADS,
+        "secondary_muscles": ["glutes", "hamstrings"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in machine. Press each leg plate independently. "
+            "Alternate or train simultaneously."
+        ),
+        "tips": "Identifies and corrects left-right strength imbalances.",
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # HAMSTRINGS
+    # ══════════════════════════════════════════════════════════════
+
+    {
+        "name": "Good Morning",
+        "muscle_group": MuscleGroup.HAMSTRINGS,
+        "secondary_muscles": ["lower back", "glutes"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Bar on upper traps. Hinge at hips, pushing them back. "
+            "Lower torso until parallel to floor. Drive hips forward to stand."
+        ),
+        "tips": "Keep back neutral. Soft bend in knees. Heavy loading demands great technique.",
+    },
+    {
+        "name": "Dumbbell Romanian Deadlift",
+        "muscle_group": MuscleGroup.HAMSTRINGS,
+        "secondary_muscles": ["glutes", "lower back"],
+        "equipment": EquipmentType.DUMBBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Hold dumbbells in front of thighs. Hinge at hips, lowering dumbbells along legs. "
+            "Feel hamstring stretch. Return to standing."
+        ),
+        "tips": "Easier to learn than barbell RDL. Great for beginners.",
+    },
+    {
+        "name": "Nordic Hamstring Curl",
+        "muscle_group": MuscleGroup.HAMSTRINGS,
+        "secondary_muscles": ["glutes"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.ADVANCED,
+        "instructions": (
+            "Kneel with feet anchored. Lower your body slowly toward the floor using hamstrings. "
+            "Use hands to catch yourself. Return up."
+        ),
+        "tips": "One of the most effective hamstring exercises. Very difficult — start with eccentrics only.",
+    },
+    {
+        "name": "Lying Leg Curl",
+        "muscle_group": MuscleGroup.HAMSTRINGS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Lie face down on leg curl machine. Curl legs toward glutes. Lower with control.",
+        "tips": "Squeeze hamstrings at peak. Avoid lifting hips.",
+    },
+    {
+        "name": "Seated Leg Curl",
+        "muscle_group": MuscleGroup.HAMSTRINGS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Sit in machine. Curl legs under the pad. Return to start with control.",
+        "tips": "Seated position stretches hamstrings more than lying.",
+    },
+    {
+        "name": "Standing Leg Curl Machine",
+        "muscle_group": MuscleGroup.HAMSTRINGS,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Stand facing the machine pad. Curl one leg toward glute. "
+            "Hold, then lower with control."
+        ),
+        "tips": "Unilateral — trains each side independently.",
+    },
+    {
+        "name": "Glute Ham Raise (GHR) Machine",
+        "muscle_group": MuscleGroup.HAMSTRINGS,
+        "secondary_muscles": ["glutes", "calves"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.ADVANCED,
+        "instructions": (
+            "Secure feet in GHR machine. Lower torso toward the floor by bending the knees. "
+            "Curl back up using hamstrings."
+        ),
+        "tips": "One of the most effective hamstring exercises. Start with partial range if too difficult.",
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # GLUTES
+    # ══════════════════════════════════════════════════════════════
+
+    {
+        "name": "Barbell Hip Thrust",
+        "muscle_group": MuscleGroup.GLUTES,
+        "secondary_muscles": ["hamstrings", "core"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Upper back on bench, bar over hips. "
+            "Drive hips up until body is parallel. Squeeze glutes at top."
+        ),
+        "tips": "The gold standard for glute development. Use a pad on the bar.",
+    },
+    {
+        "name": "Sumo Deadlift",
+        "muscle_group": MuscleGroup.GLUTES,
+        "secondary_muscles": ["hamstrings", "quads", "back"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Wide stance, toes pointed out. "
+            "Grip bar between legs. Pull bar up, driving hips forward."
+        ),
+        "tips": "More glute and inner thigh emphasis than conventional deadlift.",
+    },
+    {
+        "name": "Glute Bridge",
+        "muscle_group": MuscleGroup.GLUTES,
+        "secondary_muscles": ["hamstrings", "core"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Lie on back, knees bent. Drive hips up by squeezing glutes. Lower with control.",
+        "tips": "Beginner version of hip thrust. Add weight on hips to progress.",
+    },
+    {
+        "name": "Donkey Kick",
+        "muscle_group": MuscleGroup.GLUTES,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "On hands and knees. Kick one leg up toward ceiling, keeping knee bent. "
+            "Squeeze glute at top."
+        ),
+        "tips": "Bodyweight isolation for glutes. Add ankle weights for progression.",
+    },
+    {
+        "name": "Cable Kickback",
+        "muscle_group": MuscleGroup.GLUTES,
+        "secondary_muscles": ["hamstrings"],
+        "equipment": EquipmentType.CABLE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Attach ankle strap to low cable. Kick leg back and up, squeezing glute at top.",
+        "tips": "Keep torso stable. Full squeeze at peak.",
+    },
+    {
+        "name": "Hip Abduction Machine",
+        "muscle_group": MuscleGroup.GLUTES,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit with legs together against the pads. "
+            "Push legs outward against resistance. Return slowly."
+        ),
+        "tips": (
+            "Targets the glute medius and minimus — "
+            "important for hip stability and injury prevention."
+        ),
+    },
+    {
+        "name": "Hip Adduction Machine",
+        "muscle_group": MuscleGroup.GLUTES,
+        "secondary_muscles": ["inner thighs"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit with legs apart against the pads. "
+            "Squeeze legs inward against resistance. Return slowly."
+        ),
+        "tips": "Targets inner thigh and hip adductors. Pair with abduction machine.",
+    },
+    {
+        "name": "Glute Kickback Machine",
+        "muscle_group": MuscleGroup.GLUTES,
+        "secondary_muscles": ["hamstrings"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Stand at the machine, place ankle behind the pad. "
+            "Kick leg back and upward. Squeeze glute at top. Return with control."
+        ),
+        "tips": "Keep torso stable. Full extension for maximum glute activation.",
+    },
+    {
+        "name": "Smith Machine Hip Thrust",
+        "muscle_group": MuscleGroup.GLUTES,
+        "secondary_muscles": ["hamstrings", "core"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Upper back on bench below Smith bar. Position bar over hips with pad. "
+            "Drive hips up to parallel. Squeeze glutes at top. Lower and repeat."
+        ),
+        "tips": "Smith machine allows easy loading without needing to roll the bar.",
+    },
+    {
+        "name": "Seated Hip Thrust Machine",
+        "muscle_group": MuscleGroup.GLUTES,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in the machine with the pad across your hips. "
+            "Drive hips upward against resistance. Return with control."
+        ),
+        "tips": "Dedicated hip thrust machine. Safer and easier to load than barbell version.",
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # CALVES
+    # ══════════════════════════════════════════════════════════════
+
+    {
+        "name": "Standing Calf Raise",
+        "muscle_group": MuscleGroup.CALVES,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Stand on calf raise machine. Rise onto toes as high as possible. "
+            "Lower below platform level."
+        ),
+        "tips": "Full range of motion is key — deep stretch at bottom, full contraction at top.",
+    },
+    {
+        "name": "Seated Calf Raise",
+        "muscle_group": MuscleGroup.CALVES,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Sit with knees under pad. Rise onto toes. Lower with control.",
+        "tips": "Targets soleus more than standing variation.",
+    },
+    {
+        "name": "Donkey Calf Raise",
+        "muscle_group": MuscleGroup.CALVES,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Hinge forward, balls of feet on edge. Rise onto toes. Lower for full stretch.",
+        "tips": "Hip flexion changes angle and stretches the gastrocnemius more.",
+    },
+    {
+        "name": "Single-Leg Calf Raise",
+        "muscle_group": MuscleGroup.CALVES,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Balance on one foot on a step edge. Rise onto toes. Lower for full stretch.",
+        "tips": "Hold a dumbbell for added resistance.",
+    },
+    {
+        "name": "Leg Press Calf Raise",
+        "muscle_group": MuscleGroup.CALVES,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Sit in the leg press machine. "
+            "Place only the balls of your feet at the bottom of the plate. "
+            "Push through toes to full extension. Lower for a full stretch."
+        ),
+        "tips": "Allows very heavy loading. Full stretch at the bottom is critical.",
+    },
+    {
+        "name": "Smith Machine Calf Raise",
+        "muscle_group": MuscleGroup.CALVES,
+        "secondary_muscles": [],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Stand under the Smith bar on a calf block or plate. "
+            "Rise onto toes. Lower below block level for full stretch."
+        ),
+        "tips": "Easy to load heavy. Use a plate or block for full range.",
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # CARDIO
+    # ══════════════════════════════════════════════════════════════
+
+    {
+        "name": "Treadmill Run",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["quads", "hamstrings", "calves"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Set desired speed and incline. Maintain upright posture. Swing arms naturally.",
+        "tips": "Tracked in duration/distance rather than sets/reps.",
+    },
+    {
+        "name": "Stationary Bike",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["quads", "calves"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Adjust seat height. Pedal at target RPM/resistance for duration.",
+        "tips": "Low impact. Great for active recovery days.",
+    },
+    {
+        "name": "Rowing Machine",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["back", "biceps", "legs"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Drive with legs first, then lean back, then pull handle to lower chest. "
+            "Reverse the sequence to return."
+        ),
+        "tips": "60% legs, 20% back, 20% arms. Great full-body cardio.",
+    },
+    {
+        "name": "Elliptical Trainer",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["quads", "hamstrings", "glutes", "shoulders"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Step onto the pedals and grip the handlebars. "
+            "Push and pull the handles while pedaling in an elliptical motion."
+        ),
+        "tips": (
+            "Low-impact cardio. "
+            "Push with legs and pull with arms for full-body activation. "
+            "Increase resistance to build intensity."
+        ),
+    },
+    {
+        "name": "Stair Climber",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["quads", "glutes", "calves"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": "Step onto the machine and set your pace. Step continuously, pressing each foot fully down.",
+        "tips": (
+            "Don't lean heavily on the rails — it reduces the workout intensity. "
+            "Great for glute and cardiovascular development."
+        ),
+    },
+    {
+        "name": "Stair Mill (Step Mill)",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["glutes", "hamstrings", "calves"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Step onto the rotating stair belt. "
+            "Walk upward at a steady pace, pressing each step fully."
+        ),
+        "tips": "Higher glute activation than a standard stair climber. Avoid leaning on rails.",
+    },
+    {
+        "name": "Recumbent Bike",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["quads", "hamstrings"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Sit in the reclined seat. Pedal at desired resistance and cadence.",
+        "tips": (
+            "Very low impact — ideal for rehabilitation or warm-up. "
+            "Back support makes it comfortable for long sessions."
+        ),
+    },
+    {
+        "name": "Air Bike (Assault Bike)",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["shoulders", "quads", "hamstrings"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Sit on the bike. "
+            "Pedal with legs while simultaneously pushing and pulling the handles."
+        ),
+        "tips": (
+            "Resistance increases as you pedal faster. "
+            "One of the most brutal conditioning tools. Great for HIIT intervals."
+        ),
+    },
+    {
+        "name": "Ski Erg",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["back", "shoulders", "core"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Grab both handles overhead. "
+            "Pull them down with both arms in a double-pole skiing motion. "
+            "Hinge at the hips as you pull."
+        ),
+        "tips": "Excellent low-impact upper-body cardio. Use a hip hinge, not just arm pull.",
+    },
+    {
+        "name": "Sled Push (Machine Track)",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["quads", "glutes", "shoulders", "core"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Load the sled. "
+            "Drive it forward by leaning in and pushing with alternating legs."
+        ),
+        "tips": (
+            "Low eccentric load — minimal soreness. "
+            "Keep a low driving angle for maximum power. Increases sprint and leg power."
+        ),
+    },
+    {
+        "name": "Jump Rope",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["calves", "shoulders"],
+        "equipment": EquipmentType.OTHER,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": "Jump at a consistent rhythm. Land softly on the balls of your feet.",
+        "tips": "Excellent warm-up or conditioning tool. Progress to double-unders.",
+    },
+    {
+        "name": "Burpee",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["chest", "quads", "shoulders", "core"],
+        "equipment": EquipmentType.BODYWEIGHT,
+        "exercise_type": ExerciseType.PLYOMETRIC,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Drop to a push-up position, perform push-up, "
+            "jump feet in, then explode up with a jump."
+        ),
+        "tips": "Full body conditioning. Modify by removing the jump if needed.",
+    },
+    {
+        "name": "Box Jump",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["quads", "glutes", "calves"],
+        "equipment": EquipmentType.OTHER,
+        "exercise_type": ExerciseType.PLYOMETRIC,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Stand in front of a box. Dip into a quarter squat and explode onto the box. "
+            "Step or jump back down."
+        ),
+        "tips": "Land softly with knees bent. Always step down — don't jump down from height.",
+    },
+    {
+        "name": "Battle Ropes",
+        "muscle_group": MuscleGroup.CARDIO,
+        "secondary_muscles": ["shoulders", "core", "forearms"],
+        "equipment": EquipmentType.OTHER,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Hold one rope in each hand. "
+            "Alternate or simultaneously slam ropes in waves."
+        ),
+        "tips": "High-intensity conditioning. Keep knees slightly bent throughout.",
+    },
+
+    # ══════════════════════════════════════════════════════════════
+    # FULL BODY / COMPOUND
+    # ══════════════════════════════════════════════════════════════
+
+    {
+        "name": "Power Clean",
+        "muscle_group": MuscleGroup.FULL_BODY,
+        "secondary_muscles": ["traps", "shoulders", "quads", "glutes", "back"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.ADVANCED,
+        "instructions": (
+            "Pull bar from floor, extend explosively through hips and knees, "
+            "then drop under bar and receive in a front rack position."
+        ),
+        "tips": "Requires coaching. Focus on hip extension power.",
+    },
+    {
+        "name": "Thruster",
+        "muscle_group": MuscleGroup.FULL_BODY,
+        "secondary_muscles": ["quads", "shoulders", "triceps", "core"],
+        "equipment": EquipmentType.BARBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.ADVANCED,
+        "instructions": (
+            "Front squat the bar, then use the momentum "
+            "to press overhead in one fluid movement."
+        ),
+        "tips": "Used in CrossFit. Efficient full-body conditioning.",
+    },
+    {
+        "name": "Kettlebell Swing",
+        "muscle_group": MuscleGroup.FULL_BODY,
+        "secondary_muscles": ["glutes", "hamstrings", "core", "shoulders"],
+        "equipment": EquipmentType.KETTLEBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Hip hinge to start swing. Drive hips forward explosively "
+            "to swing the kettlebell to shoulder height. "
+            "Let it swing back between legs."
+        ),
+        "tips": "This is a hip hinge — not a squat. Power comes from the hips.",
+    },
+    {
+        "name": "Kettlebell Clean and Press",
+        "muscle_group": MuscleGroup.FULL_BODY,
+        "secondary_muscles": ["shoulders", "back", "core"],
+        "equipment": EquipmentType.KETTLEBELL,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": "Clean kettlebell to shoulder. Press overhead. Lower and repeat.",
+        "tips": "Combines pulling and pressing in one movement.",
+    },
+    {
+        "name": "Medicine Ball Slam",
+        "muscle_group": MuscleGroup.FULL_BODY,
+        "secondary_muscles": ["core", "shoulders", "lats"],
+        "equipment": EquipmentType.OTHER,
+        "exercise_type": ExerciseType.PLYOMETRIC,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Raise medicine ball overhead, then slam it forcefully into the floor. "
+            "Pick it up and repeat."
+        ),
+        "tips": "Great for power and stress relief. Use a non-bounce slam ball.",
+    },
+    {
+        "name": "Smith Machine Thruster",
+        "muscle_group": MuscleGroup.FULL_BODY,
+        "secondary_muscles": ["quads", "shoulders", "triceps", "core"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Set bar at front-rack height inside Smith machine. "
+            "Front squat down, then use the momentum to press overhead in one movement."
+        ),
+        "tips": "Fixed bar path makes this safer to learn than the barbell version.",
+    },
+    {
+        "name": "Functional Trainer Cable Machine",
+        "muscle_group": MuscleGroup.FULL_BODY,
+        "secondary_muscles": ["core", "shoulders"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.STRENGTH,
+        "difficulty": DifficultyLevel.BEGINNER,
+        "instructions": (
+            "Adjust cables to desired height. "
+            "Perform chops, lifts, rows, or presses from various angles."
+        ),
+        "tips": (
+            "One of the most versatile machines in the gym. "
+            "Can be used for nearly every muscle group and movement pattern."
+        ),
+    },
+    {
+        "name": "Total Body Cardio Machine (Jacob's Ladder)",
+        "muscle_group": MuscleGroup.FULL_BODY,
+        "secondary_muscles": ["back", "shoulders", "quads", "core"],
+        "equipment": EquipmentType.MACHINE,
+        "exercise_type": ExerciseType.CARDIO,
+        "difficulty": DifficultyLevel.INTERMEDIATE,
+        "instructions": (
+            "Attach the harness belt and step onto the ladder rungs. "
+            "Climb at a natural pace using both hands and feet."
+        ),
+        "tips": "Self-paced — slows when you slow down. Excellent full-body cardio with no joint impact.",
+    },
+]
+
+
+class Command(BaseCommand):
+    help = "Seeds the complete exercise library (146 exercises, all muscle groups × all equipment)."
+
+    def handle(self, *args, **options):
+        created_count = 0
+        updated_count = 0
+        skipped_count = 0
+
+        for data in ALL_EXERCISES:
+            obj, created = Exercise.objects.get_or_create(
+                name=data["name"],
+                defaults={
+                    "muscle_group":      data["muscle_group"],
+                    "secondary_muscles": data.get("secondary_muscles", []),
+                    "equipment":         data["equipment"],
+                    "exercise_type":     data["exercise_type"],
+                    "difficulty":        data["difficulty"],
+                    "instructions":      data.get("instructions", ""),
+                    "tips":              data.get("tips", ""),
+                    "is_global":         True,
+                    "created_by":        None,
+                },
+            )
+
+            if not created:
+                changed = False
+                for field in (
+                    "muscle_group", "secondary_muscles", "equipment",
+                    "exercise_type", "difficulty", "instructions", "tips",
+                ):
+                    new_val = data.get(field)
+                    if new_val is not None and getattr(obj, field) != new_val:
+                        setattr(obj, field, new_val)
+                        changed = True
+                if changed:
+                    obj.save()
+                    updated_count += 1
+                else:
+                    skipped_count += 1
+            else:
+                created_count += 1
+
+        total = len(ALL_EXERCISES)
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"\  Exercise seed complete — {total} exercises total\n"
+                f"   Created:  {created_count}\n"
+                f"   Updated:  {updated_count}\n"
+                f"   Skipped:  {skipped_count} (already up-to-date)\n"
+            )
+        )
