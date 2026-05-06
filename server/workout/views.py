@@ -88,6 +88,7 @@ class ExerciseProgramViewList(APIView):
             return Response({"error": "Invalid program"}, status=400)
 
         muscles = self.PROGRAM_TO_MUSCLES[program]
+        print(muscles)
         exercises = Exercise.objects.filter(
             muscle_group__in=muscles
         )
