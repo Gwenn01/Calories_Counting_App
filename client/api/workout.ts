@@ -8,7 +8,7 @@ export const createWorkoutProfile = async (data: FitnessProfile) => {
 };
 
 export const updateWorkoutProfile = async (data: FitnessProfile) => {
-  const res = await api.put("api/workout/profile/", data);
+  const res = await api.put("api/workout/profile-edit/", data);
   return res.data;
 };
 

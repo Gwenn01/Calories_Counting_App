@@ -51,6 +51,37 @@ class WorkoutProfileViewList(APIView):
 
             return Response(serializer.errors, status=400)
         
+class WorkoutProfileViewDetails(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request):
+        user = request.user
+        try:
+            user.fitness_profile
+            serializer = UserFitnessProfileSerializer(user.fitness_profile, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=200)
+            return Response(serializer.errors, status=400)               
+        except ObjectDoesNotExist:
+            return Response(
+                {"message": "You don't have a workout profile"},
+                status=400
+            )
+
+    def delete(self, request):
+        user = request.user
+        try:
+            user.fitness_profile.delete()
+            return Response(
+                {"message": "Your workout profile has been deleted"},
+        )
+        except ObjectDoesNotExist:
+            return Response(
+                {"message": "You don't have a workout profile"},
+                status=400
+            )
+        
 # EXERCISE ============================================================================
 class ExerciseViewList(APIView):
     permission_classes = [IsAuthenticated]

@@ -5,6 +5,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 urlpatterns = [
     #workout
     path('workout/profile/', views.WorkoutProfileViewList.as_view(), name='workout-profile-list'),
+    path('workout/profile-edit/', views.WorkoutProfileViewDetails.as_view(), name='workout-profile-details'),
     # exercise
     path('workout/exercise/', views.ExerciseViewList.as_view(), name='excercise-list'),
     path('workout/exercise/<str:muscle>/', views.ExerciseMuscleViewList.as_view(), name='excercise-muscle-list'),
