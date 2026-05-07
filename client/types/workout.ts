@@ -33,3 +33,30 @@ export interface FitnessProfile {
   progression_increment_lbs: number;
   updated_at?: string;
 }
+
+export type TemplateExercise = {
+  id: number;
+  exercise: {
+    id: number;
+    name: string;
+    muscle_group: string;
+    equipment: string;
+  };
+  order: number;
+  default_sets: number;
+  default_reps: number;
+  default_weight: number;
+  default_rest: number;
+  notes: string;
+};
+
+export type WorkoutTemplate = {
+  id: number;
+  name: string;
+  category: string;
+  description: string;
+  is_public: boolean;
+  estimated_duration: number;
+  template_exercises?: TemplateExercise[]; // ← make optional
+  created_at?: string;
+};
