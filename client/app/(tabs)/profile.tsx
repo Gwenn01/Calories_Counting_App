@@ -101,6 +101,7 @@ export default function ProfileScreen() {
       setProfile(data);
       setShowEditProfile(false);
       showToast("Success!", "Update successful", "success");
+      await fetchProfileData();
     } catch (error) {
       showToast("Error", "Server error", "error");
       console.log("Failed to update profile");
@@ -110,10 +111,10 @@ export default function ProfileScreen() {
   };
 
   // workout profile
-  const handleSubmit = async (data: FitnessProfile) => {
+  const handleSubmitWorkoutProfile = async (data: FitnessProfile) => {
     try {
+      setLoading(true);
       let res;
-
       if (profile) {
         // UPDATE
         res = await updateWorkoutProfile(data);
@@ -121,13 +122,16 @@ export default function ProfileScreen() {
         // CREATE
         res = await createWorkoutProfile(data);
       }
-
       const profileData = res.data ?? res;
 
       setProfile(profileData);
       setShowModal(false);
+      showToast("Success!", "Update successful", "success");
+      await fetchProfileData();
     } catch (err) {
       console.error("Profile error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -258,26 +262,12 @@ export default function ProfileScreen() {
                 </View>
               </View>
             </View>
-
-            {/* Edit Button */}
-            <Pressable
-              onPress={() => setShowEditProfile(true)}
-              className="w-9 h-9 rounded-[12px] items-center justify-center"
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? "#1e293b" : "#0d1f2d",
-                borderWidth: 1,
-                borderColor: "#1e293b",
-              })}
-            >
-              <Feather name="edit-2" size={13} color="#475569" />
-            </Pressable>
           </View>
         </View>
 
-        {/* ---------- BODY METRICS ---------- */}
-        {/* Body Metrics Card */}
+        {/* ---------- BODY METRICS + MACRO GOALS ---------- */}
         <View
-          className="rounded-[28px] p-5 mb-3 bg-white"
+          className="bg-white rounded-[28px] p-5 mb-3"
           style={{
             borderWidth: 1,
             borderColor: "#f1f5f9",
@@ -289,21 +279,45 @@ export default function ProfileScreen() {
           }}
         >
           {/* Header */}
-          <View className="flex-row items-center gap-2 mb-4">
-            <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase">
-              BODY METRICS
+          <View className="flex-row items-center mb-4">
+            <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase flex-1">
+              PROFILE
             </Text>
+
+            <Pressable
+              onPress={() => setShowEditProfile(true)}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.7 : 1,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 4,
+                backgroundColor: "#f0fdf4",
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: "#bbf7d0",
+              })}
+            >
+              <View className="flex-row items-center" style={{ gap: 4 }}>
+                <Feather name="edit-2" size={12} color="#16a34a" />
+                <Text className="text-emerald-600 font-bold text-xs">Edit</Text>
+              </View>
+            </Pressable>
           </View>
 
-          {/* Row 1 */}
+          {/* ── Body Metrics ── */}
+          <Text className="text-[10px] font-bold tracking-widest text-slate-300 uppercase mb-2 ml-1">
+            Body Metrics
+          </Text>
+
           <View className="flex-row mb-2 mx-[-4px]">
             <MetricItem metricKey="age" value={`${profile.age} yrs`} />
             <MetricItem metricKey="weight" value={`${profile.weight} kg`} />
             <MetricItem metricKey="height" value={`${profile.height} cm`} />
           </View>
 
-          {/* Row 2 */}
-          <View className="flex-row mx-[-4px]">
+          <View className="flex-row mb-4 mx-[-4px]">
             <MetricItem metricKey="gender" value={`${profile.gender}`} />
             <MetricItem
               metricKey="activity_level"
@@ -311,12 +325,13 @@ export default function ProfileScreen() {
             />
             <MetricItem metricKey="goal" value={`${profile.goal}`} />
           </View>
-        </View>
 
-        {/* ---------- MACRO GOALS ---------- */}
-        <View className="bg-white rounded-[28px] p-6 mb-3 shadow-sm">
-          <Text className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-4">
-            MACRONUTRIENT GOALS
+          {/* Divider */}
+          <View className="h-[1px] bg-slate-100 mb-4" />
+
+          {/* ── Macronutrient Goals ── */}
+          <Text className="text-[10px] font-bold tracking-widest text-slate-300 uppercase mb-2 ml-1">
+            Macronutrient Goals
           </Text>
 
           <View className="flex-row mx-[-4px]">
@@ -346,6 +361,14 @@ export default function ProfileScreen() {
             />
           </View>
         </View>
+
+        {/* ---------- Edit Modal ---------- */}
+        <EditProfileModal
+          visible={showEditProfile}
+          onClose={() => setShowEditProfile(false)}
+          profile={profile}
+          onSave={handleSaveProfile}
+        />
 
         {/* ---------- STREAK SECTION ---------- */}
         {/* Added relative and overflow-hidden to contain the decorative background circle */}
@@ -391,6 +414,7 @@ export default function ProfileScreen() {
             </Text>
           </View>
         </View>
+
         {/* ---------- WORKOUT PROFILE ---------- */}
         {workoutProfile && (
           <WorkoutProfileCard
@@ -403,25 +427,8 @@ export default function ProfileScreen() {
         <FitnessProfileModal
           isOpen={showModal}
           onClose={() => setShowModal(false)}
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmitWorkoutProfile}
           initialData={workoutProfile}
-        />
-
-        {/* ---------- SETTINGS ---------- */}
-        <View className="bg-white rounded-[28px] overflow-hidden shadow-sm mb-3">
-          <SettingsRow
-            icon="edit-3"
-            label="Edit Profile"
-            onPress={() => setShowEditProfile(true)}
-          />
-          <SettingsRow icon="info" label="About this app" />
-        </View>
-        {/* ---------- Edit Modal ---------- */}
-        <EditProfileModal
-          visible={showEditProfile}
-          onClose={() => setShowEditProfile(false)}
-          profile={profile}
-          onSave={handleSaveProfile}
         />
 
         {/* ---------- SIGN OUT ---------- */}
