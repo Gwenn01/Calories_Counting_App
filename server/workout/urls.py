@@ -12,5 +12,7 @@ urlpatterns = [
     path('workout/exercise-program/<str:program>/', views.ExerciseProgramViewList.as_view(), name='excercise-program-list'),
     #template 
     path('workout/template/', views.WorkoutTemplateViewList.as_view(), name='workout-template-list'),
+    path('workout/template/<int:pk>/', views.WorkoutTemplateViewDetails.as_view(), name='workout-template-details'),
     path('workout/exercise-template/', views.TemplateExerciseViewList.as_view(), name='template-exercise-list'),
+    path('workout/exercise-template/<int:pk>/', views.TemplateExerciseViewDetails.as_view(), name='template-exercise-details'),
 ]

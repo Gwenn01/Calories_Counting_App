@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import  (
     Exercise,
+    TemplateExercise,
     WorkoutTemplate
 )
 from .serializers import (
@@ -145,6 +146,28 @@ class WorkoutTemplateViewList(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
     
+
+class WorkoutTemplateViewDetails(APIView):
+     permission_classes = [IsAuthenticated]
+
+     def get(self, request, pk):
+        template = WorkoutTemplate.objects.get(pk=pk)
+        serializer = WorkoutTemplateSerializer(template)
+        return Response(serializer.data, status=200)
+
+     def put(self, request, pk):
+        template = WorkoutTemplate.objects.get(pk=pk)
+        serializer = WorkoutTemplateSerializer(template, data=request.data) 
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)
+    
+     def delete(self, request, pk):
+        template = WorkoutTemplate.objects.get(pk=pk)
+        template.delete()
+        return Response(status=204)
+    
 class TemplateExerciseViewList(APIView):
      permission_classes = [IsAuthenticated]
 
@@ -153,4 +176,25 @@ class TemplateExerciseViewList(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)    
+    
+class TemplateExerciseViewDetails(APIView):
+     permission_classes = [IsAuthenticated]
+
+     def get(self, request, pk):
+        template = TemplateExercise.objects.get(pk=pk)
+        serializer = TemplateExerciseSerializer(template)
+        return Response(serializer.data, status=200)
+
+     def put(self, request, pk):
+        template = TemplateExercise.objects.get(pk=pk)
+        serializer = TemplateExerciseSerializer(template, data=request.data) 
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
+
+     def delete(self, request, pk):
+        template = TemplateExercise.objects.get(pk=pk)
+        template.delete()
+        return Response(status=204)
