@@ -1,5 +1,5 @@
 // components/Workout/TemplateModal.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  FlatList,
+  ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,8 +19,13 @@ import {
   createTemplateExercise,
   editTemplateExercise,
   deleteTemplateExercise,
+  fetchExercisesByProgram, // ← add this to your api/workout.ts
 } from "@/api/workout";
-import type { WorkoutTemplate, TemplateExercise } from "@/types/workout";
+import type {
+  Exercise,
+  WorkoutTemplate,
+  TemplateExercise,
+} from "@/types/workout";
 
 type Props = {
   visible: boolean;
@@ -37,17 +44,19 @@ const CATEGORIES = [
   "cardio",
 ];
 
-// ─── Default blank exercise form ─────────────────────────────────
 const blankExerciseForm = () => ({
-  exercise_id: "",
-  exercise_name: "",
-  order: 1,
   default_sets: "3",
   default_reps: "8",
   default_weight: "0",
   default_rest: "90",
   notes: "",
 });
+
+const DIFFICULTY_COLOR: Record<string, string> = {
+  beginner: "#10b981",
+  intermediate: "#f97316",
+  advanced: "#ef4444",
+};
 
 export default function TemplateModal({
   visible,
@@ -62,22 +71,32 @@ export default function TemplateModal({
   const [duration, setDuration] = useState("60");
   const [loading, setLoading] = useState(false);
 
-  // ── Exercise management ───────────────────────────────────────
+  // ── Exercise list (from server) ───────────────────────────────
+  const [serverExercises, setServerExercises] = useState<Exercise[]>([]);
+  const [exercisesLoading, setExercisesLoading] = useState(false);
+  const [search, setSearch] = useState("");
+
+  // ── Template exercises ────────────────────────────────────────
   const [exercises, setExercises] = useState<TemplateExercise[]>([]);
+  const [savedTemplateId, setSavedTemplateId] = useState<number | null>(null);
+
+  // ── Exercise form ─────────────────────────────────────────────
+  const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [showExerciseForm, setShowExerciseForm] = useState(false);
   const [exerciseForm, setExerciseForm] = useState(blankExerciseForm());
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null,
+  );
   const [editingExercise, setEditingExercise] =
     useState<TemplateExercise | null>(null);
   const [exerciseLoading, setExerciseLoading] = useState(false);
 
-  // ── Saved template id (needed to add exercises after create) ──
-  const [savedTemplateId, setSavedTemplateId] = useState<number | null>(null);
-
+  // ── Reset on open ─────────────────────────────────────────────
   useEffect(() => {
     if (initialData) {
       setName(initialData.name);
       setCategory(initialData.category);
-      setDescription(initialData.description);
+      setDescription(initialData.description ?? "");
       setDuration(String(initialData.estimated_duration));
       setExercises(initialData.template_exercises ?? []);
       setSavedTemplateId(initialData.id);
@@ -89,12 +108,35 @@ export default function TemplateModal({
       setExercises([]);
       setSavedTemplateId(null);
     }
+    setShowExercisePicker(false);
     setShowExerciseForm(false);
     setEditingExercise(null);
-    setExerciseForm(blankExerciseForm());
+    setSelectedExercise(null);
+    setSearch("");
   }, [initialData, visible]);
 
-  // ── Save template (create or update) ─────────────────────────
+  // ── Fetch exercises when category changes ─────────────────────
+  useEffect(() => {
+    if (!visible) return;
+    const load = async () => {
+      setExercisesLoading(true);
+      try {
+        const data = await fetchExercisesByProgram(category);
+        setServerExercises(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setExercisesLoading(false);
+      }
+    };
+    load();
+  }, [category, visible]);
+
+  const filteredExercises = serverExercises.filter((e) =>
+    e.name.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  // ── Save template ─────────────────────────────────────────────
   const handleSave = async () => {
     if (!name.trim()) return;
     setLoading(true);
@@ -106,7 +148,6 @@ export default function TemplateModal({
         is_public: false,
         estimated_duration: Number(duration) || 60,
       };
-
       let saved: WorkoutTemplate;
       if (initialData) {
         saved = await editWorkoutTemplate(initialData.id, payload as any);
@@ -114,8 +155,6 @@ export default function TemplateModal({
         saved = await createWorkoutTemplate(payload as any);
         setSavedTemplateId(saved.id);
       }
-
-      // Merge local exercises into the saved template for the parent
       onSaved({ ...saved, template_exercises: exercises });
       onClose();
     } catch (e) {
@@ -125,23 +164,26 @@ export default function TemplateModal({
     }
   };
 
-  // ── Open add exercise form ────────────────────────────────────
-  const handleOpenAddExercise = () => {
-    setEditingExercise(null);
-    setExerciseForm({
-      ...blankExerciseForm(),
-      order: exercises.length + 1,
-    });
+  // ── Pick exercise → show form ─────────────────────────────────
+  const handlePickExercise = (ex: Exercise) => {
+    setSelectedExercise(ex);
+    setExerciseForm(blankExerciseForm());
+    setShowExercisePicker(false);
     setShowExerciseForm(true);
   };
 
-  // ── Open edit exercise form ───────────────────────────────────
+  // ── Open edit form ────────────────────────────────────────────
   const handleOpenEditExercise = (te: TemplateExercise) => {
     setEditingExercise(te);
+    setSelectedExercise({
+      id: te.exercise.id,
+      name: te.exercise.name,
+      muscle_group: te.exercise.muscle_group,
+      equipment: te.exercise.equipment,
+      difficulty: "",
+      exercise_type: "",
+    });
     setExerciseForm({
-      exercise_id: String(te.exercise.id),
-      exercise_name: te.exercise.name,
-      order: String(te.order) as any,
       default_sets: String(te.default_sets),
       default_reps: String(te.default_reps),
       default_weight: String(te.default_weight),
@@ -151,7 +193,7 @@ export default function TemplateModal({
     setShowExerciseForm(true);
   };
 
-  // ── Save exercise (add or edit) ───────────────────────────────
+  // ── Save exercise ─────────────────────────────────────────────
   const handleSaveExercise = async () => {
     const templateId = savedTemplateId ?? initialData?.id;
     if (!templateId) {
@@ -161,14 +203,14 @@ export default function TemplateModal({
       );
       return;
     }
-    if (!exerciseForm.exercise_name.trim()) return;
+    if (!selectedExercise) return;
 
     setExerciseLoading(true);
     try {
       const payload = {
         template: templateId,
-        exercise_id: Number(exerciseForm.exercise_id) || undefined,
-        order: exercises.length + 1,
+        exercise_id: selectedExercise.id,
+        order: editingExercise ? editingExercise.order : exercises.length + 1,
         default_sets: Number(exerciseForm.default_sets) || 3,
         default_reps: Number(exerciseForm.default_reps) || 8,
         default_weight: Number(exerciseForm.default_weight) || 0,
@@ -177,7 +219,6 @@ export default function TemplateModal({
       };
 
       if (editingExercise) {
-        // UPDATE
         const updated = await editTemplateExercise({
           ...payload,
           id: editingExercise.id,
@@ -186,14 +227,13 @@ export default function TemplateModal({
           prev.map((e) => (e.id === editingExercise.id ? updated : e)),
         );
       } else {
-        // CREATE
         const created = await createTemplateExercise(payload as any);
         setExercises((prev) => [...prev, created]);
       }
 
       setShowExerciseForm(false);
       setEditingExercise(null);
-      setExerciseForm(blankExerciseForm());
+      setSelectedExercise(null);
     } catch (e) {
       console.error(e);
     } finally {
@@ -203,29 +243,21 @@ export default function TemplateModal({
 
   // ── Delete exercise ───────────────────────────────────────────
   const handleDeleteExercise = (te: TemplateExercise) => {
-    Alert.alert(
-      "Remove Exercise",
-      `Remove "${te.exercise.name}" from this template?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteTemplateExercise(te.id);
-              setExercises((prev) => prev.filter((e) => e.id !== te.id));
-            } catch (e) {
-              console.error(e);
-            }
-          },
+    Alert.alert("Remove Exercise", `Remove "${te.exercise.name}"?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteTemplateExercise(te.id);
+            setExercises((prev) => prev.filter((e) => e.id !== te.id));
+          } catch (e) {
+            console.error(e);
+          }
         },
-      ],
-    );
-  };
-
-  const updateExerciseField = (key: string, value: string) => {
-    setExerciseForm((prev) => ({ ...prev, [key]: value }));
+      },
+    ]);
   };
 
   // ─────────────────────────────────────────────────────────────
@@ -237,7 +269,10 @@ export default function TemplateModal({
             {initialData ? "Edit Template" : "Create Template"}
           </Text>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
             {/* ── Template Info ── */}
             <Section label="Template Info">
               <IconInput
@@ -293,17 +328,142 @@ export default function TemplateModal({
             <Section
               label="Exercises"
               action={
-                <Pressable
-                  onPress={handleOpenAddExercise}
-                  className="flex-row items-center gap-x-1 bg-orange-50 border border-orange-100 px-3 py-1 rounded-xl"
-                >
-                  <Ionicons name="add" size={13} color="#f97316" />
-                  <Text className="text-xs font-bold text-orange-500">Add</Text>
-                </Pressable>
+                !showExercisePicker && !showExerciseForm ? (
+                  <Pressable
+                    onPress={() => setShowExercisePicker(true)}
+                    className="flex-row items-center gap-x-1 bg-orange-50 border border-orange-100 px-3 py-1 rounded-xl"
+                  >
+                    <Ionicons name="add" size={13} color="#f97316" />
+                    <Text className="text-xs font-bold text-orange-500">
+                      Add
+                    </Text>
+                  </Pressable>
+                ) : null
               }
             >
-              {/* Exercise form (inline) */}
-              {showExerciseForm && (
+              {/* ── Exercise Picker ── */}
+              {showExercisePicker && (
+                <View className="mb-3">
+                  {/* Search bar */}
+                  <View className="flex-row items-center border border-slate-200 rounded-xl px-3 py-2 bg-white mb-2">
+                    <Feather name="search" size={14} color="#94a3b8" />
+                    <TextInput
+                      value={search}
+                      onChangeText={setSearch}
+                      placeholder={`Search ${category.replace("_", " ")} exercises...`}
+                      placeholderTextColor="#cbd5e1"
+                      className="flex-1 text-slate-800 text-sm ml-2"
+                      style={{ padding: 0 }}
+                    />
+                    {search.length > 0 && (
+                      <Pressable onPress={() => setSearch("")}>
+                        <Feather name="x" size={14} color="#94a3b8" />
+                      </Pressable>
+                    )}
+                  </View>
+
+                  {/* Category badge */}
+                  <View className="flex-row items-center mb-2">
+                    <View className="bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full">
+                      <Text className="text-[10px] font-bold text-orange-500 capitalize">
+                        {category.replace("_", " ")} ·{" "}
+                        {filteredExercises.length} exercises
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* List */}
+                  {exercisesLoading ? (
+                    <View className="py-6 items-center">
+                      <ActivityIndicator size="small" color="#f97316" />
+                      <Text className="text-xs text-slate-400 mt-2">
+                        Loading exercises...
+                      </Text>
+                    </View>
+                  ) : (
+                    <View
+                      style={{ maxHeight: 260 }}
+                      className="rounded-2xl border border-slate-100 bg-white overflow-hidden"
+                    >
+                      <ScrollView
+                        nestedScrollEnabled
+                        showsVerticalScrollIndicator={false}
+                      >
+                        {filteredExercises.map((ex, i) => (
+                          <Pressable
+                            key={ex.id}
+                            onPress={() => handlePickExercise(ex)}
+                            className={`flex-row items-center px-3 py-3 ${
+                              i < filteredExercises.length - 1
+                                ? "border-b border-slate-50"
+                                : ""
+                            }`}
+                            style={({ pressed }) => ({
+                              opacity: pressed ? 0.7 : 1,
+                            })}
+                          >
+                            <View className="w-8 h-8 rounded-xl bg-orange-100 items-center justify-center mr-3">
+                              <Ionicons
+                                name="barbell-outline"
+                                size={14}
+                                color="#f97316"
+                              />
+                            </View>
+                            <View className="flex-1">
+                              <Text className="text-sm font-bold text-slate-700">
+                                {ex.name}
+                              </Text>
+                              <Text className="text-xs text-slate-400 mt-0.5 capitalize">
+                                {ex.muscle_group} · {ex.equipment}
+                              </Text>
+                            </View>
+                            <View
+                              className="px-2 py-0.5 rounded-full"
+                              style={{
+                                backgroundColor: `${DIFFICULTY_COLOR[ex.difficulty] ?? "#64748b"}18`,
+                              }}
+                            >
+                              <Text
+                                className="text-[9px] font-bold capitalize"
+                                style={{
+                                  color:
+                                    DIFFICULTY_COLOR[ex.difficulty] ??
+                                    "#64748b",
+                                }}
+                              >
+                                {ex.difficulty}
+                              </Text>
+                            </View>
+                          </Pressable>
+                        ))}
+                        {filteredExercises.length === 0 && (
+                          <View className="py-6 items-center">
+                            <Text className="text-sm text-slate-400">
+                              No exercises found
+                            </Text>
+                          </View>
+                        )}
+                      </ScrollView>
+                    </View>
+                  )}
+
+                  {/* Cancel picker */}
+                  <Pressable
+                    onPress={() => {
+                      setShowExercisePicker(false);
+                      setSearch("");
+                    }}
+                    className="mt-2 py-2.5 rounded-xl bg-slate-100 items-center"
+                  >
+                    <Text className="text-slate-500 font-semibold text-sm">
+                      Cancel
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+
+              {/* ── Exercise Config Form ── */}
+              {showExerciseForm && selectedExercise && (
                 <View
                   className="rounded-2xl p-4 mb-3"
                   style={{
@@ -312,25 +472,47 @@ export default function TemplateModal({
                     backgroundColor: "#fff7ed",
                   }}
                 >
-                  <Text className="text-[10px] font-bold text-orange-400 uppercase tracking-widest mb-3">
-                    {editingExercise ? "Edit Exercise" : "New Exercise"}
-                  </Text>
+                  {/* Selected exercise header */}
+                  <View
+                    className="flex-row items-center mb-4 pb-3"
+                    style={{
+                      borderBottomWidth: 1,
+                      borderBottomColor: "#ffedd5",
+                    }}
+                  >
+                    <View className="w-9 h-9 rounded-xl bg-orange-100 items-center justify-center mr-3">
+                      <Ionicons
+                        name="barbell-outline"
+                        size={16}
+                        color="#f97316"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-sm font-black text-slate-800">
+                        {selectedExercise.name}
+                      </Text>
+                      <Text className="text-xs text-slate-400 capitalize mt-0.5">
+                        {selectedExercise.muscle_group} ·{" "}
+                        {selectedExercise.equipment}
+                      </Text>
+                    </View>
+                    {!editingExercise && (
+                      <Pressable
+                        onPress={() => {
+                          setShowExerciseForm(false);
+                          setShowExercisePicker(true);
+                        }}
+                      >
+                        <Text className="text-xs text-orange-500 font-bold">
+                          Change
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
 
-                  <IconInput
-                    fieldKey="exercise_name"
-                    label="Exercise Name"
-                    value={exerciseForm.exercise_name}
-                    onChange={(v) => updateExerciseField("exercise_name", v)}
-                    placeholder="e.g. Bench Press"
-                  />
-                  <IconInput
-                    fieldKey="exercise_id"
-                    label="Exercise ID (from DB)"
-                    value={exerciseForm.exercise_id}
-                    onChange={(v) => updateExerciseField("exercise_id", v)}
-                    keyboard="numeric"
-                    placeholder="Optional"
-                  />
+                  <Text className="text-[10px] font-bold text-orange-400 uppercase tracking-widest mb-3">
+                    Set Defaults
+                  </Text>
 
                   <View className="flex-row gap-x-3">
                     <View className="flex-1">
@@ -338,7 +520,9 @@ export default function TemplateModal({
                         fieldKey="default_sets"
                         label="Sets"
                         value={exerciseForm.default_sets}
-                        onChange={(v) => updateExerciseField("default_sets", v)}
+                        onChange={(v) =>
+                          setExerciseForm((p) => ({ ...p, default_sets: v }))
+                        }
                         keyboard="numeric"
                       />
                     </View>
@@ -347,7 +531,9 @@ export default function TemplateModal({
                         fieldKey="default_reps"
                         label="Reps"
                         value={exerciseForm.default_reps}
-                        onChange={(v) => updateExerciseField("default_reps", v)}
+                        onChange={(v) =>
+                          setExerciseForm((p) => ({ ...p, default_reps: v }))
+                        }
                         keyboard="numeric"
                       />
                     </View>
@@ -360,7 +546,7 @@ export default function TemplateModal({
                         label="Weight"
                         value={exerciseForm.default_weight}
                         onChange={(v) =>
-                          updateExerciseField("default_weight", v)
+                          setExerciseForm((p) => ({ ...p, default_weight: v }))
                         }
                         keyboard="numeric"
                         unit="kg"
@@ -371,7 +557,9 @@ export default function TemplateModal({
                         fieldKey="default_rest"
                         label="Rest"
                         value={exerciseForm.default_rest}
-                        onChange={(v) => updateExerciseField("default_rest", v)}
+                        onChange={(v) =>
+                          setExerciseForm((p) => ({ ...p, default_rest: v }))
+                        }
                         keyboard="numeric"
                         unit="sec"
                       />
@@ -382,16 +570,18 @@ export default function TemplateModal({
                     fieldKey="notes"
                     label="Notes"
                     value={exerciseForm.notes}
-                    onChange={(v) => updateExerciseField("notes", v)}
+                    onChange={(v) =>
+                      setExerciseForm((p) => ({ ...p, notes: v }))
+                    }
                     placeholder="Optional cues"
                   />
 
-                  {/* Form buttons */}
-                  <View className="flex-row gap-x-2 mt-2">
+                  <View className="flex-row gap-x-2 mt-1">
                     <Pressable
                       onPress={() => {
                         setShowExerciseForm(false);
                         setEditingExercise(null);
+                        setSelectedExercise(null);
                       }}
                       className="flex-1 py-2.5 rounded-xl bg-white border border-slate-200 items-center"
                     >
@@ -416,21 +606,26 @@ export default function TemplateModal({
                 </View>
               )}
 
-              {/* Exercise list */}
-              {exercises.length === 0 && !showExerciseForm && (
-                <View
-                  className="py-6 items-center rounded-2xl"
-                  style={{
-                    borderWidth: 1.5,
-                    borderColor: "#f1f5f9",
-                    borderStyle: "dashed",
-                  }}
-                >
-                  <Text className="text-slate-300 text-sm font-medium">
-                    No exercises yet
-                  </Text>
-                </View>
-              )}
+              {/* ── Exercise List ── */}
+              {exercises.length === 0 &&
+                !showExercisePicker &&
+                !showExerciseForm && (
+                  <View
+                    className="py-6 items-center rounded-2xl"
+                    style={{
+                      borderWidth: 1.5,
+                      borderColor: "#f1f5f9",
+                      borderStyle: "dashed",
+                    }}
+                  >
+                    <Text className="text-slate-300 text-sm font-medium">
+                      No exercises yet
+                    </Text>
+                    <Text className="text-slate-200 text-xs mt-0.5">
+                      Tap Add to pick from the library
+                    </Text>
+                  </View>
+                )}
 
               {exercises.map((te, i) => (
                 <View
@@ -439,14 +634,11 @@ export default function TemplateModal({
                     i < exercises.length - 1 ? "border-b border-slate-100" : ""
                   }`}
                 >
-                  {/* Order badge */}
                   <View className="w-6 h-6 rounded-lg bg-orange-100 items-center justify-center mr-3">
                     <Text className="text-[10px] font-black text-orange-500">
                       {te.order}
                     </Text>
                   </View>
-
-                  {/* Info */}
                   <View className="flex-1">
                     <Text className="text-sm font-bold text-slate-700">
                       {te.exercise.name}
@@ -456,16 +648,12 @@ export default function TemplateModal({
                       kg · {te.default_rest}s rest
                     </Text>
                   </View>
-
-                  {/* Edit */}
                   <Pressable
                     onPress={() => handleOpenEditExercise(te)}
                     className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 items-center justify-center ml-1"
                   >
                     <Feather name="edit-2" size={12} color="#94a3b8" />
                   </Pressable>
-
-                  {/* Delete */}
                   <Pressable
                     onPress={() => handleDeleteExercise(te)}
                     className="w-8 h-8 rounded-xl bg-red-50 border border-red-100 items-center justify-center ml-1"
@@ -503,7 +691,7 @@ export default function TemplateModal({
   );
 }
 
-/* ── Section wrapper ── */
+/* ── Section ── */
 function Section({
   label,
   children,
@@ -572,18 +760,6 @@ function IconInput({
       color: "#3b82f6",
       bg: "#eff6ff",
       border: "#dbeafe",
-    },
-    exercise_name: {
-      icon: "activity",
-      color: "#f97316",
-      bg: "#fff7ed",
-      border: "#ffedd5",
-    },
-    exercise_id: {
-      icon: "hash",
-      color: "#64748b",
-      bg: "#f8fafc",
-      border: "#e2e8f0",
     },
     default_sets: {
       icon: "layers",

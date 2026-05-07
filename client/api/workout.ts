@@ -21,6 +21,12 @@ export const fetchWorkoutProfile = async () => {
   return res.data;
 };
 
+// Exercise ==================================================================
+export const fetchExercisesByProgram = async (program: string) => {
+  const res = await api.get(`api/workout/exercise-program/${program}/`);
+  return res.data;
+};
+
 // workout template =================================================================
 export const createWorkoutTemplate = async (data: WorkoutTemplate) => {
   const res = await api.post("api/workout/template/", data);

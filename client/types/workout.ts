@@ -15,14 +15,6 @@ export interface SetRow {
   done: boolean;
 }
 
-export interface Exercise {
-  id: string;
-  name: string;
-  sets: SetRow[];
-  notes: string;
-  isFavorite: boolean;
-}
-
 export interface FitnessProfile {
   id?: number;
   weight_unit: "kg" | "lbs";
@@ -33,6 +25,15 @@ export interface FitnessProfile {
   progression_increment_lbs: number;
   updated_at?: string;
 }
+
+export type Exercise = {
+  id: number;
+  name: string;
+  muscle_group: string;
+  equipment: string;
+  difficulty: string;
+  exercise_type: string;
+};
 
 export type TemplateExercise = {
   id: number;

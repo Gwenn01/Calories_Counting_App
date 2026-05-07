@@ -93,14 +93,14 @@ export default function WorkoutScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header =========================================================================================================== */}
+        {/* HEADER ===========================================================================================================*/}
         <WorkoutHeader
           currentDate={currentDate}
           onPrev={goPrevDay}
           onNext={goNextDay}
         />
 
-        {/* Hero =========================================================================================================== */}
+        {/* SESSIONS =========================================================================================================== */}
         <View className="bg-white rounded-[32px] border border-slate-100 shadow-sm p-8 items-center mt-4">
           <View className="w-20 h-20 rounded-[24px] bg-orange-50 border border-orange-100 items-center justify-center mb-5">
             <Ionicons name="barbell-outline" size={36} color="#f97316" />
@@ -113,7 +113,7 @@ export default function WorkoutScreen() {
           </Text>
         </View>
 
-        {/*Templates =========================================================================================================== */}
+        {/* TEMPLATE =========================================================================================================== */}
         <View className="mt-3 bg-white rounded-[28px] border border-slate-100 shadow-sm p-5">
           {/* Header row */}
           <View className="flex-row items-center justify-between mb-4">
