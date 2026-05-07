@@ -179,7 +179,8 @@ const MealSection = memo(function MealSection({
 export default function AddFoodScreen() {
   const [activeTab, setActiveTab] = useState<TabType>("log");
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [loading, setLoading] = useState(false);
+  const [logLoading, setLogLoading] = useState(false);
+  const [nutritionLoading, setNutritionLoading] = useState(false);
   const { showToast } = useToast();
   const [direction, setDirection] = useState<"left" | "right">("right");
 
@@ -189,12 +190,16 @@ export default function AddFoodScreen() {
 
   const startLoading = useCallback(() => {
     loadingCountRef.current += 1;
-    setLoading(true);
-  }, []);
+    if (activeTab === "nutrition") setNutritionLoading(true);
+    else setLogLoading(true);
+  }, [activeTab]);
 
   const stopLoading = useCallback(() => {
     loadingCountRef.current = Math.max(0, loadingCountRef.current - 1);
-    if (loadingCountRef.current === 0) setLoading(false);
+    if (loadingCountRef.current === 0) {
+      setLogLoading(false);
+      setNutritionLoading(false);
+    }
   }, []);
 
   // ── Food log state ──────────────────────────────────────────────
@@ -431,7 +436,7 @@ export default function AddFoodScreen() {
   // ── Render ──────────────────────────────────────────────────────
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
-      {loading && <LoadingOverlay text="Loading..." />}
+      {logLoading && <LoadingOverlay text="Loading..." />}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -520,7 +525,7 @@ export default function AddFoodScreen() {
                   {nutritionError}
                 </Text>
               </View>
-            ) : !loading && !dayData.date ? (
+            ) : !logLoading && !dayData.date ? (
               <View className="bg-white border border-slate-100 rounded-3xl p-6">
                 <Text className="text-slate-400 font-semibold text-center">
                   No nutrition data for this day
