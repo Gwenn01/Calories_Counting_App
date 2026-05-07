@@ -223,6 +223,9 @@ export default function WorkoutScreen() {
           }}
           showsVerticalScrollIndicator={false}
         >
+          {/* ══════════════════════════════════════════════════════════
+               WORKOUT HEADER
+           ══════════════════════════════════════════════════════════ */}
           <WorkoutHeader
             currentDate={currentDate}
             workoutType={workoutType}
@@ -231,6 +234,9 @@ export default function WorkoutScreen() {
             onTypeChange={() => setShowTypePicker(true)}
           />
 
+          {/* ══════════════════════════════════════════════════════════
+              CONTAINER
+            ══════════════════════════════════════════════════════════ */}
           {/* Hero card */}
           <View className="bg-white rounded-[32px] border border-slate-100 shadow-sm p-8 items-center mt-4">
             <View className="w-20 h-20 rounded-[24px] bg-orange-50 border border-orange-100 items-center justify-center mb-5">
@@ -287,6 +293,8 @@ export default function WorkoutScreen() {
               </Text>
             </Pressable>
           </View>
+
+          {/* SESSION AND DASHBOARD */}
 
           {/* Stat teasers */}
           <View className="flex-row gap-x-3 mt-3">
