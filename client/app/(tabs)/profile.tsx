@@ -118,9 +118,6 @@ export default function ProfileScreen() {
       if (profile) {
         // UPDATE
         res = await updateWorkoutProfile(data);
-      } else {
-        // CREATE
-        res = await createWorkoutProfile(data);
       }
       const profileData = res.data ?? res;
 
