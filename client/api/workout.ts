@@ -53,16 +53,19 @@ export const deleteWorkoutTemplate = async (id: number) => {
 
 // template exercise =================================================================
 export const createTemplateExercise = async (data: TemplateExercise) => {
-  const res = await api.post("api/workout/template-exercise/", data);
+  const res = await api.post("api/workout/exercise-template/", data);
   return res.data;
 };
 
-export const editTemplateExercise = async (data: TemplateExercise) => {
-  const res = await api.put("api/workout/template-exercise/", data);
+export const editTemplateExercise = async (
+  id: number,
+  data: TemplateExercise,
+) => {
+  const res = await api.put(`api/workout/exercise-template/${id}/`, data);
   return res.data;
 };
 
 export const deleteTemplateExercise = async (id: number) => {
-  const res = await api.delete(`api/workout/template-exercise/${id}/`);
+  const res = await api.delete(`api/workout/exercise-template/${id}/`);
   return res.data;
 };

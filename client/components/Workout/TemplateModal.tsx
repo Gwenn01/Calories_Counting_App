@@ -117,9 +117,12 @@ export default function TemplateModal({
 
   // ── Fetch exercises when category changes ─────────────────────
   useEffect(() => {
-    if (!visible) return;
+    if (!showExercisePicker) return;
+
     const load = async () => {
       setExercisesLoading(true);
+      setServerExercises([]);
+
       try {
         const data = await fetchExercisesByProgram(category);
         setServerExercises(Array.isArray(data) ? data : []);
@@ -129,8 +132,9 @@ export default function TemplateModal({
         setExercisesLoading(false);
       }
     };
+
     load();
-  }, [category, visible]);
+  }, [showExercisePicker, category]);
 
   const filteredExercises = serverExercises.filter((e) =>
     e.name.toLowerCase().includes(search.toLowerCase()),
@@ -219,15 +223,17 @@ export default function TemplateModal({
       };
 
       if (editingExercise) {
-        const updated = await editTemplateExercise({
-          ...payload,
-          id: editingExercise.id,
-        } as any);
+        const updated = await editTemplateExercise(
+          editingExercise.id,
+          payload as any,
+        );
+
         setExercises((prev) =>
           prev.map((e) => (e.id === editingExercise.id ? updated : e)),
         );
       } else {
         const created = await createTemplateExercise(payload as any);
+
         setExercises((prev) => [...prev, created]);
       }
 
@@ -549,7 +555,7 @@ export default function TemplateModal({
                           setExerciseForm((p) => ({ ...p, default_weight: v }))
                         }
                         keyboard="numeric"
-                        unit="kg"
+                        unit="lbs"
                       />
                     </View>
                     <View className="flex-1">
@@ -645,7 +651,7 @@ export default function TemplateModal({
                     </Text>
                     <Text className="text-xs text-slate-400 mt-0.5">
                       {te.default_sets}×{te.default_reps} · {te.default_weight}
-                      kg · {te.default_rest}s rest
+                      lbs · {te.default_rest}s rest
                     </Text>
                   </View>
                   <Pressable
