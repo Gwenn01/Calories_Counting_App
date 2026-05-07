@@ -4,19 +4,9 @@ import {
   Text,
   Modal,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
-import {
-  Scale,
-  Timer,
-  Zap,
-  TrendingUp,
-  Dumbbell,
-  Settings2,
-} from "lucide-react-native";
 
 type FitnessProfile = {
   weight_unit: "kg" | "lbs";
@@ -56,201 +46,183 @@ export default function FitnessProfileModal({
   }, [initialData]);
 
   const handleChange = (name: keyof FitnessProfile, value: string | number) => {
-    setForm({
-      ...form,
-      [name]: value,
-    } as FitnessProfile);
-  };
-
-  const handleSubmit = () => {
-    onSubmit(form);
+    setForm({ ...form, [name]: value } as FitnessProfile);
   };
 
   return (
-    <Modal visible={isOpen} transparent animationType="slide">
-      <View className="flex-1 justify-end bg-black/40">
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <View className="bg-white rounded-t-[40px] p-6 pb-10 shadow-2xl">
-            {/* Grabber Handle */}
-            <View className="items-center mb-6">
-              <View className="w-12 h-1.5 bg-gray-200 rounded-full" />
+    <Modal visible={isOpen} animationType="slide" transparent>
+      <View className="flex-1 bg-black/40 justify-end">
+        <View className="bg-white rounded-t-3xl px-5 pt-6 pb-10 max-h-[90%]">
+          <Text className="text-xl font-extrabold mb-5">
+            {initialData ? "Edit Fitness Profile" : "Create Fitness Profile"}
+          </Text>
+
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Weight Unit */}
+            <View className="mb-4">
+              <Text className="text-sm text-slate-500 mb-1">Weight Unit</Text>
+              <View className="flex-row">
+                {(["kg", "lbs"] as const).map((unit, i) => (
+                  <Pressable
+                    key={unit}
+                    onPress={() => handleChange("weight_unit", unit)}
+                    className={`flex-1 py-3 rounded-xl border items-center ${
+                      i === 0 ? "mr-2" : ""
+                    } ${
+                      form.weight_unit === unit
+                        ? "bg-emerald-50 border-emerald-500"
+                        : "bg-white border-slate-200"
+                    }`}
+                  >
+                    <Text
+                      className={`font-semibold ${
+                        form.weight_unit === unit
+                          ? "text-emerald-600"
+                          : "text-slate-400"
+                      }`}
+                    >
+                      {unit.toUpperCase()}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
             </View>
 
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              className="max-h-[85vh]"
-            >
-              {/* Header section with Icon (Replaced gap with mr-3) */}
-              <View className="flex-row items-center mb-2">
-                <View className="bg-green-100 p-2.5 rounded-xl mr-3">
-                  <Settings2 size={24} color="#16a34a" />
-                </View>
-                <View>
-                  <Text className="text-2xl font-bold text-gray-900">
-                    {initialData ? "Edit Profile" : "Create Profile"}
-                  </Text>
-                </View>
-              </View>
-              <Text className="text-gray-400 mb-8 ml-1">
-                Optimize your workout tracking experience.
+            {/* Rest Time */}
+            <Input
+              label="Default Rest Time (sec)"
+              value={String(form.default_rest_time)}
+              keyboard="numeric"
+              onChange={(v: string) =>
+                handleChange("default_rest_time", Number(v) || 0)
+              }
+            />
+
+            {/* Experience Level */}
+            <View className="mb-4">
+              <Text className="text-sm text-slate-500 mb-1">
+                Experience Level
               </Text>
-
-              {/* Weight Unit Selection */}
-              <Label
-                text="Weight Unit"
-                icon={<Scale size={16} color="#9ca3af" />}
-              />
-              {/* Replaced gap-3 and map array with explicit margins for safety */}
-              <View className="flex-row justify-between mb-6">
-                <SelectChip
-                  label="KG"
-                  isSelected={form.weight_unit === "kg"}
-                  onPress={() => handleChange("weight_unit", "kg")}
-                  extraClass="mr-1.5"
-                />
-                <SelectChip
-                  label="LBS"
-                  isSelected={form.weight_unit === "lbs"}
-                  onPress={() => handleChange("weight_unit", "lbs")}
-                  extraClass="ml-1.5"
-                />
-              </View>
-
-              {/* Numeric Inputs Grid */}
-              <View className="flex-row justify-between mb-6">
-                <View className="w-[48%]">
-                  <Label
-                    text="Rest (sec)"
-                    icon={<Timer size={16} color="#9ca3af" />}
-                  />
-                  <StyledInput
-                    value={String(form.default_rest_time)}
-                    keyboardType="numeric"
-                    onChangeText={(v: string) =>
-                      handleChange("default_rest_time", Number(v))
-                    }
-                  />
-                </View>
-                <View className="w-[48%]">
-                  <Label
-                    text="Exp. Level"
-                    icon={<Zap size={16} color="#9ca3af" />}
-                  />
-                  <StyledInput
-                    value={capitalize(form.experience_level)}
-                    onChangeText={(v: string) =>
-                      handleChange("experience_level", v.toLowerCase())
-                    }
-                  />
-                </View>
-              </View>
-
-              <Label
-                text="Progression Method"
-                icon={<TrendingUp size={16} color="#9ca3af" />}
-              />
-              <StyledInput
-                value={capitalize(form.progression_type)}
-                onChangeText={(v: string) =>
-                  handleChange("progression_type", v.toLowerCase())
-                }
-              />
-
-              <View className="flex-row justify-between mb-8 mt-6">
-                <View className="w-[48%]">
-                  <Label
-                    text="Inc (KG)"
-                    icon={<Dumbbell size={16} color="#9ca3af" />}
-                  />
-                  <StyledInput
-                    value={String(form.progression_increment_kg)}
-                    keyboardType="numeric"
-                    onChangeText={(v: string) =>
-                      handleChange("progression_increment_kg", Number(v))
-                    }
-                  />
-                </View>
-                <View className="w-[48%]">
-                  <Label
-                    text="Inc (LBS)"
-                    icon={<Dumbbell size={16} color="#9ca3af" />}
-                  />
-                  <StyledInput
-                    value={String(form.progression_increment_lbs)}
-                    keyboardType="numeric"
-                    onChangeText={(v: string) =>
-                      handleChange("progression_increment_lbs", Number(v))
-                    }
-                  />
-                </View>
-              </View>
-
-              {/* Action Buttons (Replaced gap-4 with mr-2 and ml-2) */}
               <View className="flex-row">
-                <TouchableOpacity
-                  onPress={onClose}
-                  className="flex-1 bg-gray-100 py-4 rounded-2xl items-center mr-2"
-                >
-                  <Text className="text-gray-600 font-semibold text-lg">
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={handleSubmit}
-                  className="flex-[2] bg-green-500 py-4 rounded-2xl items-center shadow-lg shadow-green-200 ml-2"
-                >
-                  <Text className="text-white font-bold text-lg">
-                    {initialData ? "Save Changes" : "Get Started"}
-                  </Text>
-                </TouchableOpacity>
+                {(["beginner", "intermediate", "advanced"] as const).map(
+                  (level, i) => (
+                    <Pressable
+                      key={level}
+                      onPress={() => handleChange("experience_level", level)}
+                      className={`flex-1 py-3 rounded-xl border items-center ${
+                        i < 2 ? "mr-2" : ""
+                      } ${
+                        form.experience_level === level
+                          ? "bg-emerald-50 border-emerald-500"
+                          : "bg-white border-slate-200"
+                      }`}
+                    >
+                      <Text
+                        className={`font-semibold text-xs ${
+                          form.experience_level === level
+                            ? "text-emerald-600"
+                            : "text-slate-400"
+                        }`}
+                      >
+                        {level.charAt(0).toUpperCase() + level.slice(1)}
+                      </Text>
+                    </Pressable>
+                  ),
+                )}
               </View>
-            </ScrollView>
+            </View>
+
+            {/* Progression Type */}
+            <View className="mb-4">
+              <Text className="text-sm text-slate-500 mb-1">
+                Progression Type
+              </Text>
+              <View className="flex-row flex-wrap">
+                {(["linear", "double", "percentage", "rpe"] as const).map(
+                  (type, i) => (
+                    <Pressable
+                      key={type}
+                      onPress={() => handleChange("progression_type", type)}
+                      className={`py-3 px-4 rounded-xl border items-center mb-2 ${
+                        i % 2 === 0 ? "mr-2" : ""
+                      } ${
+                        form.progression_type === type
+                          ? "bg-emerald-50 border-emerald-500"
+                          : "bg-white border-slate-200"
+                      }`}
+                    >
+                      <Text
+                        className={`font-semibold text-xs ${
+                          form.progression_type === type
+                            ? "text-emerald-600"
+                            : "text-slate-400"
+                        }`}
+                      >
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </Text>
+                    </Pressable>
+                  ),
+                )}
+              </View>
+            </View>
+
+            {/* Progression Increment KG */}
+            <Input
+              label="Progression Increment (kg)"
+              value={String(form.progression_increment_kg)}
+              keyboard="numeric"
+              onChange={(v: string) =>
+                handleChange("progression_increment_kg", Number(v) || 0)
+              }
+            />
+
+            {/* Progression Increment LBS */}
+            <Input
+              label="Progression Increment (lbs)"
+              value={String(form.progression_increment_lbs)}
+              keyboard="numeric"
+              onChange={(v: string) =>
+                handleChange("progression_increment_lbs", Number(v) || 0)
+              }
+            />
+          </ScrollView>
+
+          {/* Buttons */}
+          <View className="flex-row gap-3 mt-6">
+            <Pressable
+              onPress={onClose}
+              className="flex-1 py-3 rounded-xl bg-slate-200"
+            >
+              <Text className="text-center font-semibold">Cancel</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => onSubmit(form)}
+              className="flex-1 py-3 rounded-xl bg-emerald-500"
+            >
+              <Text className="text-center text-white font-semibold">
+                {initialData ? "Save" : "Get Started"}
+              </Text>
+            </Pressable>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </View>
     </Modal>
   );
 }
 
-// Internal Styled Sub-components
+/* ---------- Small Input Component ---------- */
 
-// Wrapped {icon} in a View and used mr-1.5 instead of gap
-const Label = ({ text, icon }: { text: string; icon?: React.ReactNode }) => (
-  <View className="flex-row items-center mb-2 ml-1">
-    {icon && <View className="mr-1.5">{icon}</View>}
-    <Text className="text-gray-500 font-bold text-xs uppercase tracking-widest">
-      {text}
-    </Text>
-  </View>
-);
-
-const StyledInput = (props: any) => (
-  <TextInput
-    {...props}
-    placeholderTextColor="#9ca3af"
-    className="bg-gray-50 border border-gray-100 p-4 rounded-2xl text-gray-900 font-semibold mb-1"
-  />
-);
-
-// Fixed: Changed border-1 to border, removed static ml-5, added extraClass prop
-const SelectChip = ({ label, isSelected, onPress, extraClass = "" }: any) => (
-  <TouchableOpacity
-    onPress={onPress}
-    className={`flex-1 flex-row justify-center py-3.5 rounded-2xl border items-center ${
-      isSelected ? "bg-green-50 border-green-500" : "bg-white border-gray-100"
-    } ${extraClass}`}
-  >
-    <Text
-      className={`font-bold ${isSelected ? "text-green-600" : "text-gray-400"}`}
-    >
-      {label}
-    </Text>
-  </TouchableOpacity>
-);
-
-function capitalize(text: string) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
+function Input({ label, value, onChange, keyboard = "default" }: any) {
+  return (
+    <View className="mb-4">
+      <Text className="text-sm text-slate-500 mb-1">{label}</Text>
+      <TextInput
+        value={value}
+        onChangeText={onChange}
+        keyboardType={keyboard}
+        className="border border-slate-200 rounded-xl px-4 py-3 text-base"
+      />
+    </View>
+  );
 }

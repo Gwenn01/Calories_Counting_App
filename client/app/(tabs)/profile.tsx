@@ -261,6 +261,7 @@ export default function ProfileScreen() {
 
             {/* Edit Button */}
             <Pressable
+              onPress={() => setShowEditProfile(true)}
               className="w-9 h-9 rounded-[12px] items-center justify-center"
               style={({ pressed }) => ({
                 backgroundColor: pressed ? "#1e293b" : "#0d1f2d",
