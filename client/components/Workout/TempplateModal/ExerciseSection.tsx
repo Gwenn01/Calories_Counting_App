@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
 import { IconInput } from "./IconInput";
 import type { Exercise, TemplateExercise } from "@/types/workout";
+import { useAlert } from "@/components/AlertProvider";
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   beginner: "#10b981",
@@ -72,6 +73,23 @@ export default function ExerciseSection({
   onEditExercise,
   onDeleteExercise,
 }: Props) {
+  const { showAlert } = useAlert();
+
+  const confirmDeleteExercise = (te: TemplateExercise) => {
+    showAlert(
+      "Remove Exercise",
+      `Remove "${te.exercise.name}" from this template?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: () => onDeleteExercise(te),
+        },
+      ],
+    );
+  };
+
   return (
     <Section
       label="Exercises"
@@ -160,7 +178,7 @@ export default function ExerciseSection({
             <Feather name="edit-2" size={12} color="#94a3b8" />
           </Pressable>
           <Pressable
-            onPress={() => onDeleteExercise(te)}
+            onPress={() => confirmDeleteExercise(te)}
             className="w-8 h-8 rounded-xl bg-red-50 border border-red-100 items-center justify-center ml-1"
           >
             <Feather name="trash-2" size={12} color="#ef4444" />

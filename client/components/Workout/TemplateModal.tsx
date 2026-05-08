@@ -207,22 +207,13 @@ export default function TemplateModal({
     }
   };
 
-  const handleDeleteExercise = (te: TemplateExercise) => {
-    Alert.alert("Remove Exercise", `Remove "${te.exercise.name}"?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteTemplateExercise(te.id);
-            setExercises((prev) => prev.filter((e) => e.id !== te.id));
-          } catch (e) {
-            console.error(e);
-          }
-        },
-      },
-    ]);
+  const handleDeleteExercise = async (te: TemplateExercise) => {
+    try {
+      await deleteTemplateExercise(te.id);
+      setExercises((prev) => prev.filter((e) => e.id !== te.id));
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const filteredExercises = serverExercises.filter((e) =>

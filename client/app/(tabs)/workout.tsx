@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useToast } from "@/components/ToastProvider";
 
 // ─── Components ───────────────────────────────────────────────────
 import WorkoutHeader from "@/components/Workout/WorkoutHeader";
@@ -19,6 +20,8 @@ export default function WorkoutScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
+
+  const { showToast } = useToast();
 
   // Template modal
   const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -81,26 +84,15 @@ export default function WorkoutScreen() {
     setEditingTemplate(null);
   }, []);
 
-  const handleDeleteTemplate = useCallback((t: WorkoutTemplate) => {
-    Alert.alert(
-      "Delete Template",
-      `Delete "${t.name}"? This will also remove all its exercises.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteWorkoutTemplate(t.id);
-              setTemplates((prev) => prev.filter((item) => item.id !== t.id));
-            } catch (e) {
-              console.error(e);
-            }
-          },
-        },
-      ],
-    );
+  const handleDeleteTemplate = useCallback(async (t: WorkoutTemplate) => {
+    try {
+      await deleteWorkoutTemplate(t.id);
+      setTemplates((prev) => prev.filter((item) => item.id !== t.id));
+      showToast("Success!", "Template deleted", "success");
+    } catch (e) {
+      console.error(e);
+      showToast("Error", "Failed to delete template", "error");
+    }
   }, []);
 
   // ─────────────────────────────────────────────────────────────

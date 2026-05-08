@@ -1,8 +1,10 @@
 // components/Workout/TemplateList.tsx
 import React from "react";
-import { View, Text, Pressable, Alert } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import type { WorkoutTemplate } from "@/types/workout";
+import { useAlert } from "@/components/AlertProvider";
 
 type Props = {
   templates: WorkoutTemplate[];
@@ -12,6 +14,19 @@ type Props = {
   onDelete: (t: WorkoutTemplate) => void;
 };
 
+const CATEGORY_META: Record<
+  string,
+  { color: string; bg: string; border: string }
+> = {
+  push: { color: "#f97316", bg: "#fff7ed", border: "#ffedd5" },
+  pull: { color: "#3b82f6", bg: "#eff6ff", border: "#dbeafe" },
+  legs: { color: "#10b981", bg: "#f0fdf4", border: "#dcfce7" },
+  upper: { color: "#8b5cf6", bg: "#f5f3ff", border: "#ede9fe" },
+  lower: { color: "#ec4899", bg: "#fdf2f8", border: "#fce7f3" },
+  full_body: { color: "#f59e0b", bg: "#fffbeb", border: "#fef3c7" },
+  cardio: { color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
+};
+
 export default function TemplateList({
   templates,
   templatesLoading,
@@ -19,8 +34,36 @@ export default function TemplateList({
   onOpenEdit,
   onDelete,
 }: Props) {
+  const { showAlert } = useAlert();
+
+  const confirmDelete = (t: WorkoutTemplate) => {
+    showAlert(
+      "Delete Template",
+      `Delete "${t.name}"? This will also remove all its exercises.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => onDelete(t),
+        },
+      ],
+    );
+  };
+
   return (
-    <View className="mt-3 bg-white rounded-[28px] border border-slate-100 shadow-sm p-5">
+    <View
+      className="mt-3 bg-white rounded-[28px] p-5"
+      style={{
+        borderWidth: 1,
+        borderColor: "#f1f5f9",
+        shadowColor: "#94a3b8",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 16,
+        elevation: 4,
+      }}
+    >
       {/* Header */}
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -28,6 +71,7 @@ export default function TemplateList({
         </Text>
         <Pressable
           onPress={onOpenCreate}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           className="flex-row items-center gap-x-1 bg-orange-50 border border-orange-100 px-3 py-1.5 rounded-xl"
         >
           <Ionicons name="add" size={14} color="#f97316" />
@@ -48,18 +92,23 @@ export default function TemplateList({
       {!templatesLoading && templates.length === 0 && (
         <Pressable
           onPress={onOpenCreate}
-          className="py-8 items-center rounded-2xl"
-          style={{
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.8 : 1,
             borderWidth: 2,
             borderColor: "#f1f5f9",
             borderStyle: "dashed",
-          }}
+            borderRadius: 16,
+            padding: 32,
+            alignItems: "center",
+          })}
         >
-          <Ionicons name="clipboard-outline" size={32} color="#cbd5e1" />
-          <Text className="text-sm font-semibold text-slate-400 mt-2">
+          <View className="w-12 h-12 rounded-[16px] bg-orange-50 border border-orange-100 items-center justify-center mb-3">
+            <Ionicons name="clipboard-outline" size={24} color="#f97316" />
+          </View>
+          <Text className="text-sm font-bold text-slate-500 mb-0.5">
             No templates yet
           </Text>
-          <Text className="text-xs text-slate-300 mt-0.5">
+          <Text className="text-xs text-slate-400 text-center">
             Tap to create your first template
           </Text>
         </Pressable>
@@ -73,7 +122,7 @@ export default function TemplateList({
             template={t}
             isLast={i === templates.length - 1}
             onEdit={() => onOpenEdit(t)}
-            onDelete={() => onDelete(t)}
+            onDelete={() => confirmDelete(t)}
           />
         ))}
     </View>
@@ -92,43 +141,83 @@ function TemplateRow({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const meta = CATEGORY_META[template.category] ?? {
+    color: "#64748b",
+    bg: "#f8fafc",
+    border: "#e2e8f0",
+  };
+
   return (
     <View
-      className={`flex-row items-center justify-between py-3 ${
+      className={`flex-row items-center py-3 ${
         !isLast ? "border-b border-slate-100" : ""
       }`}
     >
-      {/* Left */}
-      <View className="flex-row items-center gap-x-3 flex-1">
-        <View className="w-9 h-9 rounded-xl bg-orange-100 items-center justify-center">
-          <Ionicons name="barbell-outline" size={16} color="#f97316" />
-        </View>
-        <View className="flex-1">
+      {/* Category icon */}
+      <View
+        className="w-10 h-10 rounded-[14px] items-center justify-center mr-3"
+        style={{
+          backgroundColor: meta.bg,
+          borderWidth: 1,
+          borderColor: meta.border,
+        }}
+      >
+        <Ionicons name="barbell-outline" size={17} color={meta.color} />
+      </View>
+
+      {/* Info */}
+      <View className="flex-1">
+        <View className="flex-row items-center gap-x-2 mb-0.5">
           <Text className="text-sm font-bold text-slate-700">
             {template.name}
           </Text>
-          <Text className="text-xs text-slate-400 mt-0.5">
-            {template.template_exercises?.length ?? 0} exercises ·{" "}
-            {template.estimated_duration}min · {template.category}
-          </Text>
+          <View
+            className="px-1.5 py-0.5 rounded-full"
+            style={{ backgroundColor: meta.bg }}
+          >
+            <Text
+              className="text-[9px] font-bold capitalize"
+              style={{ color: meta.color }}
+            >
+              {template.category.replace("_", " ")}
+            </Text>
+          </View>
+        </View>
+
+        <View className="flex-row items-center gap-x-2 mt-0.5">
+          <View className="flex-row items-center gap-x-1">
+            <Feather name="layers" size={9} color="#94a3b8" />
+            <Text className="text-[10px] text-slate-400 font-medium">
+              {template.template_exercises?.length ?? 0} exercises
+            </Text>
+          </View>
+          <View className="w-0.5 h-0.5 rounded-full bg-slate-300" />
+          <View className="flex-row items-center gap-x-1">
+            <Feather name="clock" size={9} color="#94a3b8" />
+            <Text className="text-[10px] text-slate-400 font-medium">
+              {template.estimated_duration}min
+            </Text>
+          </View>
         </View>
       </View>
 
-      {/* Edit */}
-      <Pressable
-        onPress={onEdit}
-        className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 items-center justify-center ml-2"
-      >
-        <Ionicons name="pencil-outline" size={13} color="#94a3b8" />
-      </Pressable>
-
-      {/* Delete */}
-      <Pressable
-        onPress={onDelete}
-        className="w-8 h-8 rounded-xl bg-red-50 border border-red-100 items-center justify-center ml-1"
-      >
-        <Ionicons name="trash-outline" size={13} color="#ef4444" />
-      </Pressable>
+      {/* Actions */}
+      <View className="flex-row items-center gap-x-1.5 ml-2">
+        <Pressable
+          onPress={onEdit}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 items-center justify-center"
+        >
+          <Feather name="edit-2" size={12} color="#94a3b8" />
+        </Pressable>
+        <Pressable
+          onPress={onDelete}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          className="w-8 h-8 rounded-xl bg-red-50 border border-red-100 items-center justify-center"
+        >
+          <Feather name="trash-2" size={12} color="#ef4444" />
+        </Pressable>
+      </View>
     </View>
   );
 }
