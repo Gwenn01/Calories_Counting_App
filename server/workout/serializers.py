@@ -194,7 +194,7 @@ class WorkoutSessionCreateSerializer(serializers.ModelSerializer):
     """Used to start a new session (POST /sessions/)."""
     class Meta:
         model  = WorkoutSession
-        fields = ["id", "date", "category", "template", "bodyweight", "weight_unit", "notes"]
+        fields = ["id", "date","template",  "notes", "energy_level", "mood_rating"]
         read_only_fields = ["id"]
 
 

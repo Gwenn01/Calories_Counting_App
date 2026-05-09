@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.views import APIView
@@ -6,15 +7,22 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import  (
     Exercise,
+    UserFitnessProfile,
     TemplateExercise,
-    WorkoutTemplate
+    WorkoutTemplate, 
+    WorkoutSession
 )
 from .serializers import (
     UserFitnessProfileSerializer,
     ExerciseSerializer,
     WorkoutTemplateSerializer,
-    TemplateExerciseSerializer
+    TemplateExerciseSerializer,
+    WorkoutSessionCreateSerializer,
+    WorkoutSessionListSerializer,
+    WorkoutSessionDetailSerializer
 )
+from .services import WorkoutServices
+from users.models import UserProfile
 
 # WORKOUT PROFILE ===================================================================================
 # Create your views here.
@@ -198,3 +206,50 @@ class TemplateExerciseViewDetails(APIView):
         template = TemplateExercise.objects.get(pk=pk)
         template.delete()
         return Response(status=204)
+    
+#SESSION WORKOUT =========================================================
+class WorkoutSessionViewList(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        session = WorkoutSession.objects.get(user=request.user)
+        serializer = WorkoutSessionDetailSerializer(session)
+        return Response(serializer.data, status=200)
+    
+
+    def post(self, request):
+        user = request.user
+
+        serializer = WorkoutSessionCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_profile = UserProfile.objects.get(user=user)
+        fitness_profile = UserFitnessProfile.objects.get(user=user)
+
+        template = serializer.validated_data["template"]
+
+        # 1. Save session
+        session = serializer.save(
+            user=user,
+            bodyweight=user_profile.weight,
+            weight_unit=fitness_profile.weight_unit,
+            category=template.category,
+            start_time=timezone.now(),
+        )
+
+        # 2. Create exercises + sets from template
+        WorkoutServices.create_session_from_template(session, template)
+
+        # 3. Return full session with exercises
+        return Response(
+            WorkoutSessionDetailSerializer(session).data,
+            status=201
+        )
+        
+# WORKOUT EXERCISE AND SETS ==========================================================
+
+     
+        
+        
+        
+        
