@@ -115,6 +115,15 @@ class SetCreateSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id"]
 
+class SetUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Set
+        fields = [
+            "weight", "reps", "completed",
+            "rpe", "rest_taken", "rest_target",
+            "tempo", "is_warmup", "is_dropset",
+        ]
+
 # ─────────────────────────────────────────────────────────────────
 # WORKOUT EXERCISE
 # ─────────────────────────────────────────────────────────────────
@@ -143,6 +152,10 @@ class WorkoutExerciseSerializer(serializers.ModelSerializer):
             return None
         return {"weight": best.weight, "reps": best.reps, "volume": best.volume}
 
+class WorkoutExerciseUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkoutExercise
+        fields = ["notes", "is_favorite", "order", "superset_group"]
 
 # ─────────────────────────────────────────────────────────────────
 # WORKOUT SESSION
@@ -197,7 +210,18 @@ class WorkoutSessionCreateSerializer(serializers.ModelSerializer):
         fields = ["id", "date","template",  "notes", "energy_level", "mood_rating"]
         read_only_fields = ["id"]
 
-
+class WorkoutSessionUpdateSerializer(serializers.ModelSerializer):
+    """Used to update session notes, mood, energy, and finish it."""
+    class Meta:
+        model = WorkoutSession
+        fields = [
+            "notes",
+            "energy_level",
+            "mood_rating",
+            "is_finished",
+        ]
+        
+        
 # ─────────────────────────────────────────────────────────────────
 # PERSONAL RECORDS
 # ─────────────────────────────────────────────────────────────────

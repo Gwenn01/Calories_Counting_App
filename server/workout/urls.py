@@ -16,5 +16,12 @@ urlpatterns = [
     path('workout/exercise-template/', views.TemplateExerciseViewList.as_view(), name='template-exercise-list'),
     path('workout/exercise-template/<int:pk>/', views.TemplateExerciseViewDetails.as_view(), name='template-exercise-details'),
     #sessions
-    path('workout/session/', views.WorkoutSessionViewList.as_view(), name='workout-session-list')
+    path('workout/session/', views.WorkoutSessionViewList.as_view(), name='workout-session-list'),
+    path('workout/session/<int:pk>/', views.WorkoutSessionViewDetails.as_view(), name='workout-session-details'),
+    #workout exercise
+    path('workout/session/exercise/<int:pk>/', views.WorkoutExerciseViewDetails.as_view(), name='workout-exercise-details'),
+    path('workout/session/exercise-create/<int:session_pk>/', views.WorkoutExerciseCreateView.as_view(), name='workout-exercise-create'),
+    #sets
+    path('workout/exercise/set/<int:pk>/', views.SetViewDetails.as_view(), name='set-details'),
+    path('workout/exercise/set-create/<int:exercise_pk>/', views.SetCreateView.as_view(), name='set-create'),
 ]
