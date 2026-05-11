@@ -6,11 +6,16 @@ import { useToast } from "@/components/ToastProvider";
 
 // ─── Components ───────────────────────────────────────────────────
 import WorkoutHeader from "@/components/Workout/WorkoutHeader";
+import StartSessionCard from "@/components/Workout/StartSessionCard";
 import TemplateList from "@/components/Workout/TemplateList";
 import TemplateModal from "@/components/Workout/TemplateModal";
 
 // ─── API ──────────────────────────────────────────────────────────
-import { fetchWorkoutTemplate, deleteWorkoutTemplate } from "@/api/workout";
+import {
+  fetchWorkoutTemplate,
+  createWorkoutSession,
+  deleteWorkoutTemplate,
+} from "@/api/workout";
 
 // ─── Types ────────────────────────────────────────────────────────
 import type { WorkoutType, WorkoutTemplate } from "@/types/workout";
@@ -115,18 +120,21 @@ export default function WorkoutScreen() {
           onNext={goNextDay}
         />
 
-        {/* SESSIONS =========================================================================================================== */}
-        <View className="bg-white rounded-[32px] border border-slate-100 shadow-sm p-8 items-center mt-4">
-          <View className="w-20 h-20 rounded-[24px] bg-orange-50 border border-orange-100 items-center justify-center mb-5">
-            <Ionicons name="barbell-outline" size={36} color="#f97316" />
-          </View>
-          <Text className="text-xl font-black text-slate-800 mb-2 text-center">
-            Ready to Train?
-          </Text>
-          <Text className="text-sm text-slate-400 text-center leading-5">
-            Build your workout templates, then start a session.
-          </Text>
-        </View>
+        {/* CREATE SESSIONS =========================================================================================================== */}
+        <StartSessionCard
+          templates={templates}
+          templatesLoading={templatesLoading}
+          onStartSession={async (payload) => {
+            try {
+              await createWorkoutSession(payload);
+              showToast("Session started!", "Go crush it 💪", "success");
+              // No navigation — stays on this screen
+            } catch (e) {
+              console.error(e);
+              showToast("Error", "Failed to start session", "error");
+            }
+          }}
+        />
 
         {/* TEMPLATE =========================================================================================================== */}
         <TemplateList

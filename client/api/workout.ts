@@ -69,3 +69,15 @@ export const deleteTemplateExercise = async (id: number) => {
   const res = await api.delete(`api/workout/exercise-template/${id}/`);
   return res.data;
 };
+
+// session log =================================================================
+// services/workoutService.ts
+export const createWorkoutSession = async (payload: {
+  template: number;
+  notes: string;
+  energy_level: number;
+  mood_rating: number;
+}) => {
+  const res = await api.post("api/workout/session/", payload);
+  return res.data;
+};

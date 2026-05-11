@@ -13,9 +13,9 @@ import type {
   WorkoutTemplate,
   TemplateExercise,
 } from "@/types/workout";
-import TemplateInfoSection from "@/components/Workout/TempplateModal/TemplateInfoSection";
-import CategorySection from "@/components/Workout/TempplateModal/CategorySection";
-import ExerciseSection from "@/components/Workout/TempplateModal/ExerciseSection";
+import TemplateInfoSection from "@/components/Workout/TemplateModalContainer/TemplateInfoSection";
+import CategorySection from "@/components/Workout/TemplateModalContainer/CategorySection";
+import ExerciseSection from "@/components/Workout/TemplateModalContainer/ExerciseSection";
 
 type Props = {
   visible: boolean;

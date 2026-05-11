@@ -1,6 +1,7 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { View, Text, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
+import { MotiView } from "moti";
 
 interface WorkoutHeaderProps {
   currentDate: Date;
@@ -8,44 +9,83 @@ interface WorkoutHeaderProps {
   onNext: () => void;
 }
 
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
 const WorkoutHeader = memo(function WorkoutHeader({
   currentDate,
   onPrev,
   onNext,
 }: WorkoutHeaderProps) {
-  const dateLabel = currentDate.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "long",
-    day: "numeric",
-  });
   const isToday = currentDate.toDateString() === new Date().toDateString();
+  const [direction, setDirection] = useState<"left" | "right">("right");
+
+  const handlePrev = () => {
+    setDirection("left");
+    onPrev();
+  };
+
+  const handleNext = () => {
+    setDirection("right");
+    onNext();
+  };
 
   return (
-    <View className="mb-3">
-      <View className="flex-row items-center justify-between mb-2">
-        <Pressable
-          onPress={onPrev}
-          className="w-9 h-9 rounded-xl bg-white border border-slate-100 items-center justify-center shadow-sm"
-        >
-          <Ionicons name="chevron-back" size={16} color="#475569" />
-        </Pressable>
+    <View className="flex-row items-center justify-between bg-white rounded-[20px] px-4 py-4 border border-slate-100">
+      {/* Prev */}
+      <Pressable
+        onPress={handlePrev}
+        className="w-10 h-10 rounded-[14px] bg-slate-900 items-center justify-center"
+      >
+        <Feather name="chevron-left" size={18} color="#fff" />
+      </Pressable>
 
-        <View className="items-center">
-          <Text className="text-xs font-semibold text-slate-400 tracking-widest uppercase mb-0.5">
+      {/* Animated center */}
+      <MotiView
+        key={currentDate.toISOString()}
+        from={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ type: "timing", duration: 200 }}
+        className="flex-1 items-center px-3 gap-0.5"
+      >
+        <View className="flex-row items-center gap-1.5 mb-0.5">
+          <Feather name="activity" size={11} color="#94a3b8" />
+          <Text className="text-[10px] font-bold tracking-[2px] uppercase text-slate-400">
             Workout Session
-          </Text>
-          <Text className="text-base font-bold text-slate-800">
-            {isToday ? "Today" : dateLabel}
           </Text>
         </View>
 
-        <Pressable
-          onPress={onNext}
-          className="w-9 h-9 rounded-xl bg-white border border-slate-100 items-center justify-center shadow-sm"
+        <Text className="text-[11px] font-semibold text-slate-400">
+          {currentDate.toLocaleDateString("en-US", { weekday: "long" })}
+        </Text>
+
+        <Text
+          className="text-xl font-black text-slate-900"
+          style={{ letterSpacing: -0.5 }}
         >
-          <Ionicons name="chevron-forward" size={16} color="#475569" />
-        </Pressable>
-      </View>
+          {formatDate(currentDate)}
+        </Text>
+
+        {isToday && (
+          <View className="mt-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-0.5">
+            <Text className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
+              Today
+            </Text>
+          </View>
+        )}
+      </MotiView>
+
+      {/* Next */}
+      <Pressable
+        onPress={handleNext}
+        className="w-10 h-10 rounded-[14px] bg-slate-900 items-center justify-center"
+      >
+        <Feather name="chevron-right" size={18} color="#fff" />
+      </Pressable>
     </View>
   );
 });
