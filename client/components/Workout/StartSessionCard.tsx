@@ -97,17 +97,15 @@ export default function StartSessionCard({
 
         <RatingSlider
           label="Energy Level"
-          icon="⚡"
+          icon="zap"
           value={energyLevel}
           onChange={setEnergyLevel}
           activeColor="#f97316"
         />
 
-        <View className="h-px bg-slate-100" />
-
         <RatingSlider
           label="Mood"
-          icon="🧠"
+          icon="smile"
           value={moodRating}
           onChange={setMoodRating}
           activeColor="#8b5cf6"
