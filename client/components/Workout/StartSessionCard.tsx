@@ -86,12 +86,14 @@ export default function StartSessionCard({
       <View className="h-px bg-slate-100 mx-6" />
 
       {/* ── Form ── */}
-      <View className="px-6 pt-5 pb-6 gap-4">
+      <View className="px-6 pt-6 pb-6 gap-5">
         <TemplateDropdown
           selected={selectedTemplate}
           loading={templatesLoading}
           onOpenPicker={() => setDropdownOpen(true)}
         />
+
+        <View className="h-px bg-slate-100" />
 
         <RatingSlider
           label="Energy Level"
@@ -101,6 +103,8 @@ export default function StartSessionCard({
           activeColor="#f97316"
         />
 
+        <View className="h-px bg-slate-100" />
+
         <RatingSlider
           label="Mood"
           icon="🧠"
@@ -109,11 +113,16 @@ export default function StartSessionCard({
           activeColor="#8b5cf6"
         />
 
+        <View className="h-px bg-slate-100" />
+
         {/* Notes */}
         <View>
-          <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-[2px] mb-2">
-            Notes (optional)
-          </Text>
+          <View className="flex-row items-center gap-1.5 mb-2">
+            <Feather name="edit-3" size={11} color="#94a3b8" />
+            <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-[2px]">
+              Notes (optional)
+            </Text>
+          </View>
           <TextInput
             value={notes}
             onChangeText={setNotes}
@@ -125,7 +134,6 @@ export default function StartSessionCard({
             style={{ textAlignVertical: "top", minHeight: 64 }}
           />
         </View>
-
         {/* Start Button */}
         <Pressable
           onPress={handleStart}
@@ -137,12 +145,12 @@ export default function StartSessionCard({
             {submitting ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <>
+              <View className="flex-row items-center gap-2.5">
                 <Ionicons name="barbell-outline" size={18} color="#fff" />
                 <Text className="text-sm font-black text-white tracking-wide uppercase">
                   Start Session
                 </Text>
-              </>
+              </View>
             )}
           </View>
         </Pressable>
