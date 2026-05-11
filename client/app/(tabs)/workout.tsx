@@ -100,6 +100,23 @@ export default function WorkoutScreen() {
     }
   }, []);
 
+  // session creation  ───────────────────────────────────────────
+  const handleStartSession = async (payload: {
+    template: number;
+    notes: string;
+    energy_level: number;
+    mood_rating: number;
+  }) => {
+    try {
+      const session = await createWorkoutSession(payload);
+      showToast("Session started!", "Go crush it", "success");
+    } catch (e) {
+      console.error(e);
+
+      showToast("Error", "Failed to start session", "error");
+    }
+  };
+
   // ─────────────────────────────────────────────────────────────
   //  RENDER
   // ─────────────────────────────────────────────────────────────
@@ -124,16 +141,7 @@ export default function WorkoutScreen() {
         <StartSessionCard
           templates={templates}
           templatesLoading={templatesLoading}
-          onStartSession={async (payload) => {
-            try {
-              await createWorkoutSession(payload);
-              showToast("Session started!", "Go crush it 💪", "success");
-              // No navigation — stays on this screen
-            } catch (e) {
-              console.error(e);
-              showToast("Error", "Failed to start session", "error");
-            }
-          }}
+          onStartSession={handleStartSession}
         />
 
         {/* TEMPLATE =========================================================================================================== */}
