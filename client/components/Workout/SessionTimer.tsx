@@ -7,7 +7,7 @@ interface Props {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-function AnimatedDigit({ value }: { value: string }) {
+function AnimatedDigit({ value, size = 38 }: { value: string; size?: number }) {
   const translateY = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(1)).current;
   const prevValue = useRef(value);
@@ -15,7 +15,6 @@ function AnimatedDigit({ value }: { value: string }) {
   useEffect(() => {
     if (prevValue.current === value) return;
     prevValue.current = value;
-
     Animated.sequence([
       Animated.parallel([
         Animated.timing(translateY, {
@@ -49,11 +48,11 @@ function AnimatedDigit({ value }: { value: string }) {
       style={{
         transform: [{ translateY }],
         opacity,
-        fontSize: 38,
+        fontSize: size,
         fontWeight: "800",
         color: "#0f172a",
-        letterSpacing: -2,
-        minWidth: 24,
+        letterSpacing: -1,
+        minWidth: size * 0.65,
         textAlign: "center",
       }}
     >
@@ -62,7 +61,7 @@ function AnimatedDigit({ value }: { value: string }) {
   );
 }
 
-function BlinkingColon() {
+function BlinkingColon({ size = 28 }: { size?: number }) {
   const opacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -86,7 +85,7 @@ function BlinkingColon() {
     <Animated.Text
       style={{
         opacity,
-        fontSize: 28,
+        fontSize: size,
         fontWeight: "700",
         color: "#cbd5e1",
         marginHorizontal: 1,
@@ -180,9 +179,9 @@ export default function SessionTimer({ startTime }: Props) {
   return (
     <View className="mx-4 mb-3 bg-white border border-slate-100 rounded-[20px] px-5 py-4 flex-row items-center justify-between">
       {/* Left — pulse + label */}
-      <View className="flex-row items-center gap-3">
+      <View className="flex-row items-center gap-3 flex-1 mr-4">
         <PulsingDot />
-        <View>
+        <View className="flex-1">
           <Text
             style={{
               fontSize: 10,
@@ -195,29 +194,33 @@ export default function SessionTimer({ startTime }: Props) {
           >
             Session duration
           </Text>
-          <Text style={{ fontSize: 11, color: "#94a3b8" }}>{elapsedLabel}</Text>
+          <Text style={{ fontSize: 11, color: "#94a3b8" }} numberOfLines={1}>
+            {elapsedLabel}
+          </Text>
         </View>
       </View>
 
       {/* Right — animated digits */}
-      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
+      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 1 }}>
         {h > 0 && (
-          <>
+          <View
+            style={{ flexDirection: "row", alignItems: "baseline", gap: 1 }}
+          >
             <View style={{ flexDirection: "row" }}>
-              <AnimatedDigit value={hp[0]} />
-              <AnimatedDigit value={hp[1]} />
+              <AnimatedDigit value={hp[0]} size={28} />
+              <AnimatedDigit value={hp[1]} size={28} />
             </View>
-            <BlinkingColon />
-          </>
+            <BlinkingColon size={20} />
+          </View>
         )}
         <View style={{ flexDirection: "row" }}>
-          <AnimatedDigit value={mp[0]} />
-          <AnimatedDigit value={mp[1]} />
+          <AnimatedDigit value={mp[0]} size={h > 0 ? 28 : 38} />
+          <AnimatedDigit value={mp[1]} size={h > 0 ? 28 : 38} />
         </View>
-        <BlinkingColon />
+        <BlinkingColon size={h > 0 ? 20 : 28} />
         <View style={{ flexDirection: "row" }}>
-          <AnimatedDigit value={sp[0]} />
-          <AnimatedDigit value={sp[1]} />
+          <AnimatedDigit value={sp[0]} size={h > 0 ? 28 : 38} />
+          <AnimatedDigit value={sp[1]} size={h > 0 ? 28 : 38} />
         </View>
       </View>
     </View>

@@ -135,7 +135,12 @@ export interface ExerciseHeaderProps {
 export interface SetRowProps {
   set: WorkoutSet;
   restTimer?: number;
-  onComplete: (weight: number, reps: number, rpe: number | null) => void;
+  onComplete: (
+    weight: number,
+    reps: number,
+    rpe: number | null,
+    restTarget: number,
+  ) => void;
   onDelete: () => void;
 }
 

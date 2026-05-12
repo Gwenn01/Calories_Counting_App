@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, Pressable, TextInput } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { SetRowProps } from "@/types/workout";
+import { updateSetPerExercise } from "@/api/workout";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -11,14 +12,39 @@ export default function SetRow({
   onComplete,
   onDelete,
 }: SetRowProps) {
+  // ── Existing state ──
   const [weight, setWeight] = useState(String(set.weight ?? ""));
   const [reps, setReps] = useState(String(set.reps ?? ""));
   const [rpe, setRpe] = useState(set.rpe ? String(set.rpe) : "");
 
+  // ── New state ──
+  const [saving, setSaving] = useState(false);
+  const [restTarget, setRestTarget] = useState(set.rest_target ?? 90);
+  const [isWarmup, setIsWarmup] = useState(set.is_warmup ?? false);
+  const [isPr, setIsPr] = useState(set.is_pr ?? false);
+
+  // ── Auto-save on blur ──
+  const handleBlurSave = async () => {
+    try {
+      setSaving(true);
+      await updateSetPerExercise(set.id, {
+        weight: parseFloat(weight) || set.weight,
+        reps: parseInt(reps) || set.reps,
+        rest_target: restTarget,
+        is_warmup: isWarmup,
+        is_dropset: set.is_dropset ?? false,
+      });
+    } catch (e) {
+      console.error("Failed to save set:", e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // ── Completed + rest timer ──
   if (set.completed && restTimer !== undefined && restTimer > 0) {
     return (
-      <View className="bg-orange-50 border border-orange-100 rounded-[12px] px-3 py-2.5 flex-row items-center gap-2">
+      <View className="bg-orange-50 border border-orange-100 rounded-[5px] px-3 py-3 flex-row items-center">
         <Text className="w-7 text-xs font-black text-orange-500 text-center">
           {set.set_number}
         </Text>
@@ -39,7 +65,7 @@ export default function SetRow({
   // ── Completed ──
   if (set.completed) {
     return (
-      <View className="bg-emerald-50 border border-emerald-100 rounded-[12px] px-3 py-2.5 flex-row items-center gap-2">
+      <View className="bg-emerald-50 border border-emerald-100 rounded-[5px] px-3 py-3 flex-row items-center">
         <Text className="w-7 text-xs font-black text-emerald-600 text-center">
           {set.set_number}
         </Text>
@@ -63,60 +89,198 @@ export default function SetRow({
   }
 
   // ── Active ──
+  // ── Active ──
   return (
-    <View className="flex-row items-center gap-1.5 py-0.5">
-      <Text className="w-7 text-xs font-black text-slate-400 text-center">
-        {set.set_number}
-      </Text>
-
-      <View className="flex-1 bg-slate-50 border border-slate-200 rounded-[10px] px-1 py-2">
-        <TextInput
-          value={weight}
-          onChangeText={setWeight}
-          keyboardType="decimal-pad"
-          className="text-sm font-bold text-slate-800 text-center"
-          selectTextOnFocus
-        />
+    <View className="bg-white border border-slate-200 rounded-[16px] px-3 py-3">
+      {/* Set header */}
+      <View className="flex-row items-center justify-between mb-2.5">
+        <View className="flex-row items-center gap-2">
+          <View className="w-6 h-6 rounded-full bg-slate-100 items-center justify-center">
+            <Text className="text-[10px] font-black text-slate-500">
+              {set.set_number}
+            </Text>
+          </View>
+          <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            Set {set.set_number}
+          </Text>
+          {saving && (
+            <View className="flex-row items-center gap-1">
+              <View className="w-1 h-1 rounded-full bg-orange-400" />
+              <Text className="text-[9px] text-orange-400 font-bold">
+                Saving…
+              </Text>
+            </View>
+          )}
+        </View>
+        <Pressable
+          onPress={onDelete}
+          className="w-6 h-6 rounded-full bg-slate-100 items-center justify-center"
+        >
+          <Feather name="x" size={11} color="#94a3b8" />
+        </Pressable>
       </View>
 
-      <View className="flex-1 bg-slate-50 border border-slate-200 rounded-[10px] px-1 py-2">
-        <TextInput
-          value={reps}
-          onChangeText={setReps}
-          keyboardType="number-pad"
-          className="text-sm font-bold text-slate-800 text-center"
-          selectTextOnFocus
-        />
+      {/* Inputs */}
+      <View className="flex-row items-end gap-2 mb-3">
+        {/* Weight */}
+        <View className="flex-1 items-center">
+          <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+            kg
+          </Text>
+          <View className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-2.5">
+            <TextInput
+              value={weight}
+              onChangeText={setWeight}
+              onBlur={handleBlurSave}
+              keyboardType="decimal-pad"
+              className="text-sm font-black text-slate-800 text-center"
+              selectTextOnFocus
+            />
+          </View>
+        </View>
+
+        <View className="w-px h-8 bg-slate-100 mb-1" />
+
+        {/* Reps */}
+        <View className="flex-1 items-center">
+          <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+            reps
+          </Text>
+          <View className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-2.5">
+            <TextInput
+              value={reps}
+              onChangeText={setReps}
+              onBlur={handleBlurSave}
+              keyboardType="number-pad"
+              className="text-sm font-black text-slate-800 text-center"
+              selectTextOnFocus
+            />
+          </View>
+        </View>
+
+        <View className="w-px h-8 bg-slate-100 mb-1" />
+
+        {/* RPE */}
+        <View className="flex-1 items-center">
+          <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+            rpe
+          </Text>
+          <View className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-2.5">
+            <TextInput
+              value={rpe}
+              onChangeText={setRpe}
+              keyboardType="decimal-pad"
+              placeholder="—"
+              placeholderTextColor="#cbd5e1"
+              className="text-sm font-black text-slate-800 text-center"
+              selectTextOnFocus
+            />
+          </View>
+        </View>
+
+        {/* Complete */}
+        <Pressable
+          onPress={() =>
+            onComplete(
+              parseFloat(weight) || 0,
+              parseInt(reps) || 0,
+              rpe ? parseFloat(rpe) : null,
+              restTarget, // ← add this
+            )
+          }
+          className="w-11 h-11 bg-slate-900 rounded-[12px] items-center justify-center"
+        >
+          <Feather name="check" size={15} color="#fff" />
+        </Pressable>
       </View>
 
-      <View className="flex-1 bg-slate-50 border border-slate-200 rounded-[10px] px-1 py-2">
-        <TextInput
-          value={rpe}
-          onChangeText={setRpe}
-          keyboardType="decimal-pad"
-          placeholder="—"
-          placeholderTextColor="#cbd5e1"
-          className="text-sm font-bold text-slate-800 text-center"
-          selectTextOnFocus
-        />
+      {/* ── Options row ── */}
+      <View className="flex-row items-center gap-2 pt-2.5 border-t border-slate-100">
+        {/* Rest target */}
+        <View className="flex-row items-center gap-1.5 flex-1">
+          <Feather name="clock" size={11} color="#94a3b8" />
+          <Text className="text-[10px] font-bold text-slate-400">Rest</Text>
+          <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-full overflow-hidden">
+            <Pressable
+              onPress={() => {
+                const next = Math.max(30, restTarget - 15);
+                setRestTarget(next);
+                updateSetPerExercise(set.id, { rest_target: next });
+              }}
+              className="px-2 py-1"
+            >
+              <Text className="text-xs font-black text-slate-500">−</Text>
+            </Pressable>
+            <Text className="text-[10px] font-black text-slate-700 px-1">
+              {restTarget}s
+            </Text>
+            <Pressable
+              onPress={() => {
+                const next = Math.min(300, restTarget + 15);
+                setRestTarget(next);
+                updateSetPerExercise(set.id, { rest_target: next });
+              }}
+              className="px-2 py-1"
+            >
+              <Text className="text-xs font-black text-slate-500">+</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Warmup toggle */}
+        <Pressable
+          onPress={() => {
+            const next = !isWarmup;
+            setIsWarmup(next);
+            updateSetPerExercise(set.id, { is_warmup: next });
+          }}
+          className="flex-row items-center gap-1 rounded-full px-2.5 py-1"
+          style={{
+            backgroundColor: isWarmup ? "#eff6ff" : "#f8fafc",
+            borderWidth: 1,
+            borderColor: isWarmup ? "#bfdbfe" : "#e2e8f0",
+          }}
+        >
+          <Feather
+            name="sun"
+            size={11}
+            color={isWarmup ? "#3b82f6" : "#94a3b8"}
+          />
+          <Text
+            className="text-[10px] font-bold"
+            style={{ color: isWarmup ? "#3b82f6" : "#94a3b8" }}
+          >
+            Warm
+          </Text>
+        </Pressable>
+
+        {/* PR toggle */}
+        <Pressable
+          onPress={() => {
+            const next = !isPr;
+            setIsPr(next);
+            updateSetPerExercise(set.id, { is_pr: next });
+          }}
+          className="flex-row items-center gap-1 rounded-full px-2.5 py-1"
+          style={{
+            backgroundColor: isPr ? "#fefce8" : "#f8fafc",
+            borderWidth: 1,
+            borderColor: isPr ? "#fde68a" : "#e2e8f0",
+          }}
+        >
+          <Feather
+            name="award"
+            size={11}
+            color={isPr ? "#f59e0b" : "#94a3b8"}
+          />
+          <Text
+            className="text-[10px] font-bold"
+            style={{ color: isPr ? "#f59e0b" : "#94a3b8" }}
+          >
+            PR
+          </Text>
+        </Pressable>
       </View>
-
-      <Pressable
-        onPress={() =>
-          onComplete(
-            parseFloat(weight) || 0,
-            parseInt(reps) || 0,
-            rpe ? parseFloat(rpe) : null,
-          )
-        }
-        className="w-12 bg-slate-900 rounded-[10px] py-2.5 items-center justify-center"
-      >
-        <Feather name="check" size={14} color="#fff" />
-      </Pressable>
-
-      <Pressable onPress={onDelete} className="w-7 items-center justify-center">
-        <Feather name="trash-2" size={13} color="#cbd5e1" />
-      </Pressable>
     </View>
   );
 }

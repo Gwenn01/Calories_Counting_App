@@ -125,7 +125,7 @@ export const updateWorkoutExercise = async (
   exerciseId: number,
   payload: { notes?: string; is_favorite?: boolean },
 ) => {
-  const res = await api.patch(
+  const res = await api.put(
     `api/workout/session/exercise/${exerciseId}/`,
     payload,
   );

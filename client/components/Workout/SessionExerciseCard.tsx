@@ -57,6 +57,7 @@ export default function ExerciseCard({
     weight: number,
     reps: number,
     rpe: number | null,
+    restTarget: number, // ← add this
   ) => {
     try {
       await markSetAsCompleted(set.id, {
@@ -64,9 +65,9 @@ export default function ExerciseCard({
         reps,
         completed: true,
         rpe,
-        rest_taken: set.rest_target ?? 90,
+        rest_taken: restTarget, // ← use passed value
       });
-      startRestTimer(set.id, set.rest_target ?? 90);
+      startRestTimer(set.id, restTarget); // ← use passed value
       onUpdate();
     } catch (e) {
       console.error(e);
@@ -162,32 +163,15 @@ export default function ExerciseCard({
         onDeleteExercise={handleDeleteExercise}
       />
 
-      {/* ── Column headers ── */}
-      <View className="flex-row items-center px-3 py-2 bg-slate-50 border-b border-slate-100">
-        {["Set", "Kg", "Reps", "RPE"].map((h) => (
-          <Text
-            key={h}
-            className="flex-1 text-[9px] font-bold text-slate-400 text-center uppercase tracking-wider"
-            style={h === "Set" ? { maxWidth: 28 } : undefined}
-          >
-            {h}
-          </Text>
-        ))}
-        <Text className="w-12 text-[9px] font-bold text-slate-400 text-center uppercase tracking-wider">
-          Done
-        </Text>
-        <View className="w-7" />
-      </View>
-
       {/* ── Sets ── */}
-      <View className="px-3 py-2 gap-1.5">
+      <View className="px-4 py-3 gap-2.5">
         {workoutExercise.sets.map((set) => (
           <SetRow
             key={set.id}
             set={set}
             restTimer={restTimers[set.id]}
-            onComplete={(weight, reps, rpe) =>
-              handleCompleteSet(set, weight, reps, rpe)
+            onComplete={(weight, reps, rpe, restTarget) =>
+              handleCompleteSet(set, weight, reps, rpe, restTarget)
             }
             onDelete={() => handleDeleteSet(set.id)}
           />
@@ -208,10 +192,10 @@ export default function ExerciseCard({
         {addingSet ? (
           <ActivityIndicator size="small" color="#94a3b8" />
         ) : (
-          <>
+          <View className="flex-row items-center gap-2">
             <Feather name="plus" size={13} color="#94a3b8" />
             <Text className="text-xs font-bold text-slate-400">Add set</Text>
-          </>
+          </View>
         )}
       </Pressable>
     </View>
