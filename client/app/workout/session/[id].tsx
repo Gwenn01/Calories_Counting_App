@@ -13,6 +13,7 @@ import { fetchWorkoutSession, finishWorkoutSession } from "@/api/workout";
 import { useToast } from "@/components/ToastProvider";
 import SessionHeader from "@/components/Workout/SessionHeader";
 import SessionTimer from "@/components/Workout/SessionTimer";
+import SessionProgress from "@/components/Workout/SessionProgress";
 import ExerciseCard from "@/components/Workout/ExerciseCard";
 import AddExerciseModal from "@/components/Workout/AddExerciseModal";
 import type { WorkoutSession } from "@/types/workout";
@@ -86,30 +87,15 @@ export default function ActiveSessionScreen() {
         {/* ── Header ── */}
         <SessionHeader session={session} onBack={() => router.back()} />
 
-        <View className="px-4">
+        <View className="px-1">
           {/* ── Timer ── */}
-          <View className="bg-white border border-slate-100 rounded-[16px] px-4 py-3 flex-row items-center justify-between mb-3">
-            <View className="flex-row items-center gap-2">
-              <Feather name="clock" size={16} color="#f97316" />
-              <Text className="text-sm text-slate-400 font-medium">
-                Elapsed
-              </Text>
-            </View>
-            <SessionTimer startTime={session.start_time} />
-          </View>
+          <SessionTimer startTime={session.start_time} />
 
           {/* ── Progress ── */}
-          <View className="flex-row items-center justify-between mb-8">
-            <Text className="text-xs text-slate-400">
-              {completedSets} / {totalSets} sets completed
-            </Text>
-            <View className="w-2/5 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-              <View
-                className="h-full bg-slate-500 rounded-full"
-                style={{ width: `${progressPct}%` }}
-              />
-            </View>
-          </View>
+          <SessionProgress
+            completedSets={completedSets}
+            totalSets={totalSets}
+          />
 
           {/* ── Exercise cards ── */}
           <View className="gap-3 mb-3">
