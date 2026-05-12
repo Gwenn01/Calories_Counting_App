@@ -17,8 +17,8 @@ urlpatterns = [
     path('workout/exercise-template/<int:pk>/', views.TemplateExerciseViewDetails.as_view(), name='template-exercise-details'),
     #sessions
     path('workout/session/', views.WorkoutSessionViewList.as_view(), name='workout-session-list'),
-    path('workout/session/<str:date>/', views.WorkoutSessionPerDateView.as_view(), name='workout-session-date'),
     path('workout/session/<int:pk>/', views.WorkoutSessionViewDetails.as_view(), name='workout-session-details'),
+    path('workout/session/<str:date>/', views.WorkoutSessionPerDateView.as_view(), name='workout-session-date'),
     #workout exercise
     path('workout/session/exercise/<int:pk>/', views.WorkoutExerciseViewDetails.as_view(), name='workout-exercise-details'),
     path('workout/session/exercise-create/<int:session_pk>/', views.WorkoutExerciseCreateView.as_view(), name='workout-exercise-create'),

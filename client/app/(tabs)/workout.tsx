@@ -1,7 +1,8 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { View, Text, ScrollView, Pressable, Alert } from "react-native";
+import { useState, useCallback, useEffect } from "react";
+import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
+import { ActivityIndicator } from "react-native";
 import { useToast } from "@/components/ToastProvider";
 import { router } from "expo-router";
 
@@ -10,25 +11,51 @@ import WorkoutHeader from "@/components/Workout/WorkoutHeader";
 import StartSessionCard from "@/components/Workout/StartSessionCard";
 import TemplateList from "@/components/Workout/TemplateList";
 import TemplateModal from "@/components/Workout/TemplateModal";
+import SessionDayCard from "@/components/Workout/SessionDayCard";
 
 // ─── API ──────────────────────────────────────────────────────────
 import {
   fetchWorkoutTemplate,
   createWorkoutSession,
   deleteWorkoutTemplate,
+  fetchSessionsByDate,
 } from "@/api/workout";
 
 // ─── Types ────────────────────────────────────────────────────────
-import type { WorkoutType, WorkoutTemplate } from "@/types/workout";
+import type {
+  WorkoutType,
+  WorkoutTemplate,
+  WorkoutSession,
+} from "@/types/workout";
+
+// helper to format duration in minutes/hours
+const toDateString = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
 
 // ─── Screen ───────────────────────────────────────────────────────
 export default function WorkoutScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  // templates data
   const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
+  // session data
+  const [sessions, setSessions] = useState<WorkoutSession[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  // date data
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const currentDay = new Date(currentDate);
+  currentDay.setHours(0, 0, 0, 0);
+
+  const isToday = currentDay.getTime() === today.getTime();
+  const isPast = currentDay.getTime() < today.getTime();
+  const todaySession = sessions[0] ?? null;
 
   const { showToast } = useToast();
-
   // Template modal
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [editingTemplate, setEditingTemplate] =
@@ -36,10 +63,12 @@ export default function WorkoutScreen() {
 
   // ── Date navigation ───────────────────────────────────────────
   const goPrevDay = useCallback(() => {
+    setSessions([]); // ← clear immediately
     setCurrentDate((d) => new Date(d.getTime() - 86400000));
   }, []);
 
   const goNextDay = useCallback(() => {
+    setSessions([]); // ← clear immediately
     setCurrentDate((d) => new Date(d.getTime() + 86400000));
   }, []);
 
@@ -58,9 +87,32 @@ export default function WorkoutScreen() {
     }
   }, []);
 
+  // ── Fetch sessions for the day ───────────────────────────────────────────
+  const loadSessions = useCallback(async (date: Date) => {
+    try {
+      setSessionsLoading(true);
+      setSessions([]);
+      const dateStr = toDateString(date);
+      const data = await fetchSessionsByDate(dateStr);
+      if (!data) {
+        setSessions([]);
+      } else if (Array.isArray(data)) {
+        setSessions(data);
+      } else {
+        setSessions([data]);
+      }
+    } catch (e) {
+      console.error(e);
+      setSessions([]);
+    } finally {
+      setSessionsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadTemplates();
-  }, []);
+    loadSessions(currentDate);
+  }, [currentDate]);
 
   // ── Template handlers ─────────────────────────────────────────
   const handleOpenCreate = useCallback(() => {
@@ -111,7 +163,10 @@ export default function WorkoutScreen() {
     try {
       const session = await createWorkoutSession(payload);
       showToast("Session started!", "Go crush it ", "success");
-      router.push(`/workout/session/${session.id}`);
+      router.push({
+        pathname: "/workout/session/[id]",
+        params: { id: session.id },
+      });
     } catch (e) {
       console.error(e);
       showToast("Error", "Failed to start session", "error");
@@ -139,11 +194,36 @@ export default function WorkoutScreen() {
         />
 
         {/* CREATE SESSIONS =========================================================================================================== */}
-        <StartSessionCard
-          templates={templates}
-          templatesLoading={templatesLoading}
-          onStartSession={handleStartSession}
-        />
+        {sessionsLoading ? (
+          <View className="bg-white rounded-[24px] border border-slate-100 mt-4 py-12 items-center">
+            <ActivityIndicator size="small" color="#f97316" />
+            <Text className="text-xs text-slate-400 mt-2">
+              Loading session…
+            </Text>
+          </View>
+        ) : todaySession ? (
+          <SessionDayCard session={todaySession} isToday={isToday} />
+        ) : isPast ? (
+          // past date with no session
+          <View className="bg-white rounded-[24px] border border-slate-100 mt-4 py-10 items-center px-6">
+            <View className="w-14 h-14 rounded-[16px] bg-slate-100 items-center justify-center mb-4">
+              <Feather name="calendar" size={24} color="#94a3b8" />
+            </View>
+            <Text className="text-base font-black text-slate-700 mb-1">
+              No Session
+            </Text>
+            <Text className="text-sm text-slate-400 text-center leading-5">
+              No workout was logged on this day.
+            </Text>
+          </View>
+        ) : (
+          // today or future with no session → allow starting
+          <StartSessionCard
+            templates={templates}
+            templatesLoading={templatesLoading}
+            onStartSession={handleStartSession}
+          />
+        )}
 
         {/* TEMPLATE =========================================================================================================== */}
         <TemplateList

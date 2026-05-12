@@ -88,8 +88,7 @@ export const fetchAllWorkoutSession = async () => {
 };
 
 export const fetchSessionsByDate = async (date: string) => {
-  // date format: "2026-05-12"
-  const res = await api.get(`api/workout/session/?date=${date}`);
+  const res = await api.get(`api/workout/session/${date}/`);
   return res.data;
 };
 
