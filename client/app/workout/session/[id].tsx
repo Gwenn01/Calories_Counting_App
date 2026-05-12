@@ -105,8 +105,6 @@ export default function ActiveSessionScreen() {
     (acc, we) => acc + we.sets.length,
     0,
   );
-  const progressPct = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
-
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <ScrollView
