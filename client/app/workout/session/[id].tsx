@@ -14,7 +14,7 @@ import { useToast } from "@/components/ToastProvider";
 import SessionHeader from "@/components/Workout/SessionHeader";
 import SessionTimer from "@/components/Workout/SessionTimer";
 import SessionProgress from "@/components/Workout/SessionProgress";
-import ExerciseCard from "@/components/Workout/ExerciseCard";
+import ExerciseCard from "@/components/Workout/SessionExerciseCard";
 import AddExerciseModal from "@/components/Workout/AddExerciseModal";
 import type { WorkoutSession } from "@/types/workout";
 

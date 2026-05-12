@@ -110,3 +110,37 @@ export interface WorkoutSession {
   workout_exercises: WorkoutExercise[];
   is_finished: boolean;
 }
+
+export interface ExerciseCardProps {
+  workoutExercise: WorkoutExercise;
+  sessionId: number;
+  onUpdate: () => void;
+}
+
+export interface ExerciseHeaderProps {
+  workoutExercise: WorkoutExercise;
+  completedCount: number;
+  notes: string;
+  showNotes: boolean;
+  savingNotes: boolean;
+  togglingFav: boolean;
+  deletingExercise: boolean;
+  onToggleNotes: () => void;
+  onChangeNotes: (text: string) => void;
+  onBlurNotes: () => void;
+  onToggleFavorite: () => void;
+  onDeleteExercise: () => void;
+}
+
+export interface SetRowProps {
+  set: WorkoutSet;
+  restTimer?: number;
+  onComplete: (weight: number, reps: number, rpe: number | null) => void;
+  onDelete: () => void;
+}
+
+export interface StatsRowProps {
+  totalVolume: number;
+  bestSet: { weight: number; reps: number } | null;
+  est1rm: number | undefined;
+}

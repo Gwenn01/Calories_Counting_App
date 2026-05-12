@@ -114,29 +114,26 @@ export const deleteWorkoutSession = async (id: number) => {
   return res.data;
 };
 
+// session exercise log =================================================================
+
 export const getExercisePerSession = async (exerciseId: number) => {
   const res = await api.get(`/workout/session/exercise/${exerciseId}/`);
   return res.data;
 };
 
-export const updateExercisePerSession = async (
+export const updateWorkoutExercise = async (
   exerciseId: number,
-  payload: any,
+  payload: { notes?: string; is_favorite?: boolean },
 ) => {
-  // example payload: {
-  //   "notes": "Focus on form",
-  //   "is_favorite": true
-  // }
-  const res = await api.put(
+  const res = await api.patch(
     `api/workout/session/exercise/${exerciseId}/`,
     payload,
   );
   return res.data;
 };
 
-export const deleteExercisePerSession = async (exerciseId: number) => {
-  const res = await api.delete(`api/workout/session/exercise/${exerciseId}/`);
-  return res.data;
+export const deleteWorkoutExercise = async (exerciseId: number) => {
+  await api.delete(`api/workout/session/exercise/${exerciseId}/`);
 };
 
 export const createExercisePerSession = async (
@@ -157,6 +154,8 @@ export const createExercisePerSession = async (
   );
   return res.data;
 };
+
+// set log =================================================================
 
 export const getSetPerExercise = async (setID: number) => {
   const res = await api.get(`api/workout/exercise/set/${setID}/`);
