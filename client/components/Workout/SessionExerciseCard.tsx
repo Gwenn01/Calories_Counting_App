@@ -14,11 +14,16 @@ import ExerciseHeader from "@/components/Workout/SessionExerciseCardContainer/Ex
 import SetRow from "@/components/Workout/SessionExerciseCardContainer/SetRow";
 import StatsRow from "@/components/Workout/SessionExerciseCardContainer/StatsRow";
 import AddSetButton from "@/components/Workout/SessionExerciseCardContainer/AddSetButton";
+import { useAlert } from "../AlertProvider";
+import { useToast } from "../ToastProvider";
 
 export default function ExerciseCard({
   workoutExercise,
   onUpdate,
 }: ExerciseCardProps) {
+  const { showAlert } = useAlert();
+  const { showToast } = useToast();
+  //  variables needed
   const [restTimers, setRestTimers] = useState<Record<number, number>>({});
   const [addingSet, setAddingSet] = useState(false);
   const [showNotes, setShowNotes] = useState(!!workoutExercise.notes);
@@ -70,6 +75,7 @@ export default function ExerciseCard({
       });
       startRestTimer(set.id, restTarget); // ← use passed value
       onUpdate();
+      showToast("Set Completed", "Great job!", "success");
     } catch (e) {
       console.error(e);
     }
@@ -123,28 +129,29 @@ export default function ExerciseCard({
   };
 
   const handleDeleteExercise = () => {
-    Alert.alert(
-      "Remove Exercise",
-      `Remove "${workoutExercise.exercise.name}" from this session?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setDeletingExercise(true);
-              await deleteWorkoutExercise(workoutExercise.id);
-              onUpdate();
-            } catch (e) {
-              console.error(e);
-            } finally {
-              setDeletingExercise(false);
-            }
-          },
+    showAlert("Remove Exercise", `Remove "${workoutExercise.exercise.name}"?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            setDeletingExercise(true);
+            await deleteWorkoutExercise(workoutExercise.id);
+            showToast(
+              "Removed!",
+              `${workoutExercise.exercise.name} removed`,
+              "success",
+            );
+            onUpdate();
+          } catch (e) {
+            showToast("Error", "Failed to remove exercise", "error");
+          } finally {
+            setDeletingExercise(false);
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   return (
