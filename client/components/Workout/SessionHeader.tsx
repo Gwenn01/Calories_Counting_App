@@ -1,6 +1,17 @@
 import { useState, useEffect } from "react";
 import { View, Text, Pressable } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import {
+  ChevronLeft,
+  Calendar,
+  Clock,
+  Weight,
+  Layers,
+  Repeat,
+  Timer,
+  Zap,
+  Smile,
+  User,
+} from "lucide-react-native"; // Using Lucide for a consistent look
 import type { WorkoutSession, WorkoutTemplate } from "@/types/workout";
 import { getCategoryMeta } from "@/components/Workout/StartSessionCardContainer/helpers";
 import { fetchWorkoutTemplateById } from "@/api/workout";
@@ -35,7 +46,7 @@ export default function SessionHeader({ session, onBack }: Props) {
     });
 
   const formatDuration = (seconds: number | null) => {
-    if (!seconds) return "In progress";
+    if (!seconds) return "Live";
     const m = Math.floor(seconds / 60);
     const h = Math.floor(m / 60);
     return h > 0 ? `${h}h ${m % 60}m` : `${m}m`;
@@ -47,175 +58,106 @@ export default function SessionHeader({ session, onBack }: Props) {
   );
 
   return (
-    <View className="bg-slate-900 px-5 pt-5 pb-6 mb-4">
+    <View className="bg-slate-900 px-4 pt-4 pb-4 mb-4 border-b border-slate-800">
       {/* ── Top row ── */}
-      <View className="flex-row items-center justify-between mb-5">
-        <Pressable
-          onPress={onBack}
-          className="w-9 h-9 rounded-[12px] bg-slate-800 border border-slate-700 items-center justify-center"
-        >
-          <Feather name="chevron-left" size={18} color="#fff" />
-        </Pressable>
-
-        <View className="flex-row items-center gap-1.5">
-          <Feather name="activity" size={11} color="#f97316" />
-          <Text className="text-[10px] font-bold tracking-[2px] uppercase text-orange-400">
-            Active Session
-          </Text>
-        </View>
-
-        <View className="flex-row items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full px-2.5 py-1">
-          <View className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          <Text className="text-[10px] font-bold text-emerald-400">LIVE</Text>
-        </View>
-      </View>
-
-      {/* ── Title + template name ── */}
-      <Text
-        className="text-2xl font-black text-white mb-1"
-        style={{ letterSpacing: -0.5 }}
-      >
-        {template?.name ?? `${meta.label} Day`}
-      </Text>
-
-      {template?.description ? (
-        <Text className="text-xs text-slate-500 mb-3" numberOfLines={1}>
-          {template.description}
-        </Text>
-      ) : null}
-
-      {/* ── Meta row ── */}
-      <View className="flex-row items-center gap-2 flex-wrap mb-4">
-        <View
-          className="px-2.5 py-0.5 rounded-full border"
-          style={{
-            backgroundColor: meta.color + "25",
-            borderColor: meta.color + "50",
-          }}
-        >
-          <Text
-            className="text-[10px] font-bold uppercase tracking-widest"
-            style={{ color: meta.color }}
+      <View className="flex-row items-center justify-between mb-3">
+        <View className="flex-row items-center gap-3">
+          <Pressable
+            onPress={onBack}
+            className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 items-center justify-center"
           >
-            {meta.label}
-          </Text>
-        </View>
-
-        <View className="flex-row items-center gap-1">
-          <Feather name="calendar" size={11} color="#94a3b8" />
-          <Text className="text-xs text-slate-400">
-            {formatDate(session.date)}
-          </Text>
-        </View>
-
-        <View className="flex-row items-center gap-1">
-          <Feather name="clock" size={11} color="#94a3b8" />
-          <Text className="text-xs text-slate-400">
-            {formatTime(session.start_time)}
-          </Text>
-        </View>
-
-        {/* Estimated duration from template */}
-        {template?.estimated_duration ? (
-          <View className="flex-row items-center gap-1 bg-slate-800 rounded-full px-2 py-0.5">
-            <Feather name="flag" size={10} color="#64748b" />
-            <Text className="text-[10px] text-slate-400">
-              ~{template.estimated_duration}m goal
+            <ChevronLeft size={16} color="#fff" />
+          </Pressable>
+          <View className="flex-1">
+            <Text className="text-lg font-black text-white leading-tight">
+              {template?.name ?? `${meta.label} Day`}
             </Text>
-          </View>
-        ) : null}
 
-        {session.notes ? (
-          <Text className="text-xs text-slate-500 flex-1" numberOfLines={1}>
-            · {session.notes}
-          </Text>
-        ) : null}
+            {/* RESTORED: Notes & Goal (Small) */}
+            <View className="flex-row items-center gap-2 mt-0.5">
+              <Text className="text-[10px] font-bold text-slate-500 uppercase">
+                {formatDate(session.date)}
+              </Text>
+
+              {template?.estimated_duration && (
+                <Text className="text-[10px] text-orange-500/80 font-bold uppercase">
+                  • {template.estimated_duration}m Goal
+                </Text>
+              )}
+
+              {session.notes && (
+                <Text
+                  className="text-[10px] text-slate-500 italic flex-1"
+                  numberOfLines={1}
+                >
+                  • {session.notes}
+                </Text>
+              )}
+            </View>
+          </View>
+        </View>
       </View>
 
-      {/* ── Divider ── */}
-      <View className="h-px bg-slate-800 mb-4" />
-
-      {/* ── Stats grid ── */}
-      <View className="flex-row gap-2 mb-3">
-        {[
-          {
-            label: "Volume",
-            value: session.total_volume.toLocaleString(),
-            unit: "kg",
-          },
-          {
-            label: "Sets",
-            value: `${session.total_sets_completed}`,
-            unit: `/${totalSets}`,
-          },
-          { label: "Reps", value: `${session.total_reps}`, unit: "" },
-          {
-            label: "Duration",
-            value: formatDuration(session.duration_seconds),
-            unit: "",
-          },
-        ].map((s) => (
-          <View
-            key={s.label}
-            className="flex-1 bg-slate-800 rounded-[12px] px-2 py-2.5 items-center"
-          >
-            <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-              {s.label}
-            </Text>
-            <Text className="text-sm font-black text-white">
-              {s.value}
-              {s.unit ? (
-                <Text className="text-xs text-slate-500">{s.unit}</Text>
-              ) : null}
-            </Text>
-          </View>
-        ))}
+      {/* ── Compact Stats Row ── */}
+      <View className="flex-row items-center justify-between bg-slate-800/50 rounded-xl py-2.5 px-3 mb-3 border border-slate-800">
+        <View className="items-center">
+          <Weight size={12} color="#3b82f6" />
+          <Text className="text-[11px] font-black text-white mt-0.5">
+            {session.total_volume.toLocaleString()}
+            <Text className="text-[8px] text-slate-500"> kg</Text>
+          </Text>
+        </View>
+        <View className="w-[1px] h-4 bg-slate-700" />
+        <View className="items-center">
+          <Layers size={12} color="#f59e0b" />
+          <Text className="text-[11px] font-black text-white mt-0.5">
+            {session.total_sets_completed}
+            <Text className="text-[8px] text-slate-500">/{totalSets}</Text>
+          </Text>
+        </View>
+        <View className="w-[1px] h-4 bg-slate-700" />
+        <View className="items-center">
+          <Repeat size={12} color="#10b981" />
+          <Text className="text-[11px] font-black text-white mt-0.5">
+            {session.total_reps}
+          </Text>
+        </View>
+        <View className="w-[1px] h-4 bg-slate-700" />
+        <View className="items-center">
+          <Timer size={12} color="#6366f1" />
+          <Text className="text-[11px] font-black text-white mt-0.5">
+            {formatDuration(session.duration_seconds)}
+          </Text>
+        </View>
       </View>
 
-      {/* ── Vitals row ── */}
-      <View className="flex-row gap-2">
-        {/* Energy */}
-        <View className="flex-1 bg-slate-800 rounded-[12px] px-3 py-2.5">
-          <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-            Energy
-          </Text>
-          <Text className="text-sm font-black text-white mb-1">
-            {session.energy_level}
-            <Text className="text-xs text-slate-500"> /10</Text>
-          </Text>
-          <View className="h-1 bg-slate-900 rounded-full overflow-hidden">
+      {/* ── Vitals Footer Row ── */}
+      <View className="flex-row items-center gap-4 px-1">
+        <View className="flex-1 flex-row items-center gap-2">
+          <Zap size={10} color="#f97316" fill="#f97316" />
+          <View className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
             <View
-              className="h-full bg-orange-500 rounded-full"
+              className="h-full bg-orange-500"
               style={{ width: `${session.energy_level * 10}%` }}
             />
           </View>
         </View>
 
-        {/* Mood */}
-        <View className="flex-1 bg-slate-800 rounded-[12px] px-3 py-2.5">
-          <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-            Mood
-          </Text>
-          <Text className="text-sm font-black text-white mb-1">
-            {session.mood_rating}
-            <Text className="text-xs text-slate-500"> /10</Text>
-          </Text>
-          <View className="h-1 bg-slate-900 rounded-full overflow-hidden">
+        <View className="flex-1 flex-row items-center gap-2">
+          <Smile size={10} color="#8b5cf6" fill="#8b5cf6" />
+          <View className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
             <View
-              className="h-full bg-violet-500 rounded-full"
+              className="h-full bg-violet-500"
               style={{ width: `${session.mood_rating * 10}%` }}
             />
           </View>
         </View>
 
-        {/* Bodyweight */}
-        <View className="flex-1 bg-slate-800 rounded-[12px] px-3 py-2.5">
-          <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-            Bodyweight
-          </Text>
-          <Text className="text-sm font-black text-white">
+        <View className="flex-row items-center gap-1.5">
+          <User size={10} color="#94a3b8" />
+          <Text className="text-[10px] font-bold text-slate-400">
             {session.bodyweight}
-            <Text className="text-xs text-slate-500">
+            <Text className="text-[8px] text-slate-600">
               {" "}
               {session.weight_unit}
             </Text>
