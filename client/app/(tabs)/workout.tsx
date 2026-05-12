@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { ActivityIndicator } from "react-native";
 import { useToast } from "@/components/ToastProvider";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 // ─── Components ───────────────────────────────────────────────────
 import WorkoutHeader from "@/components/Workout/WorkoutHeader";
@@ -111,8 +111,13 @@ export default function WorkoutScreen() {
 
   useEffect(() => {
     loadTemplates();
-    loadSessions(currentDate);
-  }, [currentDate]);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSessions(currentDate);
+    }, [currentDate]),
+  );
 
   // ── Template handlers ─────────────────────────────────────────
   const handleOpenCreate = useCallback(() => {

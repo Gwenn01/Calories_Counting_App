@@ -12,7 +12,7 @@ import { Feather } from "@expo/vector-icons";
 import { fetchWorkoutSession, finishWorkoutSession } from "@/api/workout";
 import { useToast } from "@/components/ToastProvider";
 import SessionHeader from "@/components/Workout/SessionHeader";
-import SessionTimer from "@/components/Workout//SessionTimer";
+import SessionTimer from "@/components/Workout/SessionTimer";
 import ExerciseCard from "@/components/Workout/ExerciseCard";
 import AddExerciseModal from "@/components/Workout/AddExerciseModal";
 import type { WorkoutSession } from "@/types/workout";
@@ -75,93 +75,85 @@ export default function ActiveSessionScreen() {
     (acc, we) => acc + we.sets.length,
     0,
   );
+  const progressPct = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
+        {/* ── Header ── */}
         <SessionHeader session={session} onBack={() => router.back()} />
 
-        {/* Timer */}
-        <SessionTimer startTime={session.start_time} />
-
-        {/* Stats strip */}
-        <View className="flex-row mx-4 mb-4 gap-3">
-          <View className="flex-1 bg-white border border-slate-100 rounded-[16px] px-3 py-3 items-center">
-            <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-              Sets
-            </Text>
-            <Text className="text-lg font-black text-slate-800">
-              {completedSets}
-              <Text className="text-xs font-bold text-slate-300">
-                /{totalSets}
-              </Text>
-            </Text>
-          </View>
-          <View className="flex-1 bg-white border border-slate-100 rounded-[16px] px-3 py-3 items-center">
-            <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-              Volume
-            </Text>
-            <Text className="text-lg font-black text-slate-800">
-              {session.total_volume}
-              <Text className="text-xs font-bold text-slate-400"> kg</Text>
-            </Text>
-          </View>
-          <View className="flex-1 bg-white border border-slate-100 rounded-[16px] px-3 py-3 items-center">
-            <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-              Exercises
-            </Text>
-            <Text className="text-lg font-black text-slate-800">
-              {session.workout_exercises.length}
-            </Text>
-          </View>
-        </View>
-
-        {/* Exercise cards */}
-        <View className="px-4 gap-4">
-          {session.workout_exercises.map((we) => (
-            <ExerciseCard
-              key={we.id}
-              workoutExercise={we}
-              sessionId={session.id}
-              onUpdate={loadSession}
-            />
-          ))}
-        </View>
-
-        {/* Add Exercise button */}
-        <Pressable
-          onPress={() => setShowAddExercise(true)}
-          className="mx-4 mt-4 flex-row items-center justify-center gap-2 bg-white border border-dashed border-slate-300 rounded-[18px] py-4"
-        >
-          <Feather name="plus-circle" size={16} color="#94a3b8" />
-          <Text className="text-sm font-bold text-slate-400">Add Exercise</Text>
-        </Pressable>
-      </ScrollView>
-
-      {/* Finish button — fixed bottom */}
-      <View className="absolute bottom-0 left-0 right-0 px-4 pb-8 pt-4 bg-slate-50 border-t border-slate-100">
-        <Pressable
-          onPress={handleFinish}
-          disabled={finishing}
-          className="bg-slate-900 rounded-[18px] py-4 items-center justify-center"
-          style={{ opacity: finishing ? 0.6 : 1 }}
-        >
-          {finishing ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <View className="flex-row items-center gap-2.5">
-              <Feather name="check-circle" size={18} color="#fff" />
-              <Text className="text-sm font-black text-white uppercase tracking-wide">
-                Finish Session
+        <View className="px-4">
+          {/* ── Timer ── */}
+          <View className="bg-white border border-slate-100 rounded-[16px] px-4 py-3 flex-row items-center justify-between mb-3">
+            <View className="flex-row items-center gap-2">
+              <Feather name="clock" size={16} color="#f97316" />
+              <Text className="text-sm text-slate-400 font-medium">
+                Elapsed
               </Text>
             </View>
-          )}
-        </Pressable>
-      </View>
+            <SessionTimer startTime={session.start_time} />
+          </View>
+
+          {/* ── Progress ── */}
+          <View className="flex-row items-center justify-between mb-8">
+            <Text className="text-xs text-slate-400">
+              {completedSets} / {totalSets} sets completed
+            </Text>
+            <View className="w-2/5 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+              <View
+                className="h-full bg-slate-500 rounded-full"
+                style={{ width: `${progressPct}%` }}
+              />
+            </View>
+          </View>
+
+          {/* ── Exercise cards ── */}
+          <View className="gap-3 mb-3">
+            {session.workout_exercises.map((we) => (
+              <ExerciseCard
+                key={we.id}
+                workoutExercise={we}
+                sessionId={session.id}
+                onUpdate={loadSession}
+              />
+            ))}
+          </View>
+
+          {/* ── Add exercise ── */}
+          <Pressable
+            onPress={() => setShowAddExercise(true)}
+            className="flex-row items-center justify-center gap-2 bg-white border border-dashed border-slate-300 rounded-[16px] py-4 mb-4"
+          >
+            <Feather name="plus-circle" size={16} color="#94a3b8" />
+            <Text className="text-sm font-bold text-slate-400">
+              Add exercise
+            </Text>
+          </Pressable>
+
+          {/* ── Finish button — inline, bottom of scroll ── */}
+          <Pressable
+            onPress={handleFinish}
+            disabled={finishing}
+            className="bg-slate-900 rounded-[18px] py-4 items-center justify-center"
+            style={{ opacity: finishing ? 0.6 : 1 }}
+          >
+            {finishing ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <View className="flex-row items-center gap-2.5">
+                <Feather name="check-circle" size={18} color="#fff" />
+                <Text className="text-sm font-black text-white uppercase tracking-wide">
+                  Finish Session
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        </View>
+      </ScrollView>
 
       <AddExerciseModal
         visible={showAddExercise}

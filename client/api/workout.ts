@@ -38,6 +38,11 @@ export const fetchWorkoutTemplate = async () => {
   return res.data;
 };
 
+export const fetchWorkoutTemplateById = async (id: number) => {
+  const res = await api.get(`api/workout/template/${id}/`);
+  return res.data;
+};
+
 export const editWorkoutTemplate = async (
   id: number,
   data: TemplateExercise,
