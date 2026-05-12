@@ -163,8 +163,8 @@ export default function ExerciseCard({
         onDeleteExercise={handleDeleteExercise}
       />
 
-      {/* ── Sets ── */}
-      <View className="px-4 py-3 gap-2.5">
+      {/* ── Exercise and Sets ── */}
+      <View className="px-4 py-3 gap-2">
         {workoutExercise.sets.map((set) => (
           <SetRow
             key={set.id}

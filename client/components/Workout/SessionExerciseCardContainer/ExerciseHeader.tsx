@@ -117,7 +117,7 @@ export default function ExerciseHeader({
             }}
           >
             <Text
-              className="text-[9px] font-bold uppercase tracking-widest"
+              className="text-[7px] font-bold uppercase tracking-widest"
               style={{ color: muscleColor }}
             >
               {workoutExercise.exercise.muscle_group}
@@ -125,14 +125,14 @@ export default function ExerciseHeader({
           </View>
 
           <View className="bg-slate-800 border border-slate-700 px-2.5 py-0.5 rounded-full">
-            <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+            <Text className="text-[7px] font-bold text-slate-400 uppercase tracking-widest">
               {totalSets} sets
             </Text>
           </View>
 
           {completedCount > 0 && (
             <View className="bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
-              <Text className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">
+              <Text className="text-[7px] font-bold text-emerald-400 uppercase tracking-widest">
                 {completedCount}/{totalSets} done
               </Text>
             </View>
@@ -140,7 +140,7 @@ export default function ExerciseHeader({
 
           {progress === 1 && (
             <View className="bg-emerald-500/20 border border-emerald-500/30 px-1 py-0.5 rounded-full ml-auto">
-              <Text className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">
+              <Text className="text-[7px] font-bold text-emerald-400 uppercase tracking-widest">
                 ✓ Complete
               </Text>
             </View>

@@ -111,7 +111,7 @@ class SetCreateSerializer(serializers.ModelSerializer):
         fields = [
             "id", "set_number", "weight", "reps",
             "rpe", "rest_taken", "rest_target",
-            "is_warmup", "is_dropset",
+            "is_warmup", "is_dropset", 'is_pr'
         ]
         read_only_fields = ["id"]
 
@@ -121,7 +121,7 @@ class SetUpdateSerializer(serializers.ModelSerializer):
         fields = [
             "weight", "reps", "completed",
             "rpe", "rest_taken", "rest_target",
-            "tempo", "is_warmup", "is_dropset",
+            "tempo", "is_warmup", "is_dropset", 'is_pr'
         ]
 
 # ─────────────────────────────────────────────────────────────────

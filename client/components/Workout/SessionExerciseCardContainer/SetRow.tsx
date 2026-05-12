@@ -22,6 +22,7 @@ export default function SetRow({
   const [restTarget, setRestTarget] = useState(set.rest_target ?? 90);
   const [isWarmup, setIsWarmup] = useState(set.is_warmup ?? false);
   const [isPr, setIsPr] = useState(set.is_pr ?? false);
+  const [isDropset, setIsDropset] = useState(set.is_dropset ?? false);
 
   // ── Auto-save on blur ──
   const handleBlurSave = async () => {
@@ -32,7 +33,8 @@ export default function SetRow({
         reps: parseInt(reps) || set.reps,
         rest_target: restTarget,
         is_warmup: isWarmup,
-        is_dropset: set.is_dropset ?? false,
+        is_dropset: isDropset,
+        is_pr: isPr,
       });
     } catch (e) {
       console.error("Failed to save set:", e);
@@ -45,7 +47,7 @@ export default function SetRow({
   if (set.completed && restTimer !== undefined && restTimer > 0) {
     return (
       <View className="bg-orange-50 border border-orange-100 rounded-[5px] px-3 py-3 flex-row items-center">
-        <Text className="w-7 text-xs font-black text-orange-500 text-center">
+        <Text className="w-7 text-base font-black text-orange-500 text-center">
           {set.set_number}
         </Text>
         <Feather name="check-circle" size={13} color="#f97316" />
@@ -70,7 +72,7 @@ export default function SetRow({
           {set.set_number}
         </Text>
         <Feather name="check" size={13} color="#10b981" />
-        <Text className="flex-1 text-xs font-bold text-emerald-700">
+        <Text className="flex-1 text-base font-bold text-emerald-700">
           {set.weight}kg × {set.reps} reps
           {set.rpe ? ` · RPE ${set.rpe}` : ""}
         </Text>
@@ -84,16 +86,20 @@ export default function SetRow({
             <Text className="text-[9px] font-bold text-blue-500">WARM</Text>
           </View>
         )}
+        {set.is_dropset && (
+          <View className="bg-purple-100 border border-purple-200 rounded-full px-2 py-0.5">
+            <Text className="text-[9px] font-bold text-purple-500">DROP</Text>
+          </View>
+        )}
       </View>
     );
   }
 
   // ── Active ──
-  // ── Active ──
   return (
-    <View className="bg-white border border-slate-200 rounded-[16px] px-3 py-3">
+    <View className="bg-white border border-slate-200 rounded-[5px] px-3 py-3">
       {/* Set header */}
-      <View className="flex-row items-center justify-between mb-2.5">
+      <View className="flex-row items-center justify-between mb-1">
         <View className="flex-row items-center gap-2">
           <View className="w-6 h-6 rounded-full bg-slate-100 items-center justify-center">
             <Text className="text-[10px] font-black text-slate-500">
@@ -125,15 +131,15 @@ export default function SetRow({
         {/* Weight */}
         <View className="flex-1 items-center">
           <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-            kg
+            lbs
           </Text>
-          <View className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-2.5">
+          <View className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-0.5">
             <TextInput
               value={weight}
               onChangeText={setWeight}
               onBlur={handleBlurSave}
               keyboardType="decimal-pad"
-              className="text-sm font-black text-slate-800 text-center"
+              className="text-xs font-black text-slate-800 text-center"
               selectTextOnFocus
             />
           </View>
@@ -146,13 +152,13 @@ export default function SetRow({
           <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
             reps
           </Text>
-          <View className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-2.5">
+          <View className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-0.5">
             <TextInput
               value={reps}
               onChangeText={setReps}
               onBlur={handleBlurSave}
               keyboardType="number-pad"
-              className="text-sm font-black text-slate-800 text-center"
+              className="text-xs font-black text-slate-800 text-center"
               selectTextOnFocus
             />
           </View>
@@ -165,14 +171,14 @@ export default function SetRow({
           <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
             rpe
           </Text>
-          <View className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-2.5">
+          <View className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-0.5">
             <TextInput
               value={rpe}
               onChangeText={setRpe}
               keyboardType="decimal-pad"
               placeholder="—"
               placeholderTextColor="#cbd5e1"
-              className="text-sm font-black text-slate-800 text-center"
+              className="text-xs font-black text-slate-800 text-center"
               selectTextOnFocus
             />
           </View>
@@ -195,9 +201,9 @@ export default function SetRow({
       </View>
 
       {/* ── Options row ── */}
-      <View className="flex-row items-center gap-2 pt-2.5 border-t border-slate-100">
+      <View className="flex-row items-center pt-2.5 border-t border-slate-100">
         {/* Rest target */}
-        <View className="flex-row items-center gap-1.5 flex-1">
+        <View className="flex-row items-center gap-1 flex-1">
           <Feather name="clock" size={11} color="#94a3b8" />
           <Text className="text-[10px] font-bold text-slate-400">Rest</Text>
           <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-full overflow-hidden">
@@ -234,7 +240,7 @@ export default function SetRow({
             setIsWarmup(next);
             updateSetPerExercise(set.id, { is_warmup: next });
           }}
-          className="flex-row items-center gap-1 rounded-full px-2.5 py-1"
+          className="flex-row items-center rounded-full px-2 py-1"
           style={{
             backgroundColor: isWarmup ? "#eff6ff" : "#f8fafc",
             borderWidth: 1,
@@ -261,7 +267,7 @@ export default function SetRow({
             setIsPr(next);
             updateSetPerExercise(set.id, { is_pr: next });
           }}
-          className="flex-row items-center gap-1 rounded-full px-2.5 py-1"
+          className="flex-row items-center rounded-full px-2 py-1"
           style={{
             backgroundColor: isPr ? "#fefce8" : "#f8fafc",
             borderWidth: 1,
@@ -278,6 +284,33 @@ export default function SetRow({
             style={{ color: isPr ? "#f59e0b" : "#94a3b8" }}
           >
             PR
+          </Text>
+        </Pressable>
+
+        {/* Dropset toggle */}
+        <Pressable
+          onPress={() => {
+            const next = !isDropset;
+            setIsDropset(next);
+            updateSetPerExercise(set.id, { is_dropset: next });
+          }}
+          className="flex-row items-center rounded-full px-2 py-1"
+          style={{
+            backgroundColor: isDropset ? "#fdf4ff" : "#f8fafc",
+            borderWidth: 1,
+            borderColor: isDropset ? "#e9d5ff" : "#e2e8f0",
+          }}
+        >
+          <Feather
+            name="trending-down"
+            size={11}
+            color={isDropset ? "#a855f7" : "#94a3b8"}
+          />
+          <Text
+            className="text-[10px] font-bold"
+            style={{ color: isDropset ? "#a855f7" : "#94a3b8" }}
+          >
+            Drop
           </Text>
         </Pressable>
       </View>
