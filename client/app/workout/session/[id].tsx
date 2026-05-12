@@ -98,16 +98,14 @@ export default function ActiveSessionScreen() {
           />
 
           {/* ── Exercise cards ── */}
-          <View className="gap-3 mb-3">
-            {session.workout_exercises.map((we) => (
-              <ExerciseCard
-                key={we.id}
-                workoutExercise={we}
-                sessionId={session.id}
-                onUpdate={loadSession}
-              />
-            ))}
-          </View>
+          {session.workout_exercises.map((we) => (
+            <ExerciseCard
+              key={we.id}
+              workoutExercise={we}
+              sessionId={session.id}
+              onUpdate={loadSession}
+            />
+          ))}
 
           {/* ── Add exercise ── */}
           <Pressable

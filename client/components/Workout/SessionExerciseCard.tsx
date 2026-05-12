@@ -13,6 +13,7 @@ import type { ExerciseCardProps } from "@/types/workout";
 import ExerciseHeader from "@/components/Workout/SessionExerciseCardContainer/ExerciseHeader";
 import SetRow from "@/components/Workout/SessionExerciseCardContainer/SetRow";
 import StatsRow from "@/components/Workout/SessionExerciseCardContainer/StatsRow";
+import AddSetButton from "@/components/Workout/SessionExerciseCardContainer/AddSetButton";
 
 export default function ExerciseCard({
   workoutExercise,
@@ -147,7 +148,7 @@ export default function ExerciseCard({
   };
 
   return (
-    <View className="bg-white border border-slate-100 rounded-[20px] overflow-hidden mx-4">
+    <View className="bg-white border border-slate-300 rounded-[20px] overflow-hidden mx-4 mb-6">
       <ExerciseHeader
         workoutExercise={workoutExercise}
         completedCount={completedCount}
@@ -163,20 +164,17 @@ export default function ExerciseCard({
         onDeleteExercise={handleDeleteExercise}
       />
 
-      {/* ── Exercise and Sets ── */}
-      <View className="px-4 py-3 gap-2">
-        {workoutExercise.sets.map((set) => (
-          <SetRow
-            key={set.id}
-            set={set}
-            restTimer={restTimers[set.id]}
-            onComplete={(weight, reps, rpe, restTarget) =>
-              handleCompleteSet(set, weight, reps, rpe, restTarget)
-            }
-            onDelete={() => handleDeleteSet(set.id)}
-          />
-        ))}
-      </View>
+      {workoutExercise.sets.map((set) => (
+        <SetRow
+          key={set.id}
+          set={set}
+          restTimer={restTimers[set.id]}
+          onComplete={(weight, reps, rpe, restTarget) =>
+            handleCompleteSet(set, weight, reps, rpe, restTarget)
+          }
+          onDelete={() => handleDeleteSet(set.id)}
+        />
+      ))}
 
       {/* ── Stats ── */}
       {completedCount > 0 && (
@@ -184,20 +182,7 @@ export default function ExerciseCard({
       )}
 
       {/* ── Add set ── */}
-      <Pressable
-        onPress={handleAddSet}
-        disabled={addingSet}
-        className="mx-3 mb-3 flex-row items-center justify-center gap-2 border border-dashed border-slate-200 rounded-[12px] py-2.5"
-      >
-        {addingSet ? (
-          <ActivityIndicator size="small" color="#94a3b8" />
-        ) : (
-          <View className="flex-row items-center gap-2">
-            <Feather name="plus" size={13} color="#94a3b8" />
-            <Text className="text-xs font-bold text-slate-400">Add set</Text>
-          </View>
-        )}
-      </Pressable>
+      <AddSetButton onPress={handleAddSet} addingSet={addingSet} />
     </View>
   );
 }

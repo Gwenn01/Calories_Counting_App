@@ -1,4 +1,5 @@
 import { View, Text } from "react-native";
+import { Weight, Trophy, Target } from "lucide-react-native"; // Standard icon set
 import type { StatsRowProps } from "@/types/workout";
 
 export default function StatsRow({
@@ -7,36 +8,41 @@ export default function StatsRow({
   est1rm,
 }: StatsRowProps) {
   return (
-    <View className="flex-row gap-2 mx-3 mb-3">
-      <View className="flex-1 bg-slate-50 border border-slate-100 rounded-[10px] px-2 py-2 items-center">
-        <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-          Volume
-        </Text>
-        <Text className="text-sm font-black text-slate-700">
-          {totalVolume}
-          <Text className="text-[10px] text-slate-400 font-normal"> kg</Text>
-        </Text>
-      </View>
-
-      {bestSet && (
-        <View className="flex-1 bg-slate-50 border border-slate-100 rounded-[10px] px-2 py-2 items-center">
-          <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-            Best set
-          </Text>
-          <Text className="text-sm font-black text-slate-700">
-            {bestSet.weight}×{bestSet.reps}
+    <View className="flex-row items-center justify-between bg-slate-50/50 border border-slate-100 px-3 py-1.5">
+      {/* Total Volume */}
+      <View className="flex-row items-center gap-1.5">
+        <Weight size={12} color="#94a3b8" />
+        <View>
+          <Text className="text-[11px] font-bold text-slate-700">
+            {totalVolume}
+            <Text className="text-[9px] text-slate-400 font-medium"> kg</Text>
           </Text>
         </View>
+      </View>
+
+      {/* Divider */}
+      <View className="h-4 w-[1px] bg-slate-200" />
+
+      {/* Best Set */}
+      {bestSet && (
+        <>
+          <View className="flex-row items-center gap-1.5">
+            <Trophy size={12} color="#94a3b8" />
+            <Text className="text-[11px] font-bold text-slate-700">
+              {bestSet.weight}×{bestSet.reps}
+            </Text>
+          </View>
+          <View className="h-4 w-[1px] bg-slate-200" />
+        </>
       )}
 
+      {/* Est. 1RM */}
       {est1rm && (
-        <View className="flex-1 bg-slate-50 border border-slate-100 rounded-[10px] px-2 py-2 items-center">
-          <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-            Est. 1RM
-          </Text>
-          <Text className="text-sm font-black text-slate-700">
+        <View className="flex-row items-center gap-1.5">
+          <Target size={12} color="#94a3b8" />
+          <Text className="text-[11px] font-bold text-slate-700">
             {Math.round(est1rm)}
-            <Text className="text-[10px] text-slate-400 font-normal"> kg</Text>
+            <Text className="text-[9px] text-slate-400 font-medium"> 1RM</Text>
           </Text>
         </View>
       )}

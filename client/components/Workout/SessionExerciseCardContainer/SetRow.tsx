@@ -46,7 +46,7 @@ export default function SetRow({
   // ── Completed + rest timer ──
   if (set.completed && restTimer !== undefined && restTimer > 0) {
     return (
-      <View className="bg-orange-50 border border-orange-100 rounded-[5px] px-3 py-3 flex-row items-center">
+      <View className="bg-orange-50 border border-orange-100 px-3 py-3 flex-row items-center">
         <Text className="w-7 text-base font-black text-orange-500 text-center">
           {set.set_number}
         </Text>
@@ -67,7 +67,7 @@ export default function SetRow({
   // ── Completed ──
   if (set.completed) {
     return (
-      <View className="bg-emerald-50 border border-emerald-100 rounded-[5px] px-3 py-3 flex-row items-center">
+      <View className="bg-emerald-50 border border-emerald-100 px-3 py-3 flex-row items-center">
         <Text className="w-7 text-xs font-black text-emerald-600 text-center">
           {set.set_number}
         </Text>
@@ -97,7 +97,7 @@ export default function SetRow({
 
   // ── Active ──
   return (
-    <View className="bg-white border border-slate-200 rounded-[5px] px-3 py-3">
+    <View className="bg-white border border-slate-200 px-3 py-3 ">
       {/* Set header */}
       <View className="flex-row items-center justify-between mb-1">
         <View className="flex-row items-center gap-2">
