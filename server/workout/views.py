@@ -240,12 +240,16 @@ class TemplateExerciseViewDetails(APIView):
 #SESSION WORKOUT =========================================================
 class WorkoutSessionViewList(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
-        session = WorkoutSession.objects.get(user=request.user)
-        serializer = WorkoutSessionDetailSerializer(session)
+        sessions = WorkoutSession.objects.filter(
+            user=request.user
+        )
+        serializer = WorkoutSessionDetailSerializer(
+            sessions,
+            many=True
+        )
         return Response(serializer.data, status=200)
-    
 
     def post(self, request):
         user = request.user
@@ -275,6 +279,15 @@ class WorkoutSessionViewList(APIView):
             WorkoutSessionDetailSerializer(session).data,
             status=201
         )
+        
+class WorkoutSessionPerDateView(APIView):
+    permission_classes = [IsAuthenticated]  # ← fix: needs to be a list
+
+    def get(self, request, date):
+        user = request.user
+        sessions = WorkoutSession.objects.filter(user=user,  date=date)
+        serializer = WorkoutSessionDetailSerializer(sessions, many=True)
+        return Response(serializer.data, status=200)
         
 class WorkoutSessionViewDetails(APIView):
     permission_classes = [IsAuthenticated]  # ← fix: needs to be a list

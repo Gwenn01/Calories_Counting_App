@@ -61,3 +61,52 @@ export type WorkoutTemplate = {
   template_exercises?: TemplateExercise[]; // ← make optional
   created_at?: string;
 };
+
+export interface WorkoutSet {
+  id: number;
+  set_number: number;
+  weight: number;
+  reps: number;
+  completed: boolean;
+  rpe: number | null;
+  rest_taken: number | null;
+  rest_target: number | null;
+  is_warmup: boolean;
+  is_dropset: boolean;
+  is_pr: boolean;
+  volume: number;
+  estimated_1rm: number;
+  completed_at: string | null;
+}
+
+export interface WorkoutExercise {
+  id: number;
+  exercise: Exercise;
+  order: number;
+  notes: string;
+  is_favorite: boolean;
+  superset_group: string;
+  sets: WorkoutSet[];
+  total_volume: number;
+  best_set: WorkoutSet | null;
+}
+
+export interface WorkoutSession {
+  id: number;
+  date: string;
+  category: string;
+  template: number;
+  start_time: string;
+  end_time: string | null;
+  duration_seconds: number | null;
+  notes: string;
+  energy_level: number;
+  mood_rating: number;
+  bodyweight: number;
+  weight_unit: string;
+  total_volume: number;
+  total_sets_completed: number;
+  total_reps: number;
+  workout_exercises: WorkoutExercise[];
+  is_finished: boolean;
+}

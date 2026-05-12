@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useToast } from "@/components/ToastProvider";
+import { router } from "expo-router";
 
 // ─── Components ───────────────────────────────────────────────────
 import WorkoutHeader from "@/components/Workout/WorkoutHeader";
@@ -109,10 +110,10 @@ export default function WorkoutScreen() {
   }) => {
     try {
       const session = await createWorkoutSession(payload);
-      showToast("Session started!", "Go crush it", "success");
+      showToast("Session started!", "Go crush it ", "success");
+      router.push(`/workout/session/${session.id}`);
     } catch (e) {
       console.error(e);
-
       showToast("Error", "Failed to start session", "error");
     }
   };
