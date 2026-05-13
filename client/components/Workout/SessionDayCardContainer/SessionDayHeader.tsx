@@ -107,7 +107,10 @@ export default function SessionDayHeader({
           </View>
           <Text className="text-sm font-bold text-white">
             {session.total_volume.toLocaleString()}
-            <Text className="text-[10px] text-slate-500 font-medium"> kg</Text>
+            <Text className="text-[10px] text-slate-500 font-medium">
+              {" "}
+              {session.weight_unit}
+            </Text>
           </Text>
         </View>
 

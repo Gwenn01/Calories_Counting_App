@@ -15,13 +15,13 @@ import {
 import type { WorkoutSession, WorkoutTemplate } from "@/types/workout";
 import { getCategoryMeta } from "@/components/Workout/StartSessionCardContainer/helpers";
 import { fetchWorkoutTemplateById } from "@/api/workout";
+import { SessionHeaderProps } from "@/types/workout";
 
-interface Props {
-  session: WorkoutSession;
-  onBack: () => void;
-}
-
-export default function SessionHeader({ session, onBack }: Props) {
+export default function SessionHeader({
+  weightUnit,
+  session,
+  onBack,
+}: SessionHeaderProps) {
   const meta = getCategoryMeta(session.category);
   const [template, setTemplate] = useState<WorkoutTemplate | null>(null);
 
@@ -104,7 +104,7 @@ export default function SessionHeader({ session, onBack }: Props) {
           <Weight size={12} color="#3b82f6" />
           <Text className="text-[11px] font-black text-white mt-0.5">
             {session.total_volume.toLocaleString()}
-            <Text className="text-[8px] text-slate-500"> kg</Text>
+            <Text className="text-[8px] text-slate-500"> {weightUnit}</Text>
           </Text>
         </View>
         <View className="w-[1px] h-4 bg-slate-700" />

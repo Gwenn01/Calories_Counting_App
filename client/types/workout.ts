@@ -112,6 +112,7 @@ export interface WorkoutSession {
 }
 
 export interface ExerciseCardProps {
+  weightUnit: string;
   workoutExercise: WorkoutExercise;
   sessionId: number;
   onUpdate: () => void;
@@ -132,7 +133,14 @@ export interface ExerciseHeaderProps {
   onDeleteExercise: () => void;
 }
 
+export interface SessionHeaderProps {
+  weightUnit: string;
+  session: WorkoutSession;
+  onBack: () => void;
+}
+
 export interface SetRowProps {
+  weightUnit: string;
   set: WorkoutSet;
   restTimer?: number;
   onComplete: (
@@ -143,9 +151,18 @@ export interface SetRowProps {
   ) => void;
   onDelete: () => void;
 }
-
 export interface StatsRowProps {
   totalVolume: number;
   bestSet: { weight: number; reps: number } | null;
   est1rm: number | undefined;
+}
+
+export interface ExerciseBreakdownProps {
+  weightUnit: string;
+  exercises: WorkoutExercise[];
+}
+
+export interface ExerciseTableProps {
+  weightUnit: string;
+  workoutExercise: WorkoutExercise;
 }

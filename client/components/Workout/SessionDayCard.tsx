@@ -29,7 +29,10 @@ export default function SessionDayCard({ session, isToday }: Props) {
         totalSets={totalSets}
       />
 
-      <ExerciseBreakdown exercises={session.workout_exercises} />
+      <ExerciseBreakdown
+        weightUnit={session.weight_unit}
+        exercises={session.workout_exercises}
+      />
 
       {isToday && !session.is_finished && (
         <View className="px-4 pb-4">

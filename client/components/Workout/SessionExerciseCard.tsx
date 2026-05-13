@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { View, Text, Pressable, ActivityIndicator, Alert } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { View } from "react-native";
 import {
   markSetAsCompleted,
   addSetPerExercise,
@@ -18,6 +17,7 @@ import { useAlert } from "../AlertProvider";
 import { useToast } from "../ToastProvider";
 
 export default function ExerciseCard({
+  weightUnit,
   workoutExercise,
   onUpdate,
 }: ExerciseCardProps) {
@@ -173,6 +173,7 @@ export default function ExerciseCard({
 
       {workoutExercise.sets.map((set) => (
         <SetRow
+          weightUnit={weightUnit}
           key={set.id}
           set={set}
           restTimer={restTimers[set.id]}

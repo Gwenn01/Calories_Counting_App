@@ -1,12 +1,12 @@
 import { View, Text } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { WorkoutExercise } from "@/types/workout";
+import { ExerciseTableProps } from "@/types/workout";
 
-interface Props {
-  workoutExercise: WorkoutExercise;
-}
-
-export default function ExerciseSetTable({ workoutExercise: we }: Props) {
+export default function ExerciseSetTable({
+  weightUnit,
+  workoutExercise: we,
+}: ExerciseTableProps) {
   return (
     <View className="border-t border-slate-100 px-2 pb-2 pt-2 gap-1">
       {/* Column headers with Icons */}
@@ -18,7 +18,7 @@ export default function ExerciseSetTable({ workoutExercise: we }: Props) {
         <View className="flex-1 flex-row items-center justify-center gap-1">
           <Feather name="layers" size={10} color="#94a3b8" />
           <Text className="text-[9px] font-bold text-slate-400 uppercase">
-            Kg
+            {weightUnit}
           </Text>
         </View>
 

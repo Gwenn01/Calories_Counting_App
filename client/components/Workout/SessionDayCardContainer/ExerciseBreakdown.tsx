@@ -4,12 +4,12 @@ import { Feather } from "@expo/vector-icons";
 import type { WorkoutExercise } from "@/types/workout";
 import { MUSCLE_COLORS } from "./helpers";
 import ExerciseSetTable from "./ExerciseSetTable";
+import { ExerciseBreakdownProps } from "@/types/workout";
 
-interface Props {
-  exercises: WorkoutExercise[];
-}
-
-export default function ExerciseBreakdown({ exercises }: Props) {
+export default function ExerciseBreakdown({
+  weightUnit,
+  exercises,
+}: ExerciseBreakdownProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   return (
@@ -31,7 +31,7 @@ export default function ExerciseBreakdown({ exercises }: Props) {
         return (
           <View
             key={we.id}
-            className="bg-slate-50 border border-slate-100 rounded-[16px] overflow-hidden"
+            className="bg-slate-50 border border-slate-100 rounded-[16px] overflow-hidden mb-2"
           >
             <Pressable
               onPress={() => setExpandedId(isExpanded ? null : we.id)}
@@ -61,13 +61,14 @@ export default function ExerciseBreakdown({ exercises }: Props) {
                   </Text>
                   <Text className="text-[10px] text-slate-300">·</Text>
                   <Text className="text-[10px] text-slate-400">
-                    {we.total_volume.toLocaleString()} kg
+                    {we.total_volume.toLocaleString()} {weightUnit}
                   </Text>
                   {bestSet && (
                     <View className="flex-row items-center gap-1">
                       <Text className="text-[10px] text-slate-300">·</Text>
                       <Text className="text-[10px] text-slate-400">
-                        Best {bestSet.weight}kg×{bestSet.reps}
+                        Best {bestSet.weight}
+                        {weightUnit}×{bestSet.reps}
                       </Text>
                     </View>
                   )}
@@ -86,7 +87,9 @@ export default function ExerciseBreakdown({ exercises }: Props) {
               </View>
             </Pressable>
 
-            {isExpanded && <ExerciseSetTable workoutExercise={we} />}
+            {isExpanded && (
+              <ExerciseSetTable weightUnit={weightUnit} workoutExercise={we} />
+            )}
           </View>
         );
       })}

@@ -7,6 +7,7 @@ import { updateSetPerExercise } from "@/api/workout";
 const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function SetRow({
+  weightUnit,
   set,
   restTimer,
   onComplete,
@@ -52,7 +53,8 @@ export default function SetRow({
         </Text>
         <Feather name="check-circle" size={13} color="#f97316" />
         <Text className="flex-1 text-xs font-bold text-orange-700">
-          {set.weight}kg × {set.reps} reps
+          {set.weight}
+          {weightUnit} × {set.reps} reps
         </Text>
         <View className="flex-row items-center gap-1 bg-orange-100 border border-orange-200 rounded-full px-2 py-0.5">
           <Feather name="clock" size={10} color="#ea580c" />
@@ -73,7 +75,8 @@ export default function SetRow({
         </Text>
         <Feather name="check" size={13} color="#10b981" />
         <Text className="flex-1 text-base font-bold text-emerald-700">
-          {set.weight}kg × {set.reps} reps
+          {set.weight}
+          {weightUnit} × {set.reps} reps
           {set.rpe ? ` · RPE ${set.rpe}` : ""}
         </Text>
         {set.is_pr && (
@@ -131,7 +134,7 @@ export default function SetRow({
         {/* Weight */}
         <View className="flex-1 items-center">
           <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-            lbs
+            {weightUnit}
           </Text>
           <View className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-0.5">
             <TextInput

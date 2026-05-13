@@ -112,7 +112,11 @@ export default function ActiveSessionScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ── Header ── */}
-        <SessionHeader session={session} onBack={() => router.back()} />
+        <SessionHeader
+          weightUnit={session.weight_unit}
+          session={session}
+          onBack={() => router.back()}
+        />
 
         <View className="px-1">
           {/* ── Timer ── */}
@@ -127,6 +131,7 @@ export default function ActiveSessionScreen() {
           {/* ── Exercise cards ── */}
           {session.workout_exercises.map((we) => (
             <ExerciseCard
+              weightUnit={session.weight_unit}
               key={we.id}
               workoutExercise={we}
               sessionId={session.id}
