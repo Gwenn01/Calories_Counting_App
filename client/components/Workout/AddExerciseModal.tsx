@@ -9,10 +9,15 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { fetchWorkoutTemplate, createExercisePerSession } from "@/api/workout";
+import {
+  fetchWorkoutTemplate,
+  fetchExercisesByProgram,
+  createExercisePerSession,
+} from "@/api/workout";
 import type { Exercise } from "@/types/workout";
 
 interface Props {
+  category: string;
   visible: boolean;
   sessionId: number;
   onClose: () => void;
@@ -20,6 +25,7 @@ interface Props {
 }
 
 export default function AddExerciseModal({
+  category,
   visible,
   sessionId,
   onClose,
@@ -38,10 +44,7 @@ export default function AddExerciseModal({
     try {
       setLoading(true);
       // fetch from your exercises endpoint
-      const res = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/api/workout/exercises/`,
-      );
-      const data = await res.json();
+      const data = await fetchExercisesByProgram(category);
       setExercises(Array.isArray(data) ? data : (data?.results ?? []));
     } catch (e) {
       console.error(e);

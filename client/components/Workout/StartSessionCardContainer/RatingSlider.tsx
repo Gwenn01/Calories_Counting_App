@@ -19,7 +19,7 @@ export default function RatingSlider({
   const levels = Array.from({ length: 10 }, (_, i) => i + 1);
 
   return (
-    <View className="bg-slate-50 border border-slate-100 rounded-[18px] px-4 py-4">
+    <View className="bg-slate-50 border border-slate-100 rounded-[18px] px-4 py-4 mb-3">
       {/* Header */}
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-row items-center gap-2">

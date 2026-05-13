@@ -18,7 +18,7 @@ export default function TemplateDropdown({
   const meta = selected ? getCategoryMeta(selected.category) : null;
 
   return (
-    <View className="w-full">
+    <View className="w-full mb-3">
       <Pressable
         onPress={onOpenPicker}
         className="flex-row items-center justify-between bg-slate-50 border border-slate-200 rounded-[18px] px-4 py-4"

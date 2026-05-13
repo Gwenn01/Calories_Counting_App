@@ -186,6 +186,7 @@ export default function ActiveSessionScreen() {
       </ScrollView>
 
       <AddExerciseModal
+        category={session.category}
         visible={showAddExercise}
         sessionId={session.id}
         onClose={() => setShowAddExercise(false)}

@@ -86,7 +86,7 @@ export default function StartSessionCard({
       <View className="h-px bg-slate-100 mx-6" />
 
       {/* ── Form ── */}
-      <View className="px-6 pt-6 pb-6 gap-5">
+      <View className="px-3 pt-3 pb-6">
         <TemplateDropdown
           selected={selectedTemplate}
           loading={templatesLoading}
@@ -128,7 +128,7 @@ export default function StartSessionCard({
             placeholderTextColor="#cbd5e1"
             multiline
             numberOfLines={2}
-            className="bg-slate-50 border border-slate-200 rounded-[16px] px-4 py-3 text-sm text-slate-800"
+            className="bg-slate-50 border border-slate-200 rounded-[16px] px-4 py-3 text-sm text-slate-800 mb-3"
             style={{ textAlignVertical: "top", minHeight: 64 }}
           />
         </View>
