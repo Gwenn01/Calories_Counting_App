@@ -1,7 +1,13 @@
 # users/services.py
 from django.shortcuts import get_object_or_404
+from django.db.models import Sum, Avg, Count
+from collections import defaultdict
+from django.utils import timezone
+from datetime import timedelta
 from .models import UserProfile
 from macros.services import MacrosService
+from workout.models import WorkoutSession, WorkoutExercise, Set
+from macros.models import Macros
 
 class UserProfileService:
     #get the user profile
@@ -9,35 +15,7 @@ class UserProfileService:
     def get_user_profile(user):
         return get_object_or_404(UserProfile, user=user)
     
-    # calculate the data in the overview
-    @staticmethod
-    def calculate_remaining_macros(user):
-        profile = UserProfileService.get_user_profile(user)
-        daily_macros = MacrosService.get_today_macros(user)
-
-        calories = daily_macros.calories if daily_macros else 0
-        protein = daily_macros.protein if daily_macros else 0
-        carbs = daily_macros.carbs if daily_macros else 0
-        fats = daily_macros.fats if daily_macros else 0
-
-        return {
-            "calories_goal": int(profile.target_calories),
-            "current_calories": int(calories),
-            "calories_remaining": int(profile.target_calories - calories),
-
-            "protein_goal": int(profile.target_protein),
-            "current_protein": int(protein),
-            "protein_remaining": int(profile.target_protein - protein),
-
-            "carbs_goal": int(profile.target_carbs),
-            "current_carbs": int(carbs),
-            "carbs_remaining": int(profile.target_carbs - carbs),
-
-            "fats_goal": int(profile.target_fats),
-            "current_fats": int(fats),
-            "fats_remaining": int(profile.target_fats - fats),
-        }
-    
+    # login services =============================================
     # generate macros base on calories
     @staticmethod
     def generate_macros_base_calories(total_calories):
@@ -85,6 +63,219 @@ class UserProfileService:
             daily_calories = bmr * activity_multiplier
 
         return daily_calories
+    
+    # ==============================================
+    #  Overview summary services 
+    # ==============================================
+    #calculate the daily remaining macros =============================
+    @staticmethod
+    def calculate_remaining_macros(user):
+        profile = UserProfileService.get_user_profile(user)
+        daily_macros = MacrosService.get_today_macros(user)
+
+        calories = daily_macros.calories if daily_macros else 0
+        protein = daily_macros.protein if daily_macros else 0
+        carbs = daily_macros.carbs if daily_macros else 0
+        fats = daily_macros.fats if daily_macros else 0
+
+        return {
+            "calories_goal": int(profile.target_calories),
+            "current_calories": int(calories),
+            "calories_remaining": int(profile.target_calories - calories),
+
+            "protein_goal": int(profile.target_protein),
+            "current_protein": int(protein),
+            "protein_remaining": int(profile.target_protein - protein),
+
+            "carbs_goal": int(profile.target_carbs),
+            "current_carbs": int(carbs),
+            "carbs_remaining": int(profile.target_carbs - carbs),
+
+            "fats_goal": int(profile.target_fats),
+            "current_fats": int(fats),
+            "fats_remaining": int(profile.target_fats - fats),
+        }
+    
+    # calculate the workout overview =============================
+    @staticmethod
+    def calculate_calories(sessions, duration_seconds):
+        """
+        Rough estimation using MET formula.
+
+        Calories = MET × weight(kg) × duration(hours)
+
+        Weight training:
+        - light = 3.5
+        - moderate = 5
+        - intense = 6-8
+        """
+
+        if not sessions.exists():
+            return 0
+
+        session = sessions.first()
+
+        bodyweight = session.bodyweight or 70
+
+        duration_hours = duration_seconds / 3600
+
+        # moderate lifting
+        MET = 5.5
+
+        calories = MET * bodyweight * duration_hours
+
+        return calories
 
 
+    @staticmethod
+    def calculate_workout_overview(user):
+        today = timezone.localdate()
+    
+        sessions = WorkoutSession.objects.filter(
+            user=user,
+            date=today,
+            is_finished=True
+        )
+
+        sets = Set.objects.filter(
+            workout_exercise__session__in=sessions,
+            completed=True
+        )
+
+        # -----------------------------
+        # BASIC TOTALS
+        # -----------------------------
+        total_workouts = sessions.count()
+
+        total_duration = (
+            sessions.aggregate(
+                total=Sum("duration_seconds")
+            )["total"] or 0
+        )
+
+        total_sets = sets.count()
+
+        total_reps = (
+            sets.aggregate(
+                total=Sum("reps")
+            )["total"] or 0
+        )
+
+        # volume = weight × reps
+        total_volume = sum(
+            s.weight * s.reps
+            for s in sets
+        )
+
+        # -----------------------------
+        # CALORIES BURNED ESTIMATION
+        # -----------------------------
+        calories_burned = UserProfileService.calculate_calories(
+            sessions,
+            total_duration
+        )
+
+        # -----------------------------
+        # MOOD / ENERGY
+        # -----------------------------
+        avg_energy = (
+            sessions.aggregate(
+                avg=Avg("energy_level")
+            )["avg"] or 0
+        )
+
+        avg_mood = (
+            sessions.aggregate(
+                avg=Avg("mood_rating")
+            )["avg"] or 0
+        )
+
+        # -----------------------------
+        # PR COUNT
+        # -----------------------------
+        pr_count = sets.filter(is_pr=True).count()
+
+        return {
+            "date": today,
+            "total_workouts": total_workouts,
+            "total_duration_seconds": total_duration,
+            "total_duration_minutes": round(total_duration / 60, 1),
+            "total_sets": total_sets,
+            "total_reps": total_reps,
+            "total_volume": round(total_volume, 2),
+            "calories_burned": round(calories_burned, 2),
+            "average_energy": round(avg_energy, 1),
+            "average_mood": round(avg_mood, 1),
+            "pr_count": pr_count,
+        }
         
+    # calculate the calendar overview workout ===========================
+    # services/dashboard_service.py
+    def overview_calendar(user, year, month):
+
+        # -----------------------------
+        # WORKOUT SESSIONS
+        # -----------------------------
+        sessions = WorkoutSession.objects.filter(
+            user=user,
+            date__year=year,
+            date__month=month,
+            is_finished=True
+        ).values(
+            "date",
+            "category"
+        )
+
+        # -----------------------------
+        # MACROS
+        # -----------------------------
+        macros = Macros.objects.filter(
+            user=user.profile,
+            date__year=year,
+            date__month=month
+        ).values(
+            "date",
+            "calories",
+            "protein",
+            "carbs",
+            "fats"
+        )
+
+        # -----------------------------
+        # COMBINED RESULT
+        # -----------------------------
+        result = defaultdict(lambda: {
+            "date": None,
+            "categories": [],
+            "total_workouts": 0,
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 0,
+        })
+
+        # workout data
+        for session in sessions:
+
+            date_str = str(session["date"])
+
+            result[date_str]["date"] = date_str
+            result[date_str]["categories"].append(
+                session["category"]
+            )
+            result[date_str]["total_workouts"] += 1
+
+        # macros data
+        for macro in macros:
+
+            date_str = str(macro["date"])
+
+            result[date_str]["date"] = date_str
+            result[date_str]["calories"] = macro["calories"]
+            result[date_str]["protein"] = macro["protein"]
+            result[date_str]["carbs"] = macro["carbs"]
+            result[date_str]["fats"] = macro["fats"]
+
+        return list(result.values())
+
+    

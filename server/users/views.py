@@ -94,3 +94,17 @@ class UserOverviewView(APIView):
     def get(self, request):
         data = UserProfileService.calculate_remaining_macros(request.user)
         return Response(data, status=status.HTTP_200_OK)
+    
+class WorkoutOverviewView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = UserProfileService.calculate_workout_overview(request.user)
+        return Response(data, status=status.HTTP_200_OK)
+    
+class CalendarView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, year, month):
+        data = UserProfileService.overview_calendar(request.user, year, month)
+        return Response(data, status=status.HTTP_200_OK)
