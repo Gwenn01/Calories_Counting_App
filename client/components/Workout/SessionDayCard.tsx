@@ -35,7 +35,7 @@ export default function SessionDayCard({ session, isToday }: Props) {
       />
 
       {isToday && !session.is_finished && (
-        <View className="px-4 pb-4">
+        <View className="px-4 pb-4 mt-3">
           <Pressable
             onPress={() =>
               router.push({

@@ -51,34 +51,58 @@ export default function ExerciseSetTable({
       {we.sets.map((s) => (
         <View
           key={s.id}
-          className="flex-row items-center bg-slate-50 rounded-lg px-1 py-1.5"
+          className="flex-row items-center rounded-lg px-1 py-1.5 overflow-hidden"
+          style={{
+            backgroundColor: s.completed ? "#f0fdf4" : "#f8fafc",
+            borderLeftWidth: 3,
+            borderLeftColor: s.completed ? "#10b981" : "#e2e8f0",
+          }}
         >
           {/* Set Number */}
           <View className="w-7 items-center">
-            <View className="w-4 h-4 rounded-full bg-slate-200 items-center justify-center">
-              <Text className="text-[8px] font-black text-slate-500">
-                {s.set_number}
-              </Text>
+            <View
+              className="w-4 h-4 rounded-full items-center justify-center"
+              style={{ backgroundColor: s.completed ? "#10b981" : "#e2e8f0" }}
+            >
+              {s.completed ? (
+                <Feather name="check" size={8} color="#fff" />
+              ) : (
+                <Text className="text-[8px] font-black text-slate-400">
+                  {s.set_number}
+                </Text>
+              )}
             </View>
           </View>
 
           {/* Weight */}
-          <Text className="flex-1 text-[11px] font-black text-slate-700 text-center">
+          <Text
+            className="flex-1 text-[11px] font-black text-center"
+            style={{ color: s.completed ? "#15803d" : "#94a3b8" }}
+          >
             {s.weight}
           </Text>
 
           {/* Reps */}
-          <Text className="flex-1 text-[11px] font-black text-slate-700 text-center">
+          <Text
+            className="flex-1 text-[11px] font-black text-center"
+            style={{ color: s.completed ? "#15803d" : "#94a3b8" }}
+          >
             {s.reps}
           </Text>
 
           {/* RPE */}
-          <Text className="flex-1 text-[11px] font-bold text-slate-400 text-center">
+          <Text
+            className="flex-1 text-[11px] font-bold text-center"
+            style={{ color: s.completed ? "#4ade80" : "#cbd5e1" }}
+          >
             {s.rpe ?? "—"}
           </Text>
 
           {/* Rest */}
-          <Text className="flex-1 text-[11px] font-bold text-slate-400 text-center">
+          <Text
+            className="flex-1 text-[11px] font-bold text-center"
+            style={{ color: s.completed ? "#4ade80" : "#cbd5e1" }}
+          >
             {s.rest_taken ?? s.rest_target}s
           </Text>
 
@@ -97,6 +121,11 @@ export default function ExerciseSetTable({
             {s.is_dropset && (
               <View className="bg-purple-100 rounded flex-row items-center justify-center px-1.5 py-0.5">
                 <Text className="text-[7px] font-black text-purple-600">D</Text>
+              </View>
+            )}
+            {!s.completed && (
+              <View className="bg-slate-100 rounded px-1 py-0.5">
+                <Text className="text-[7px] font-black text-slate-400">—</Text>
               </View>
             )}
           </View>

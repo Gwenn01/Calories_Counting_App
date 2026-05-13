@@ -64,7 +64,7 @@ export default function ExerciseBreakdown({
                     {we.total_volume.toLocaleString()} {weightUnit}
                   </Text>
                   {bestSet && (
-                    <View className="flex-row items-center gap-1">
+                    <View className="flex-row items-center">
                       <Text className="text-[10px] text-slate-300">·</Text>
                       <Text className="text-[10px] text-slate-400">
                         Best {bestSet.weight}
