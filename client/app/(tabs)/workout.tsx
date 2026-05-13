@@ -217,6 +217,7 @@ export default function WorkoutScreen() {
           <StartSessionCard
             templates={templates}
             templatesLoading={templatesLoading}
+            disabled={!isToday}
             onStartSession={handleStartSession}
           />
         )}

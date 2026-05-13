@@ -13,21 +13,12 @@ import { WorkoutTemplate } from "@/types/workout";
 import TemplateDropdown from "@/components/Workout/StartSessionCardContainer/TemplateDropdown";
 import TemplatePickerModal from "@/components/Workout/StartSessionCardContainer/TemplatePickerModal";
 import RatingSlider from "@/components/Workout/StartSessionCardContainer/RatingSlider";
-
-interface StartSessionCardProps {
-  templates: WorkoutTemplate[];
-  templatesLoading?: boolean;
-  onStartSession: (payload: {
-    template: number;
-    notes: string;
-    energy_level: number;
-    mood_rating: number;
-  }) => Promise<void>;
-}
+import { StartSessionCardProps } from "@/types/workout";
 
 export default function StartSessionCard({
   templates,
   templatesLoading = false,
+  disabled = false,
   onStartSession,
 }: StartSessionCardProps) {
   const [selectedTemplate, setSelectedTemplate] =
@@ -135,7 +126,7 @@ export default function StartSessionCard({
         {/* Start Button */}
         <Pressable
           onPress={handleStart}
-          disabled={!selectedTemplate || submitting}
+          disabled={!selectedTemplate || submitting || disabled}
           className="rounded-[16px] overflow-hidden"
           style={{ opacity: !selectedTemplate || submitting ? 0.5 : 1 }}
         >

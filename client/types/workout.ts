@@ -62,6 +62,18 @@ export type WorkoutTemplate = {
   created_at?: string;
 };
 
+export interface StartSessionCardProps {
+  templates: WorkoutTemplate[];
+  templatesLoading?: boolean;
+  disabled?: boolean;
+  onStartSession: (payload: {
+    template: number;
+    notes: string;
+    energy_level: number;
+    mood_rating: number;
+  }) => Promise<void>;
+}
+
 export interface WorkoutSet {
   id: number;
   set_number: number;
