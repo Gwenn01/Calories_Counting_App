@@ -15,6 +15,7 @@ import StatsRow from "@/components/Workout/SessionExerciseCardContainer/StatsRow
 import AddSetButton from "@/components/Workout/SessionExerciseCardContainer/AddSetButton";
 import { useAlert } from "../AlertProvider";
 import { useToast } from "../ToastProvider";
+import { Vibration } from "react-native";
 
 export default function ExerciseCard({
   weightUnit,
@@ -43,6 +44,15 @@ export default function ExerciseCard({
       (a, b) => (b.estimated_1rm ?? 0) - (a.estimated_1rm ?? 0),
     )[0]?.estimated_1rm;
 
+  // rest timer sound  effect
+  const playRestDoneSound = () => {
+    // Pattern: [wait, vibrate, wait, vibrate, wait, vibrate]
+    // All in milliseconds
+    Vibration.vibrate([
+      0, 1000, 200, 1000, 200, 1000, 1000, 200, 1000, 200, 5000,
+    ]);
+  };
+
   const startRestTimer = (setId: number, targetSeconds: number) => {
     setRestTimers((prev) => ({ ...prev, [setId]: targetSeconds }));
     const interval = setInterval(() => {
@@ -50,6 +60,7 @@ export default function ExerciseCard({
         const next = (prev[setId] ?? 0) - 1;
         if (next <= 0) {
           clearInterval(interval);
+          playRestDoneSound();
           const { [setId]: _, ...rest } = prev;
           return rest;
         }
