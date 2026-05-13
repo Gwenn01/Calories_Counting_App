@@ -9,10 +9,10 @@ import { router, useFocusEffect } from "expo-router";
 // ─── Components ───────────────────────────────────────────────────
 import WorkoutHeader from "@/components/Workout/WorkoutHeader";
 import StartSessionCard from "@/components/Workout/StartSessionCard";
+import SessionDayCard from "@/components/Workout/SessionDayCard";
+import NoSessionCard from "@/components/Workout/NoSessionCard";
 import TemplateList from "@/components/Workout/TemplateList";
 import TemplateModal from "@/components/Workout/TemplateModal";
-import SessionDayCard from "@/components/Workout/SessionDayCard";
-
 // ─── API ──────────────────────────────────────────────────────────
 import {
   fetchWorkoutTemplate,
@@ -207,20 +207,11 @@ export default function WorkoutScreen() {
             </Text>
           </View>
         ) : todaySession ? (
+          // session exists for today → show it
           <SessionDayCard session={todaySession} isToday={isToday} />
         ) : isPast ? (
-          // past date with no session
-          <View className="bg-white rounded-[24px] border border-slate-100 mt-4 py-10 items-center px-6">
-            <View className="w-14 h-14 rounded-[16px] bg-slate-100 items-center justify-center mb-4">
-              <Feather name="calendar" size={24} color="#94a3b8" />
-            </View>
-            <Text className="text-base font-black text-slate-700 mb-1">
-              No Session
-            </Text>
-            <Text className="text-sm text-slate-400 text-center leading-5">
-              No workout was logged on this day.
-            </Text>
-          </View>
+          // no session for past day → show empty state
+          <NoSessionCard isToday={isToday} />
         ) : (
           // today or future with no session → allow starting
           <StartSessionCard
