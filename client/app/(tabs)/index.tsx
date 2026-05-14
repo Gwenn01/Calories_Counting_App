@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { fetchTodayOverview } from "@/api/overview";
-import LoadingOverlay from "@/components/LoadingOverplay";
+// api
+import { fetchTodayOverview, fetchWorkoutOverview } from "@/api/overview";
 // components
+import LoadingOverlay from "@/components/LoadingOverplay";
 import { CaloriesCard } from "@/components/Overview/CaloriesCard";
 import HomeHeader from "@/components/Overview/HomeHeader";
+import { WorkoutCard } from "@/components/Overview/WorkoutCard";
 import { StepsCard } from "@/components/Overview/StepCard";
 import { SleepCard } from "@/components/Overview/SleepCard";
 
 export default function TodayScreen() {
   const [overview, setOverview] = useState<any>(null);
+  const [workoutSummary, setWorkoutSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [keyCal, setkeyCal] = useState(0);
@@ -32,7 +33,6 @@ export default function TodayScreen() {
   const loadOverview = async () => {
     setLoading(true);
     setError(null);
-
     try {
       const data = await fetchTodayOverview();
       setOverview(data);
@@ -44,9 +44,20 @@ export default function TodayScreen() {
       setLoading(false);
     }
   };
+
+  const loadWorkoutSummary = async () => {
+    try {
+      const data = await fetchWorkoutOverview();
+      setWorkoutSummary(data);
+    } catch {
+      setError("Failed to load workout summary");
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       loadOverview();
+      loadWorkoutSummary();
     }, []),
   );
 
@@ -115,6 +126,9 @@ export default function TodayScreen() {
           caloriesRemaining={caloriesRemaining}
           macros={macros}
         />
+        {/* WORKOUT CARD */}
+        {/* WORKOUT CARD */}
+        {workoutSummary && <WorkoutCard data={workoutSummary} />}
         {/* STEP */}
         {/* <StepsCard
           key={keySteps}
