@@ -10,6 +10,7 @@ import { fetchTodayOverview } from "@/api/overview";
 import LoadingOverlay from "@/components/LoadingOverplay";
 // components
 import { CaloriesCard } from "@/components/Overview/CaloriesCard";
+import HomeHeader from "@/components/Overview/HomeHeader";
 import { StepsCard } from "@/components/Overview/StepCard";
 import { SleepCard } from "@/components/Overview/SleepCard";
 
@@ -104,55 +105,7 @@ export default function TodayScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         {/* Header ================================================================ */}
-        <View className="flex-row justify-between items-center pt-1 pb-2">
-          {/* Left: Logo + Title Block */}
-          <View className="flex-row items-center gap-3">
-            {/* Logo */}
-            <Image
-              source={require("@/assets/image/logo.jpg")}
-              className="w-10 h-10"
-              resizeMode="contain"
-            />
-
-            {/* Title */}
-            <View className="items-start">
-              <Text
-                className="text-[10px] font-semibold text-neutral-400 uppercase"
-                style={{ letterSpacing: 2 }}
-              >
-                TODAY {dateStr}
-              </Text>
-              <View className="flex-row items-center gap-1.5">
-                <Text
-                  className="text-2xl font-black text-neutral-900"
-                  style={{ letterSpacing: -0.5 }}
-                >
-                  {dayName}
-                </Text>
-                <View className="w-2 h-2 rounded-full bg-emerald-400 mb-0.5" />
-              </View>
-            </View>
-          </View>
-
-          {/* Right: Schedule button */}
-          <TouchableOpacity activeOpacity={0.8}>
-            <LinearGradient
-              colors={["#18181b", "#3f3f46"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="flex-row items-center gap-1 px-4 h-11 rounded-2xl"
-              style={{
-                shadowColor: "#18181b",
-                shadowOpacity: 0.25,
-                shadowRadius: 12,
-                shadowOffset: { width: 0, height: 4 },
-              }}
-            >
-              <Feather name="calendar" size={16} color="#fff" />
-              <Text className="text-white text-sm font-semibold">Schedule</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+        <HomeHeader dateStr={dateStr} dayName={dayName} />
         {/* MODAL ============================================ */}
         {/* CALORIES */}
         <CaloriesCard
