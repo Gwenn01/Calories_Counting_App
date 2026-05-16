@@ -13,25 +13,8 @@ import {
   fetchExercisesByProgram,
   createExercisePerSession,
 } from "@/api/workout";
-import type { Exercise } from "@/types/workout";
-
-interface Props {
-  category: string;
-  visible: boolean;
-  sessionId: number;
-  onClose: () => void;
-  onAdded: () => void;
-}
-
-const MUSCLE_COLORS: Record<string, string> = {
-  chest: "#f97316",
-  back: "#3b82f6",
-  legs: "#8b5cf6",
-  shoulders: "#10b981",
-  biceps: "#f59e0b",
-  triceps: "#ef4444",
-  core: "#06b6d4",
-};
+import type { Exercise, AddExerciseProps } from "@/types/workout";
+import { MUSCLE_COLORS } from "@/constants/workout";
 
 export default function AddExerciseModal({
   category,
@@ -39,7 +22,7 @@ export default function AddExerciseModal({
   sessionId,
   onClose,
   onAdded,
-}: Props) {
+}: AddExerciseProps) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");

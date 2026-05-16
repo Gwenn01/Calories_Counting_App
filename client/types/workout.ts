@@ -2,6 +2,10 @@ export type WorkoutType =
   | "Push"
   | "Pull"
   | "Legs"
+  | "Upper"
+  | "Lower"
+  | "Anterior"
+  | "Posterior"
   | "Full Body"
   | "Cardio"
   | "Custom";
@@ -72,6 +76,14 @@ export interface StartSessionCardProps {
     energy_level: number;
     mood_rating: number;
   }) => Promise<void>;
+}
+
+export interface AddExerciseProps {
+  category: string;
+  visible: boolean;
+  sessionId: number;
+  onClose: () => void;
+  onAdded: () => void;
 }
 
 export interface WorkoutSet {

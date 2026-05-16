@@ -6,10 +6,27 @@ export const WORKOUT_TYPES: WorkoutType[] = [
   "Push",
   "Pull",
   "Legs",
+  "Upper",
+  "Lower",
+  "Anterior",
+  "Posterior",
   "Full Body",
   "Cardio",
   "Custom",
 ];
+
+// session states
+export const MUSCLE_COLORS: Record<string, string> = {
+  chest: "#f97316",
+  back: "#3b82f6",
+  legs: "#8b5cf6",
+  anterior: "#10b981",
+  posterior: "#06b6d4",
+  shoulders: "#10b981",
+  biceps: "#f59e0b",
+  triceps: "#ef4444",
+  core: "#06b6d4",
+};
 
 export const EXERCISE_LIBRARY: { name: string; muscle: string }[] = [
   { name: "Bench Press", muscle: "Chest" },
