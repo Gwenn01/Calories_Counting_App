@@ -4,22 +4,25 @@ import { View, Text } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { MotiView } from "moti";
 
-interface WorkoutSummary {
-  date: string;
-  total_workouts: number;
-  total_duration_seconds: number;
-  total_duration_minutes: number;
-  total_sets: number;
-  total_reps: number;
-  total_volume: number;
-  calories_burned: number;
-  average_energy: number;
-  average_mood: number;
-  pr_count: number;
+interface SubStat {
+  label: string;
+  value: string;
+  unit: string;
+  progress: number;
+  color: string;
 }
 
 interface WorkoutCardProps {
-  data: WorkoutSummary;
+  date: string;
+  totalWorkouts: number;
+  durationMinutes: number;
+  prCount: number;
+  durationProgress: number;
+  subStats: SubStat[];
+  energyValue: number;
+  energyProgress: number;
+  moodValue: number;
+  moodProgress: number;
 }
 
 function formatDuration(minutes: number): string {
@@ -27,11 +30,6 @@ function formatDuration(minutes: number): string {
   const s = Math.round((minutes - m) * 60);
   if (m === 0) return `${s}s`;
   return s > 0 ? `${m}m ${s}s` : `${m}m`;
-}
-
-function formatVolume(vol: number): string {
-  if (vol >= 1000) return `${(vol / 1000).toFixed(1)}k`;
-  return vol.toString();
 }
 
 const MOOD_LABELS: Record<number, string> = {
@@ -53,47 +51,18 @@ const ENERGY_COLOR = (val: number) =>
 const MOOD_COLOR = (val: number) =>
   val >= 8 ? "#a78bfa" : val >= 5 ? "#38bdf8" : "#f472b6";
 
-export function WorkoutCard({ data }: WorkoutCardProps) {
-  const durationProgress = Math.min(
-    (data.total_duration_minutes / 60) * 100,
-    100,
-  );
-  const volumeProgress = Math.min((data.total_volume / 5000) * 100, 100);
-  const energyProgress = (data.average_energy / 10) * 100;
-  const moodProgress = (data.average_mood / 10) * 100;
-  const calProgress = Math.min((data.calories_burned / 300) * 100, 100);
-
-  const subStats = [
-    {
-      label: "Sets",
-      value: data.total_sets.toString(),
-      unit: "sets done",
-      progress: Math.min((data.total_sets / 20) * 100, 100),
-      color: "#38bdf8",
-    },
-    {
-      label: "Reps",
-      value: data.total_reps.toString(),
-      unit: "total reps",
-      progress: Math.min((data.total_reps / 100) * 100, 100),
-      color: "#a78bfa",
-    },
-    {
-      label: "Volume",
-      value: formatVolume(data.total_volume),
-      unit: "kg lifted",
-      progress: volumeProgress,
-      color: "#34d399",
-    },
-    {
-      label: "Calories",
-      value: data.calories_burned.toFixed(0),
-      unit: "kcal burned",
-      progress: calProgress,
-      color: "#fb923c",
-    },
-  ];
-
+export function WorkoutCard({
+  totalWorkouts,
+  durationMinutes,
+  prCount,
+  durationProgress,
+  subStats,
+  energyValue,
+  energyProgress,
+  moodValue,
+  moodProgress,
+}: WorkoutCardProps) {
+  // key is controlled by the parent via keyWorkout — no renderKey ref needed here
   return (
     <MotiView
       from={{ opacity: 0, translateY: 24, scale: 0.97 }}
@@ -133,7 +102,7 @@ export function WorkoutCard({ data }: WorkoutCardProps) {
           >
             <View className="flex-row items-baseline gap-1.5">
               <Text className="text-5xl font-black text-white tracking-tighter">
-                {formatDuration(data.total_duration_minutes)}
+                {formatDuration(durationMinutes)}
               </Text>
               <Text className="text-sm font-semibold text-slate-600">
                 duration
@@ -142,7 +111,7 @@ export function WorkoutCard({ data }: WorkoutCardProps) {
           </MotiView>
         </View>
 
-        {/* Icon + PR */}
+        {/* Icon + PR badge */}
         <MotiView
           from={{ opacity: 0, scale: 0.4, rotate: "-30deg" }}
           animate={{ opacity: 1, scale: 1, rotate: "0deg" }}
@@ -157,11 +126,11 @@ export function WorkoutCard({ data }: WorkoutCardProps) {
           <View className="bg-slate-800 h-11 w-11 rounded-full items-center justify-center border border-slate-700">
             <Feather name="activity" size={20} color="#38bdf8" />
           </View>
-          {data.pr_count > 0 && (
+          {prCount > 0 && (
             <View className="flex-row items-center gap-1 bg-yellow-400/10 border border-yellow-400/30 px-2 py-0.5 rounded-full">
               <Feather name="award" size={10} color="#facc15" />
               <Text className="text-[10px] font-black text-yellow-400">
-                {data.pr_count} PR
+                {prCount} PR
               </Text>
             </View>
           )}
@@ -189,8 +158,7 @@ export function WorkoutCard({ data }: WorkoutCardProps) {
       >
         <Text className="text-slate-600 text-xs font-medium text-center mb-5">
           <Text className="text-white font-bold">
-            {data.total_workouts}{" "}
-            {data.total_workouts === 1 ? "workout" : "workouts"}
+            {totalWorkouts} {totalWorkouts === 1 ? "workout" : "workouts"}
           </Text>{" "}
           logged today
         </Text>
@@ -274,23 +242,19 @@ export function WorkoutCard({ data }: WorkoutCardProps) {
         {[
           {
             label: "Energy",
-            value: data.average_energy.toFixed(1),
-            max: 10,
+            value: energyValue.toFixed(1),
             progress: energyProgress,
-            color: ENERGY_COLOR(data.average_energy),
+            color: ENERGY_COLOR(energyValue),
             icon: "zap",
             sub: `/ 10`,
           },
           {
             label: "Mood",
-            value:
-              MOOD_LABELS[Math.round(data.average_mood)] ??
-              data.average_mood.toFixed(1),
-            max: 10,
+            value: MOOD_LABELS[Math.round(moodValue)] ?? moodValue.toFixed(1),
             progress: moodProgress,
-            color: MOOD_COLOR(data.average_mood),
+            color: MOOD_COLOR(moodValue),
             icon: "smile",
-            sub: `${data.average_mood.toFixed(1)} / 10`,
+            sub: `${moodValue.toFixed(1)} / 10`,
           },
         ].map((item, index) => (
           <MotiView

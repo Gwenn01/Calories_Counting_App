@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
+import { MotiView } from "moti";
 import { fetchCalendarOverview } from "@/api/overview";
 
 interface CalendarDay {
@@ -25,6 +26,7 @@ interface CalendarDay {
 interface HomeHeaderProps {
   dateStr: string;
   dayName: string;
+  animKey?: number; // pass keyCal/keyWorkout from parent to re-animate on reload
 }
 
 const MONTH_NAMES = [
@@ -64,7 +66,11 @@ const CATEGORY_ICONS: Record<string, string> = {
   rest: "moon",
 };
 
-export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
+export default function HomeHeader({
+  dateStr,
+  dayName,
+  animKey,
+}: HomeHeaderProps) {
   const today = new Date();
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [month, setMonth] = useState(today.getMonth());
@@ -122,7 +128,6 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
       ? today.getDate()
       : null;
 
-  // Cells: null = empty offset slot, number = actual day
   const cells: (number | null)[] = [
     ...Array(firstDayOfMonth).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
@@ -132,69 +137,123 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
   return (
     <>
       {/* ── Header Card ─────────────────────────────────── */}
-      <LinearGradient
-        colors={["#0f172a", "#1e293b", "#0f172a"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="rounded-[27px] px-4 py-3 overflow-hidden"
-        style={{
-          shadowColor: "#0f172a",
-          shadowOpacity: 0.45,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 10,
-          marginBottom: 15,
-        }}
+      <MotiView
+        key={animKey}
+        from={{ opacity: 0, translateY: -20, scale: 0.97 }}
+        animate={{ opacity: 1, translateY: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 160, damping: 18 }}
+        style={{ marginBottom: 15 }}
       >
-        <View className="absolute w-36 h-36 rounded-full bg-sky-400 opacity-10 -top-10 -right-5" />
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row items-center gap-3">
-            <View className="w-11 h-11 rounded-2xl items-center justify-center border border-slate-600 bg-white/5">
-              <Image
-                source={require("@/assets/image/logo.jpg")}
-                className="w-8 h-8 rounded-lg"
-                resizeMode="contain"
-              />
-            </View>
-            <View className="items-start">
-              <Text className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">
-                TODAY · {dateStr}
-              </Text>
-              <View className="flex-row items-center gap-1.5">
-                <Text
-                  className="text-2xl font-black text-slate-100"
-                  style={{ letterSpacing: -0.5 }}
+        <LinearGradient
+          colors={["#0f172a", "#1e293b", "#0f172a"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="rounded-[27px] px-4 py-3 overflow-hidden"
+          style={{
+            shadowColor: "#0f172a",
+            shadowOpacity: 0.45,
+            shadowRadius: 18,
+            shadowOffset: { width: 0, height: 8 },
+            elevation: 10,
+          }}
+        >
+          <View className="absolute w-36 h-36 rounded-full bg-sky-400 opacity-10 -top-10 -right-5" />
+
+          <View className="flex-row justify-between items-center">
+            {/* ── Left: logo + date/day ── */}
+            <View className="flex-row items-center gap-3">
+              {/* Logo bounces in */}
+              <MotiView
+                from={{ opacity: 0, scale: 0.5, rotate: "-15deg" }}
+                animate={{ opacity: 1, scale: 1, rotate: "0deg" }}
+                transition={{
+                  type: "spring",
+                  stiffness: 220,
+                  damping: 14,
+                  delay: 150,
+                }}
+              >
+                <View className="w-11 h-11 rounded-2xl items-center justify-center border border-slate-600 bg-white/5">
+                  <Image
+                    source={require("@/assets/image/logo.jpg")}
+                    className="w-8 h-8 rounded-lg"
+                    resizeMode="contain"
+                  />
+                </View>
+              </MotiView>
+
+              <View className="items-start">
+                {/* Date label slides from left */}
+                <MotiView
+                  from={{ opacity: 0, translateX: -10 }}
+                  animate={{ opacity: 1, translateX: 0 }}
+                  transition={{ type: "timing", duration: 350, delay: 200 }}
                 >
-                  {dayName}
-                </Text>
-                <View
-                  className="w-2 h-2 rounded-full bg-emerald-400 mb-0.5"
-                  style={{
-                    shadowColor: "#34d399",
-                    shadowOpacity: 0.8,
-                    shadowRadius: 6,
-                    shadowOffset: { width: 0, height: 0 },
+                  <Text className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">
+                    TODAY · {dateStr}
+                  </Text>
+                </MotiView>
+
+                {/* Day name + dot springs up */}
+                <MotiView
+                  from={{ opacity: 0, translateY: 8 }}
+                  animate={{ opacity: 1, translateY: 0 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 16,
+                    delay: 280,
                   }}
-                />
+                >
+                  <View className="flex-row items-center gap-1.5">
+                    <Text
+                      className="text-2xl font-black text-slate-100"
+                      style={{ letterSpacing: -0.5 }}
+                    >
+                      {dayName}
+                    </Text>
+                    <View
+                      className="w-2 h-2 rounded-full bg-emerald-400 mb-0.5"
+                      style={{
+                        shadowColor: "#34d399",
+                        shadowOpacity: 0.8,
+                        shadowRadius: 6,
+                        shadowOffset: { width: 0, height: 0 },
+                      }}
+                    />
+                  </View>
+                </MotiView>
               </View>
             </View>
-          </View>
 
-          <TouchableOpacity
-            activeOpacity={0.75}
-            onPress={openCalendar}
-            className="w-11 h-11 rounded-2xl items-center justify-center bg-sky-400/10 border border-sky-400/30"
-            style={{
-              shadowColor: "#38bdf8",
-              shadowOpacity: 0.3,
-              shadowRadius: 10,
-              shadowOffset: { width: 0, height: 4 },
-            }}
-          >
-            <Feather name="calendar" size={18} color="#7dd3fc" />
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
+            {/* ── Right: calendar button bounces in ── */}
+            <MotiView
+              from={{ opacity: 0, scale: 0.4, rotate: "20deg" }}
+              animate={{ opacity: 1, scale: 1, rotate: "0deg" }}
+              transition={{
+                type: "spring",
+                stiffness: 220,
+                damping: 14,
+                delay: 320,
+              }}
+            >
+              <TouchableOpacity
+                activeOpacity={0.75}
+                onPress={openCalendar}
+                className="w-11 h-11 rounded-2xl items-center justify-center bg-sky-400/10 border border-sky-400/30"
+                style={{
+                  shadowColor: "#38bdf8",
+                  shadowOpacity: 0.3,
+                  shadowRadius: 10,
+                  shadowOffset: { width: 0, height: 4 },
+                }}
+              >
+                <Feather name="calendar" size={18} color="#7dd3fc" />
+              </TouchableOpacity>
+            </MotiView>
+          </View>
+        </LinearGradient>
+      </MotiView>
 
       {/* ── Calendar Modal ───────────────────────────────── */}
       <Modal
@@ -271,20 +330,17 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
             ) : (
               <View className="flex-row flex-wrap">
                 {cells.map((day, i) => {
-                  // ── Empty offset cell (before day 1) ──
                   if (!day) {
                     return (
                       <View
                         key={`empty-${i}`}
                         style={{ width: "14.28%", padding: 2 }}
                       >
-                        {/* invisible placeholder to preserve grid alignment */}
                         <View className="h-[72px] rounded-xl bg-transparent" />
                       </View>
                     );
                   }
 
-                  // ── Real day cell ──
                   const data = dataMap[day];
                   const isToday = day === todayDay;
                   const hasWorkout = !!data && data.total_workouts > 0;
@@ -307,7 +363,6 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
                           height: 72,
                           borderRadius: 12,
                           borderWidth: 1,
-                          // Every day gets a box — style varies by state
                           backgroundColor: isSelected
                             ? "rgba(56,189,248,0.15)"
                             : isToday
@@ -328,7 +383,6 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
                           paddingHorizontal: 2,
                         }}
                       >
-                        {/* ── Day number ── */}
                         <Text
                           style={{
                             fontSize: 11,
@@ -345,7 +399,6 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
                           {day}
                         </Text>
 
-                        {/* ── Middle content ── */}
                         <View
                           style={{
                             alignItems: "center",
@@ -353,7 +406,6 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
                             width: "100%",
                           }}
                         >
-                          {/* Workout category icon */}
                           {hasWorkout && catIcon && catColor ? (
                             <View
                               style={{
@@ -372,11 +424,9 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
                               />
                             </View>
                           ) : (
-                            // empty placeholder so layout stays consistent
                             <View style={{ width: 22, height: 22 }} />
                           )}
 
-                          {/* Calorie count */}
                           {hasFood ? (
                             <Text
                               numberOfLines={1}
@@ -397,7 +447,6 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
                           )}
                         </View>
 
-                        {/* ── Today dot ── */}
                         {isToday ? (
                           <View
                             style={{
@@ -417,13 +466,12 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
               </View>
             )}
 
-            {/* ── Divider ── */}
+            {/* Divider */}
             <View className="h-px bg-slate-700/40 my-4 mx-1" />
 
-            {/* ── Selected Day Detail ── */}
+            {/* Selected Day Detail */}
             {selectedDay ? (
               <View className="gap-3 px-1">
-                {/* Date label */}
                 <View className="flex-row items-center gap-2">
                   <View className="h-px flex-1 bg-slate-700/40" />
                   <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -438,7 +486,6 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
                   <View className="h-px flex-1 bg-slate-700/40" />
                 </View>
 
-                {/* Category pills */}
                 {selectedDay.categories.length > 0 && (
                   <View className="flex-row gap-2 flex-wrap">
                     {selectedDay.categories.map((cat) => (
@@ -475,7 +522,6 @@ export default function HomeHeader({ dateStr, dayName }: HomeHeaderProps) {
                   </View>
                 )}
 
-                {/* Nutrition cards */}
                 {selectedDay.calories > 0 ? (
                   <View className="flex-row gap-2">
                     {[

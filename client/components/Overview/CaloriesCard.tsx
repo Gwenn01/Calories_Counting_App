@@ -26,6 +26,11 @@ export function CaloriesCard({
   caloriesRemaining,
   macros,
 }: CaloriesCardProps) {
+  // Increment on every render so React remounts the root MotiView,
+  // replaying all entrance animations on every render.
+  const renderKey = React.useRef(0);
+  renderKey.current += 1;
+
   const calorieProgress = Math.min(
     (currentCalories / caloriesGoal) * 100 || 0,
     100,
@@ -34,10 +39,12 @@ export function CaloriesCard({
   return (
     //  Card slides up + fades on mount
     <MotiView
+      // Changing `key` forces a full remount, replaying all from→animate transitions.
+      key={renderKey.current}
       from={{ opacity: 0, translateY: 24, scale: 0.97 }}
       animate={{ opacity: 1, translateY: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 160, damping: 18 }}
-      className="bg-slate-900 rounded-[36px] p-6 mb-6"
+      className="bg-slate-900 rounded-[36px] p-6 mb-4"
     >
       {/* Top: Calories */}
       <View className="flex-row justify-between items-start mb-5">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { Text, ScrollView } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 // api
@@ -14,14 +14,21 @@ import { WorkoutCard } from "@/components/Overview/WorkoutCard";
 import { StepsCard } from "@/components/Overview/StepCard";
 import { SleepCard } from "@/components/Overview/SleepCard";
 
+// formatter
+function formatVolume(vol: number): string {
+  if (vol >= 1000) return `${(vol / 1000).toFixed(1)}k`;
+  return vol.toString();
+}
+
 export default function TodayScreen() {
   const [overview, setOverview] = useState<any>(null);
   const [workoutSummary, setWorkoutSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [keyCal, setkeyCal] = useState(0);
-  const [keySteps, setKeySteps] = useState(1);
-  // header data =====================================
+  const [keyCal, setKeyCal] = useState(0);
+  const [keyWorkout, setKeyWorkout] = useState(0);
+
+  // header data
   const today = new Date();
   const dayName = today.toLocaleDateString("en-US", { weekday: "long" });
   const dateStr = today.toLocaleDateString("en-US", {
@@ -29,39 +36,39 @@ export default function TodayScreen() {
     day: "numeric",
   });
 
-  // functions ===========================================
-  const loadOverview = async () => {
-    setLoading(true);
+  // load the data from backend and handle loading and error states
+  const loadAll = async () => {
     setError(null);
+    setLoading(true);
     try {
-      const data = await fetchTodayOverview();
-      setOverview(data);
-      setkeyCal((c) => c + 1);
-      setKeySteps((c) => c + 1);
+      const [overviewData, workoutData] = await Promise.all([
+        fetchTodayOverview(),
+        fetchWorkoutOverview(),
+      ]);
+      setOverview(overviewData);
+      setWorkoutSummary(workoutData);
+      // Both keys update in the same event loop tick → single re-render
+      setKeyCal((c) => c + 1);
+      setKeyWorkout((c) => c + 1);
     } catch {
-      setError("Failed to load overview");
+      setError("Failed to load data");
     } finally {
       setLoading(false);
     }
   };
 
-  const loadWorkoutSummary = async () => {
-    try {
-      const data = await fetchWorkoutOverview();
-      setWorkoutSummary(data);
-    } catch {
-      setError("Failed to load workout summary");
-    }
-  };
-
   useFocusEffect(
     useCallback(() => {
-      loadOverview();
-      loadWorkoutSummary();
+      loadAll();
     }, []),
   );
 
-  /* ---------- ERROR ---------- */
+  useFocusEffect(
+    useCallback(() => {
+      loadAll();
+    }, []),
+  );
+
   if (error || !overview) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-neutral-50">
@@ -72,7 +79,7 @@ export default function TodayScreen() {
     );
   }
 
-  // calories data ===================================
+  // ── Calories data ──────────────────────────────────────────
   const currentCalories = overview.current_calories || 0;
   const caloriesGoal = overview.calories_goal || 0;
   const caloriesRemaining = overview.calories_remaining || 0;
@@ -82,8 +89,8 @@ export default function TodayScreen() {
       value: overview.current_protein,
       goal: overview.protein_goal,
       unit: "g",
-      color: "#6366f1", // Hex for chart legend
-      bg: "bg-indigo-500", // Tailwind for Macro Card
+      color: "#6366f1",
+      bg: "bg-indigo-500",
       track: "bg-indigo-100",
     },
     {
@@ -106,54 +113,120 @@ export default function TodayScreen() {
     },
   ];
 
+  // ── Workout data ───────────────────────────────────────────
+  const workoutProps = workoutSummary
+    ? (() => {
+        const durationProgress = Math.min(
+          (workoutSummary.total_duration_minutes / 60) * 100,
+          100,
+        );
+        const volumeProgress = Math.min(
+          (workoutSummary.total_volume / 5000) * 100,
+          100,
+        );
+        const energyProgress = (workoutSummary.average_energy / 10) * 100;
+        const moodProgress = (workoutSummary.average_mood / 10) * 100;
+        const calProgress = Math.min(
+          (workoutSummary.calories_burned / 300) * 100,
+          100,
+        );
+
+        const subStats = [
+          {
+            label: "Sets",
+            value: workoutSummary.total_sets.toString(),
+            unit: "sets done",
+            progress: Math.min((workoutSummary.total_sets / 20) * 100, 100),
+            color: "#38bdf8",
+          },
+          {
+            label: "Reps",
+            value: workoutSummary.total_reps.toString(),
+            unit: "total reps",
+            progress: Math.min((workoutSummary.total_reps / 100) * 100, 100),
+            color: "#a78bfa",
+          },
+          {
+            label: "Volume",
+            value: formatVolume(workoutSummary.total_volume),
+            unit: "kg lifted",
+            progress: volumeProgress,
+            color: "#34d399",
+          },
+          {
+            label: "Calories",
+            value: workoutSummary.calories_burned.toFixed(0),
+            unit: "kcal burned",
+            progress: calProgress,
+            color: "#fb923c",
+          },
+        ];
+
+        return {
+          date: workoutSummary.date,
+          totalWorkouts: workoutSummary.total_workouts,
+          durationMinutes: workoutSummary.total_duration_minutes,
+          prCount: workoutSummary.pr_count,
+          durationProgress,
+          subStats,
+          energyValue: workoutSummary.average_energy,
+          energyProgress,
+          moodValue: workoutSummary.average_mood,
+          moodProgress,
+        };
+      })()
+    : null;
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-neutral-50">
+        <LoadingOverlay text="Loading overview..." />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-neutral-50">
       <StatusBar style="dark" />
-      {loading && <LoadingOverlay text="Loading nutrition..." />}
       <ScrollView
         className="flex-1 px-5 pt-2"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        {/* Header ================================================================ */}
+        {/* Header */}
         <HomeHeader dateStr={dateStr} dayName={dayName} />
-        {/* MODAL ============================================ */}
+
         {/* CALORIES */}
         <CaloriesCard
-          key={keyCal}
+          key={`cal-${keyCal}`}
           currentCalories={currentCalories}
           caloriesGoal={caloriesGoal}
           caloriesRemaining={caloriesRemaining}
           macros={macros}
         />
-        {/* WORKOUT CARD */}
-        {/* WORKOUT CARD */}
-        {workoutSummary && <WorkoutCard data={workoutSummary} />}
-        {/* STEP */}
-        {/* <StepsCard
-          key={keySteps}
-          currentSteps={7340}
-          stepsGoal={10000}
-          stats={[
-            { label: "Distance", value: "5.4", unit: "km", progress: 73 },
-            { label: "Calories", value: "312", unit: "kcal", progress: 60 },
-            { label: "Active", value: "48", unit: "min", progress: 80 },
-          ]}
-        /> */}
-        {/* SLEEP */}
-        {/* <SleepCard
-          key={fetchCount}
-          lastNight={{
-            total: { label: "Total", value: "7h 24m", progress: 77 },
-            deep: { label: "Deep", value: "2h 10m", progress: 45 },
-            rem: { label: "REM", value: "1h 48m", progress: 38 },
-          }}
-          bedtime="10:30 PM"
-          wakeTime="6:02 AM"
-          onSessionEnd={(seconds) =>
-            console.log("Slept for", seconds, "seconds")
-          }
-        /> */}
+
+        {/* WORKOUT */}
+        {workoutProps && (
+          <WorkoutCard
+            key={`workout-${keyWorkout}`}
+            date={workoutProps.date}
+            totalWorkouts={workoutProps.totalWorkouts}
+            durationMinutes={workoutProps.durationMinutes}
+            prCount={workoutProps.prCount}
+            durationProgress={workoutProps.durationProgress}
+            subStats={workoutProps.subStats}
+            energyValue={workoutProps.energyValue}
+            energyProgress={workoutProps.energyProgress}
+            moodValue={workoutProps.moodValue}
+            moodProgress={workoutProps.moodProgress}
+          />
+        )}
+
+        {/* STEPS (commented out) */}
+        {/* <StepsCard ... /> */}
+
+        {/* SLEEP (commented out) */}
+        {/* <SleepCard ... /> */}
       </ScrollView>
     </SafeAreaView>
   );
