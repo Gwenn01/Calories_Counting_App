@@ -82,6 +82,26 @@ const CATEGORIES: {
     activeBg: "#fef2f2",
     activeBorder: "#ef4444",
   },
+  {
+    key: "anterior",
+    label: "Anterior",
+    icon: "man-outline",
+    color: "#0891b2",
+    bg: "#ecfeff",
+    border: "#cffafe",
+    activeBg: "#ecfeff",
+    activeBorder: "#0891b2",
+  },
+  {
+    key: "posterior",
+    label: "Posterior",
+    icon: "person-outline",
+    color: "#7c3aed",
+    bg: "#f5f3ff",
+    border: "#ddd6fe",
+    activeBg: "#f5f3ff",
+    activeBorder: "#7c3aed",
+  },
 ];
 
 type Props = {

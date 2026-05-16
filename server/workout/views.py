@@ -126,11 +126,13 @@ class ExerciseProgramViewList(APIView):
     PROGRAM_TO_MUSCLES = {
         "push": ["chest", "shoulders", "triceps"],
         "pull": ["back", "biceps", "forearms"],
-        "legs": ["quads", "hamstrings", "glutes", "calves"],
+        "legs": ["quads", "hamstrings", "glutes", "calves", "core"],
         "full_body": [
             "chest", "back", "shoulders", "biceps", "triceps",
             "quads", "hamstrings", "glutes", "calves", "core"
         ],
+        "anterior": ["chest", "shoulders", "triceps", "quads", "core"],
+        "posterior": ["back", "biceps", "hamstrings", "glutes", "calves"],
         "upper": ["chest", "back", "shoulders", "biceps", "triceps"],
         "lower": ["quads", "hamstrings", "glutes", "calves"],
         "cardio": ["cardio"],
