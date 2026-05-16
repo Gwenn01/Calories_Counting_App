@@ -4,6 +4,7 @@ import { View, Text } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { MotiView } from "moti";
 import { SubStat, WorkoutCardProps } from "@/types/overview";
+import { MOOD_LABELS } from "@/constants/overview";
 
 function formatDuration(minutes: number): string {
   const m = Math.floor(minutes);
@@ -11,19 +12,6 @@ function formatDuration(minutes: number): string {
   if (m === 0) return `${s}s`;
   return s > 0 ? `${m}m ${s}s` : `${m}m`;
 }
-
-const MOOD_LABELS: Record<number, string> = {
-  1: "Awful",
-  2: "Bad",
-  3: "Poor",
-  4: "Meh",
-  5: "Okay",
-  6: "Fine",
-  7: "Good",
-  8: "Great",
-  9: "Amazing",
-  10: "Perfect",
-};
 
 const ENERGY_COLOR = (val: number) =>
   val >= 8 ? "#34d399" : val >= 5 ? "#facc15" : "#fb923c";

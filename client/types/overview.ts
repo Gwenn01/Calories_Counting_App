@@ -1,3 +1,4 @@
+// header
 export interface CalendarDay {
   date: string;
   categories: string[];
@@ -14,6 +15,7 @@ export interface HomeHeaderProps {
   animKey?: number; // pass keyCal/keyWorkout from parent to re-animate on reload
 }
 
+// calories card
 export interface MacroItem {
   label: string;
   value: number;
@@ -30,6 +32,7 @@ export interface CaloriesCardProps {
   macros: MacroItem[];
 }
 
+// workout card
 export interface SubStat {
   label: string;
   value: string;

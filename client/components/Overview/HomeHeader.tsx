@@ -13,47 +13,12 @@ import { Feather } from "@expo/vector-icons";
 import { MotiView } from "moti";
 import { fetchCalendarOverview } from "@/api/overview";
 import { CalendarDay, HomeHeaderProps } from "@/types/overview";
-
-const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-const CATEGORY_COLORS: Record<string, string> = {
-  push: "#38bdf8",
-  pull: "#a78bfa",
-  legs: "#34d399",
-  cardio: "#fb923c",
-  chest: "#f472b6",
-  back: "#facc15",
-  anterior: "#22c55e",
-  posterior: "#ef4444",
-  rest: "#94a3b8",
-};
-
-const CATEGORY_ICONS: Record<string, string> = {
-  push: "trending-up",
-  pull: "trending-down",
-  legs: "activity",
-  cardio: "wind",
-  chest: "heart",
-  back: "layers",
-  anterior: "move",
-  posterior: "rotate-ccw",
-  rest: "moon",
-};
+import {
+  MONTH_NAMES,
+  DAY_LABELS,
+  CATEGORY_COLORS,
+  CATEGORY_ICONS,
+} from "@/constants/overview";
 
 export default function HomeHeader({
   dateStr,
