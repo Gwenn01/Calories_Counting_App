@@ -12,22 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { MotiView } from "moti";
 import { fetchCalendarOverview } from "@/api/overview";
-
-interface CalendarDay {
-  date: string;
-  categories: string[];
-  total_workouts: number;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fats: number;
-}
-
-interface HomeHeaderProps {
-  dateStr: string;
-  dayName: string;
-  animKey?: number; // pass keyCal/keyWorkout from parent to re-animate on reload
-}
+import { CalendarDay, HomeHeaderProps } from "@/types/overview";
 
 const MONTH_NAMES = [
   "January",
@@ -53,6 +38,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   cardio: "#fb923c",
   chest: "#f472b6",
   back: "#facc15",
+  anterior: "#22c55e",
+  posterior: "#ef4444",
   rest: "#94a3b8",
 };
 
@@ -63,6 +50,8 @@ const CATEGORY_ICONS: Record<string, string> = {
   cardio: "wind",
   chest: "heart",
   back: "layers",
+  anterior: "move",
+  posterior: "rotate-ccw",
   rest: "moon",
 };
 

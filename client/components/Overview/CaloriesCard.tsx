@@ -3,22 +3,7 @@ import React from "react";
 import { View, Text } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { MotiView } from "moti";
-
-interface MacroItem {
-  label: string;
-  value: number;
-  goal: number;
-  unit: string;
-  bg: string;
-  track: string;
-}
-
-interface CaloriesCardProps {
-  currentCalories: number;
-  caloriesGoal: number;
-  caloriesRemaining: number;
-  macros: MacroItem[];
-}
+import { MacroItem, CaloriesCardProps } from "@/types/overview";
 
 export function CaloriesCard({
   currentCalories,

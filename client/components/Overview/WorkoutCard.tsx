@@ -3,27 +3,7 @@ import React from "react";
 import { View, Text } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { MotiView } from "moti";
-
-interface SubStat {
-  label: string;
-  value: string;
-  unit: string;
-  progress: number;
-  color: string;
-}
-
-interface WorkoutCardProps {
-  date: string;
-  totalWorkouts: number;
-  durationMinutes: number;
-  prCount: number;
-  durationProgress: number;
-  subStats: SubStat[];
-  energyValue: number;
-  energyProgress: number;
-  moodValue: number;
-  moodProgress: number;
-}
+import { SubStat, WorkoutCardProps } from "@/types/overview";
 
 function formatDuration(minutes: number): string {
   const m = Math.floor(minutes);
