@@ -63,12 +63,6 @@ export default function TodayScreen() {
     }, []),
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      loadAll();
-    }, []),
-  );
-
   if (error || !overview) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-neutral-50">
