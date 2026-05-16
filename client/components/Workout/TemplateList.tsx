@@ -5,27 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import type { WorkoutTemplate } from "@/types/workout";
 import { useAlert } from "@/components/AlertProvider";
-
-type Props = {
-  templates: WorkoutTemplate[];
-  templatesLoading: boolean;
-  onOpenCreate: () => void;
-  onOpenEdit: (t: WorkoutTemplate) => void;
-  onDelete: (t: WorkoutTemplate) => void;
-};
-
-const CATEGORY_META: Record<
-  string,
-  { color: string; bg: string; border: string }
-> = {
-  push: { color: "#f97316", bg: "#fff7ed", border: "#ffedd5" },
-  pull: { color: "#3b82f6", bg: "#eff6ff", border: "#dbeafe" },
-  legs: { color: "#10b981", bg: "#f0fdf4", border: "#dcfce7" },
-  upper: { color: "#8b5cf6", bg: "#f5f3ff", border: "#ede9fe" },
-  lower: { color: "#ec4899", bg: "#fdf2f8", border: "#fce7f3" },
-  full_body: { color: "#f59e0b", bg: "#fffbeb", border: "#fef3c7" },
-  cardio: { color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
-};
+import { TemplateListProps } from "@/types/workout";
+import { CATEGORY_META } from "@/constants/workout";
 
 export default function TemplateList({
   templates,
@@ -33,7 +14,7 @@ export default function TemplateList({
   onOpenCreate,
   onOpenEdit,
   onDelete,
-}: Props) {
+}: TemplateListProps) {
   const { showAlert } = useAlert();
 
   const confirmDelete = (t: WorkoutTemplate) => {

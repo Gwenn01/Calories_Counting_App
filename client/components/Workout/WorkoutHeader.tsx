@@ -2,12 +2,7 @@ import { memo, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { MotiView } from "moti";
-
-interface WorkoutHeaderProps {
-  currentDate: Date;
-  onPrev: () => void;
-  onNext: () => void;
-}
+import { WorkoutHeaderProps } from "@/types/workout";
 
 const formatDate = (date: Date) =>
   date.toLocaleDateString("en-US", {

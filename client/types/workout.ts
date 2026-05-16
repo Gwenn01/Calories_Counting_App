@@ -19,6 +19,19 @@ export interface SetRow {
   done: boolean;
 }
 
+export interface WorkoutHeaderProps {
+  currentDate: Date;
+  onPrev: () => void;
+  onNext: () => void;
+}
+
+export type TemplateModalProps = {
+  visible: boolean;
+  onClose: () => void;
+  initialData?: WorkoutTemplate | null;
+  onSaved: (template: WorkoutTemplate) => void;
+};
+
 export interface FitnessProfile {
   id?: number;
   weight_unit: "kg" | "lbs";
@@ -64,6 +77,14 @@ export type WorkoutTemplate = {
   estimated_duration: number;
   template_exercises?: TemplateExercise[]; // ← make optional
   created_at?: string;
+};
+
+export type TemplateListProps = {
+  templates: WorkoutTemplate[];
+  templatesLoading: boolean;
+  onOpenCreate: () => void;
+  onOpenEdit: (t: WorkoutTemplate) => void;
+  onDelete: (t: WorkoutTemplate) => void;
 };
 
 export interface StartSessionCardProps {

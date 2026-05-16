@@ -28,6 +28,21 @@ export const MUSCLE_COLORS: Record<string, string> = {
   core: "#06b6d4",
 };
 
+export const CATEGORY_META: Record<
+  string,
+  { color: string; bg: string; border: string }
+> = {
+  push: { color: "#f97316", bg: "#fff7ed", border: "#ffedd5" },
+  pull: { color: "#3b82f6", bg: "#eff6ff", border: "#dbeafe" },
+  legs: { color: "#10b981", bg: "#f0fdf4", border: "#dcfce7" },
+  upper: { color: "#8b5cf6", bg: "#f5f3ff", border: "#ede9fe" },
+  lower: { color: "#ec4899", bg: "#fdf2f8", border: "#fce7f3" },
+  full_body: { color: "#f59e0b", bg: "#fffbeb", border: "#fef3c7" },
+  cardio: { color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
+  anterior: { color: "#13dc35e", bg: "#f0fdf4", border: "#bbf3d0" },
+  posterior: { color: "#6366f1", bg: "#eef2ff", border: "#c7d2fe" },
+};
+
 export const EXERCISE_LIBRARY: { name: string; muscle: string }[] = [
   { name: "Bench Press", muscle: "Chest" },
   { name: "Incline Dumbbell Press", muscle: "Chest" },

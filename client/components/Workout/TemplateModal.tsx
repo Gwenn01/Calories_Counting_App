@@ -16,13 +16,7 @@ import type {
 import TemplateInfoSection from "@/components/Workout/TemplateModalContainer/TemplateInfoSection";
 import CategorySection from "@/components/Workout/TemplateModalContainer/CategorySection";
 import ExerciseSection from "@/components/Workout/TemplateModalContainer/ExerciseSection";
-
-type Props = {
-  visible: boolean;
-  onClose: () => void;
-  initialData?: WorkoutTemplate | null;
-  onSaved: (template: WorkoutTemplate) => void;
-};
+import { TemplateModalProps } from "@/types/workout";
 
 const blankExerciseForm = () => ({
   default_sets: "3",
@@ -37,7 +31,7 @@ export default function TemplateModal({
   onClose,
   initialData,
   onSaved,
-}: Props) {
+}: TemplateModalProps) {
   // ── Template fields ───────────────────────────────────────────
   const [name, setName] = useState("");
   const [category, setCategory] = useState("push");
