@@ -156,7 +156,7 @@ export function WorkoutCard({
             }}
             className="flex-1"
           >
-            <Text className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mb-1">
+            <Text className="text-[7px] font-bold text-slate-600 uppercase tracking-widest mb-1">
               {stat.label}
             </Text>
 

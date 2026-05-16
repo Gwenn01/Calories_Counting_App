@@ -445,7 +445,7 @@ export default function HomeHeader({
                     {selectedDay.categories.map((cat) => (
                       <View
                         key={cat}
-                        className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-full border"
+                        className="flex-row items-center gap-1 px-2 py-1 rounded-full border"
                         style={{
                           backgroundColor: `${CATEGORY_COLORS[cat] ?? "#38bdf8"}18`,
                           borderColor: `${CATEGORY_COLORS[cat] ?? "#38bdf8"}40`,
@@ -464,15 +464,34 @@ export default function HomeHeader({
                         </Text>
                       </View>
                     ))}
-                    <View className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-700/40 border border-slate-600/30">
+
+                    {/* Sessions */}
+                    <View className="flex-row items-center gap-1 px-2 py-1 rounded-full bg-slate-700/40 border border-slate-600/30">
                       <Feather name="zap" size={10} color="#94a3b8" />
                       <Text className="text-xs font-bold text-slate-400">
-                        {selectedDay.total_workouts}{" "}
-                        {selectedDay.total_workouts === 1
-                          ? "session"
-                          : "sessions"}
+                        {selectedDay.total_workouts}
                       </Text>
                     </View>
+
+                    {/* Duration */}
+                    {selectedDay.total_duration_minutes > 0 && (
+                      <View className="flex-row items-center gap-1 px-2 py-1 rounded-full bg-sky-700/20 border border-sky-600/30">
+                        <Feather name="clock" size={10} color="#38bdf8" />
+                        <Text className="text-xs font-bold text-sky-400">
+                          {selectedDay.total_duration_minutes}
+                        </Text>
+                      </View>
+                    )}
+
+                    {/* Calories burned */}
+                    {selectedDay.calories_burned > 0 && (
+                      <View className="flex-row items-center gap-1 px-2 py-1 rounded-full bg-orange-700/20 border border-orange-600/30">
+                        <Feather name="framer" size={10} color="#fb923c" />
+                        <Text className="text-xs font-bold text-orange-400">
+                          {selectedDay.calories_burned}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 )}
 

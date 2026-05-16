@@ -3,6 +3,9 @@ export interface CalendarDay {
   date: string;
   categories: string[];
   total_workouts: number;
+  total_duration_seconds: number;
+  total_duration_minutes: number;
+  calories_burned: number;
   calories: number;
   protein: number;
   carbs: number;

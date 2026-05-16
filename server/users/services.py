@@ -210,9 +210,7 @@ class UserProfileService:
         }
         
     # calculate the calendar overview workout ===========================
-    # services/dashboard_service.py
     def overview_calendar(user, year, month):
-
         # -----------------------------
         # WORKOUT SESSIONS
         # -----------------------------
@@ -223,7 +221,8 @@ class UserProfileService:
             is_finished=True
         ).values(
             "date",
-            "category"
+            "category",
+            "duration_seconds",
         )
 
         # -----------------------------
@@ -233,13 +232,7 @@ class UserProfileService:
             user=user.profile,
             date__year=year,
             date__month=month
-        ).values(
-            "date",
-            "calories",
-            "protein",
-            "carbs",
-            "fats"
-        )
+        ).values("date", "calories", "protein", "carbs", "fats")
 
         # -----------------------------
         # COMBINED RESULT
@@ -247,29 +240,57 @@ class UserProfileService:
         result = defaultdict(lambda: {
             "date": None,
             "categories": [],
-            "total_workouts": 0,
+            "total_workouts": 0,       # now = total exercises done
+            "total_duration_seconds": 0,
+            "total_duration_minutes": 0.0,
+            "calories_burned": 0.0,
             "calories": 0,
             "protein": 0,
             "carbs": 0,
             "fats": 0,
         })
 
-        # workout data
+        # ── Categories and duration per date ─────────────────────────────────────
         for session in sessions:
-
             date_str = str(session["date"])
-
             result[date_str]["date"] = date_str
-            result[date_str]["categories"].append(
-                session["category"]
+            result[date_str]["total_duration_seconds"] += session["duration_seconds"] or 0
+
+            if session["category"] not in result[date_str]["categories"]:
+                result[date_str]["categories"].append(session["category"])
+
+        # ── Total exercises + duration + calories per date ────────────────────────
+        session_aggregates = WorkoutSession.objects.filter(
+            user=user,
+            date__year=year,
+            date__month=month,
+            is_finished=True,
+        ).values("date").annotate(
+            total_duration=Sum("duration_seconds"),
+            # Count distinct exercises across all sessions on that date
+            total_exercises=Count("workout_exercises__exercise", distinct=True),
+        )
+
+        for agg in session_aggregates:
+            date_str = str(agg["date"])
+            duration_seconds = agg["total_duration"] or 0
+
+            result[date_str]["total_duration_seconds"] = duration_seconds
+            result[date_str]["total_duration_minutes"] = round(duration_seconds / 60, 1)
+            result[date_str]["total_workouts"] = agg["total_exercises"]  # ← exercises now
+
+            day_sessions = WorkoutSession.objects.filter(
+                user=user,
+                date=agg["date"],
+                is_finished=True,
             )
-            result[date_str]["total_workouts"] += 1
+            result[date_str]["calories_burned"] = round(
+                UserProfileService.calculate_calories(day_sessions, duration_seconds), 2
+            )
 
-        # macros data
+        # ── Macros data ───────────────────────────────────────────────────────────
         for macro in macros:
-
             date_str = str(macro["date"])
-
             result[date_str]["date"] = date_str
             result[date_str]["calories"] = macro["calories"]
             result[date_str]["protein"] = macro["protein"]
@@ -277,5 +298,3 @@ class UserProfileService:
             result[date_str]["fats"] = macro["fats"]
 
         return list(result.values())
-
-    
