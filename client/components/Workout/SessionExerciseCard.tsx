@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { View } from "react-native";
+import { useState, useCallback, useMemo, memo } from "react";
+import { View, Vibration } from "react-native";
 import {
   markSetAsCompleted,
   addSetPerExercise,
@@ -15,16 +15,89 @@ import StatsRow from "@/components/Workout/SessionExerciseCardContainer/StatsRow
 import AddSetButton from "@/components/Workout/SessionExerciseCardContainer/AddSetButton";
 import { useAlert } from "../AlertProvider";
 import { useToast } from "../ToastProvider";
-import { Vibration } from "react-native";
 
-export default function ExerciseCard({
+// ─── Memoized SetRow wrapper ────────────────────────────────────────────────
+// Extracted so useCallback can be used per-set without being inside .map()
+const MemoSetRow = memo(function MemoSetRow({
+  set,
+  weightUnit,
+  restTimer,
+  onComplete,
+  onDelete,
+}: {
+  set: WorkoutSet;
+  weightUnit: string;
+  restTimer?: number;
+  onComplete: (
+    weight: number,
+    reps: number,
+    rpe: number | null,
+    restTarget: number,
+  ) => void;
+  onDelete: () => void;
+}) {
+  return (
+    <SetRow
+      weightUnit={weightUnit}
+      set={set}
+      restTimer={restTimer}
+      onComplete={onComplete}
+      onDelete={onDelete}
+    />
+  );
+});
+
+// ─── SetRow container: stable callbacks per set ──────────────────────────────
+const SetRowContainer = memo(function SetRowContainer({
+  set,
+  weightUnit,
+  restTimer,
+  onCompleteSet,
+  onDeleteSet,
+}: {
+  set: WorkoutSet;
+  weightUnit: string;
+  restTimer?: number;
+  onCompleteSet: (
+    set: WorkoutSet,
+    weight: number,
+    reps: number,
+    rpe: number | null,
+    restTarget: number,
+  ) => void;
+  onDeleteSet: (setId: number) => void;
+}) {
+  const handleComplete = useCallback(
+    (weight: number, reps: number, rpe: number | null, restTarget: number) =>
+      onCompleteSet(set, weight, reps, rpe, restTarget),
+    [set, onCompleteSet],
+  );
+
+  const handleDelete = useCallback(
+    () => onDeleteSet(set.id),
+    [set.id, onDeleteSet],
+  );
+
+  return (
+    <MemoSetRow
+      set={set}
+      weightUnit={weightUnit}
+      restTimer={restTimer}
+      onComplete={handleComplete}
+      onDelete={handleDelete}
+    />
+  );
+});
+
+// ─── Main ExerciseCard ───────────────────────────────────────────────────────
+function ExerciseCard({
   weightUnit,
   workoutExercise,
   onUpdate,
 }: ExerciseCardProps) {
   const { showAlert } = useAlert();
   const { showToast } = useToast();
-  //  variables needed
+
   const [restTimers, setRestTimers] = useState<Record<number, number>>({});
   const [addingSet, setAddingSet] = useState(false);
   const [showNotes, setShowNotes] = useState(!!workoutExercise.notes);
@@ -33,66 +106,96 @@ export default function ExerciseCard({
   const [togglingFav, setTogglingFav] = useState(false);
   const [deletingExercise, setDeletingExercise] = useState(false);
 
-  const completedCount = workoutExercise.sets.filter((s) => s.completed).length;
-  const totalVolume = workoutExercise.sets
-    .filter((s) => s.completed)
-    .reduce((acc, s) => acc + (s.volume ?? 0), 0);
+  // ── Derived stats (memoized) ─────────────────────────────────────────────
+  const completedCount = useMemo(
+    () => workoutExercise.sets.filter((s) => s.completed).length,
+    [workoutExercise.sets],
+  );
+
+  const totalVolume = useMemo(
+    () =>
+      workoutExercise.sets
+        .filter((s) => s.completed)
+        .reduce((acc, s) => acc + (s.volume ?? 0), 0),
+    [workoutExercise.sets],
+  );
+
+  const est1rm = useMemo(
+    () =>
+      workoutExercise.sets
+        .filter((s) => s.completed && s.estimated_1rm)
+        .sort((a, b) => (b.estimated_1rm ?? 0) - (a.estimated_1rm ?? 0))[0]
+        ?.estimated_1rm,
+    [workoutExercise.sets],
+  );
+
   const bestSet = workoutExercise.best_set;
-  const est1rm = workoutExercise.sets
-    .filter((s) => s.completed && s.estimated_1rm)
-    .sort(
-      (a, b) => (b.estimated_1rm ?? 0) - (a.estimated_1rm ?? 0),
-    )[0]?.estimated_1rm;
 
-  // rest timer sound  effect
-  const playRestDoneSound = () => {
-    // Pattern: [wait, vibrate, wait, vibrate, wait, vibrate]
-    // All in milliseconds
-    Vibration.vibrate([
-      0, 1000, 200, 1000, 200, 1000, 1000, 200, 1000, 200, 5000,
-    ]);
-  };
+  // ── Rest timer ───────────────────────────────────────────────────────────
+  const playRestDoneSound = useCallback(() => {
+    Vibration.vibrate([0, 1000, 200, 1000, 200, 4000]);
+  }, []);
 
-  const startRestTimer = (setId: number, targetSeconds: number) => {
-    setRestTimers((prev) => ({ ...prev, [setId]: targetSeconds }));
-    const interval = setInterval(() => {
-      setRestTimers((prev) => {
-        const next = (prev[setId] ?? 0) - 1;
-        if (next <= 0) {
-          clearInterval(interval);
-          playRestDoneSound();
-          const { [setId]: _, ...rest } = prev;
-          return rest;
-        }
-        return { ...prev, [setId]: next };
-      });
-    }, 1000);
-  };
+  const startRestTimer = useCallback(
+    (setId: number, targetSeconds: number) => {
+      setRestTimers((prev) => ({ ...prev, [setId]: targetSeconds }));
 
-  const handleCompleteSet = async (
-    set: WorkoutSet,
-    weight: number,
-    reps: number,
-    rpe: number | null,
-    restTarget: number, // ← add this
-  ) => {
-    try {
-      await markSetAsCompleted(set.id, {
-        weight,
-        reps,
-        completed: true,
-        rpe,
-        rest_taken: restTarget, // ← use passed value
-      });
-      startRestTimer(set.id, restTarget); // ← use passed value
-      onUpdate();
-      showToast("Set Completed", "Great job!", "success");
-    } catch (e) {
-      console.error(e);
-    }
-  };
+      const interval = setInterval(() => {
+        setRestTimers((prev) => {
+          const next = (prev[setId] ?? 0) - 1;
+          if (next <= 0) {
+            clearInterval(interval);
+            playRestDoneSound();
+            const { [setId]: _, ...rest } = prev;
+            return rest;
+          }
+          return { ...prev, [setId]: next };
+        });
+      }, 1000);
+    },
+    [playRestDoneSound],
+  );
 
-  const handleAddSet = async () => {
+  // ── Handlers (all stable via useCallback) ────────────────────────────────
+  const handleCompleteSet = useCallback(
+    async (
+      set: WorkoutSet,
+      weight: number,
+      reps: number,
+      rpe: number | null,
+      restTarget: number,
+    ) => {
+      try {
+        await markSetAsCompleted(set.id, {
+          weight,
+          reps,
+          completed: true,
+          rpe,
+          rest_taken: restTarget,
+        });
+        startRestTimer(set.id, restTarget);
+        onUpdate();
+        showToast("Set Completed", "Great job!", "success");
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    [startRestTimer, onUpdate, showToast],
+  );
+
+  const handleDeleteSet = useCallback(
+    async (setId: number) => {
+      try {
+        await deleteSetPerExercise(setId);
+        onUpdate();
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    [onUpdate],
+  );
+
+  const handleAddSet = useCallback(async () => {
     try {
       setAddingSet(true);
       await addSetPerExercise(workoutExercise.id, {});
@@ -102,18 +205,9 @@ export default function ExerciseCard({
     } finally {
       setAddingSet(false);
     }
-  };
+  }, [workoutExercise.id, onUpdate]);
 
-  const handleDeleteSet = async (setId: number) => {
-    try {
-      await deleteSetPerExercise(setId);
-      onUpdate();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleToggleFavorite = async () => {
+  const handleToggleFavorite = useCallback(async () => {
     try {
       setTogglingFav(true);
       await updateWorkoutExercise(workoutExercise.id, {
@@ -125,9 +219,9 @@ export default function ExerciseCard({
     } finally {
       setTogglingFav(false);
     }
-  };
+  }, [workoutExercise.id, workoutExercise.is_favorite, onUpdate]);
 
-  const handleSaveNotes = async () => {
+  const handleSaveNotes = useCallback(async () => {
     try {
       setSavingNotes(true);
       await updateWorkoutExercise(workoutExercise.id, { notes });
@@ -137,9 +231,9 @@ export default function ExerciseCard({
     } finally {
       setSavingNotes(false);
     }
-  };
+  }, [workoutExercise.id, notes, onUpdate]);
 
-  const handleDeleteExercise = () => {
+  const handleDeleteExercise = useCallback(() => {
     showAlert("Remove Exercise", `Remove "${workoutExercise.exercise.name}"?`, [
       { text: "Cancel", style: "cancel" },
       {
@@ -163,8 +257,17 @@ export default function ExerciseCard({
         },
       },
     ]);
-  };
+  }, [
+    showAlert,
+    showToast,
+    workoutExercise.id,
+    workoutExercise.exercise.name,
+    onUpdate,
+  ]);
 
+  const handleToggleNotes = useCallback(() => setShowNotes((v) => !v), []);
+
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <View className="bg-white border border-slate-300 rounded-[20px] overflow-hidden mx-4 mb-6">
       <ExerciseHeader
@@ -175,7 +278,7 @@ export default function ExerciseCard({
         savingNotes={savingNotes}
         togglingFav={togglingFav}
         deletingExercise={deletingExercise}
-        onToggleNotes={() => setShowNotes((v) => !v)}
+        onToggleNotes={handleToggleNotes}
         onChangeNotes={setNotes}
         onBlurNotes={handleSaveNotes}
         onToggleFavorite={handleToggleFavorite}
@@ -183,25 +286,23 @@ export default function ExerciseCard({
       />
 
       {workoutExercise.sets.map((set) => (
-        <SetRow
-          weightUnit={weightUnit}
+        <SetRowContainer
           key={set.id}
           set={set}
+          weightUnit={weightUnit}
           restTimer={restTimers[set.id]}
-          onComplete={(weight, reps, rpe, restTarget) =>
-            handleCompleteSet(set, weight, reps, rpe, restTarget)
-          }
-          onDelete={() => handleDeleteSet(set.id)}
+          onCompleteSet={handleCompleteSet}
+          onDeleteSet={handleDeleteSet}
         />
       ))}
 
-      {/* ── Stats ── */}
       {completedCount > 0 && (
         <StatsRow totalVolume={totalVolume} bestSet={bestSet} est1rm={est1rm} />
       )}
 
-      {/* ── Add set ── */}
       <AddSetButton onPress={handleAddSet} addingSet={addingSet} />
     </View>
   );
 }
+
+export default memo(ExerciseCard);

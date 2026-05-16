@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
-  ScrollView,
+  FlatList,
   Pressable,
   ActivityIndicator,
 } from "react-native";
@@ -21,7 +21,13 @@ import SessionTimer from "@/components/Workout/SessionTimer";
 import SessionProgress from "@/components/Workout/SessionProgress";
 import ExerciseCard from "@/components/Workout/SessionExerciseCard";
 import AddExerciseModal from "@/components/Workout/AddExerciseModal";
-import type { WorkoutSession } from "@/types/workout";
+import type { WorkoutSession, WorkoutExercise } from "@/types/workout";
+
+// ── Extracted so FlatList renderItem doesn't recreate it inline ──────────────
+type ListItem =
+  | { type: "header" }
+  | { type: "exercise"; data: WorkoutExercise }
+  | { type: "footer" };
 
 export default function ActiveSessionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -48,7 +54,25 @@ export default function ActiveSessionScreen() {
     loadSession();
   }, []);
 
-  const handleFinish = async () => {
+  // ── Memoized derived stats ─────────────────────────────────────────────────
+  const completedSets = useMemo(
+    () =>
+      session?.workout_exercises.reduce(
+        (acc, we) => acc + we.sets.filter((s) => s.completed).length,
+        0,
+      ) ?? 0,
+    [session?.workout_exercises],
+  );
+
+  const totalSets = useMemo(
+    () =>
+      session?.workout_exercises.reduce((acc, we) => acc + we.sets.length, 0) ??
+      0,
+    [session?.workout_exercises],
+  );
+
+  // ── Stable handlers ────────────────────────────────────────────────────────
+  const handleFinish = useCallback(async () => {
     if (!session) return;
     try {
       setFinishing(true);
@@ -60,9 +84,9 @@ export default function ActiveSessionScreen() {
     } finally {
       setFinishing(false);
     }
-  };
+  }, [session, showToast]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     showAlert(
       "Delete Session",
       "Are you sure you want to delete this session? This action cannot be undone.",
@@ -84,64 +108,64 @@ export default function ActiveSessionScreen() {
         },
       ],
     );
-  };
+  }, [session, showAlert, showToast]);
 
-  if (loading) {
-    return (
-      <SafeAreaView className="flex-1 bg-slate-50 items-center justify-center">
-        <ActivityIndicator size="large" color="#f97316" />
-        <Text className="text-sm text-slate-400 mt-3">Loading session…</Text>
-      </SafeAreaView>
-    );
-  }
+  const handleOpenAddExercise = useCallback(() => setShowAddExercise(true), []);
 
-  if (!session) return null;
-
-  const completedSets = session.workout_exercises.reduce(
-    (acc, we) => acc + we.sets.filter((s) => s.completed).length,
-    0,
+  const handleCloseAddExercise = useCallback(
+    () => setShowAddExercise(false),
+    [],
   );
-  const totalSets = session.workout_exercises.reduce(
-    (acc, we) => acc + we.sets.length,
-    0,
-  );
-  return (
-    <SafeAreaView className="flex-1 bg-slate-50">
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 32 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ── Header ── */}
-        <SessionHeader
-          weightUnit={session.weight_unit}
-          session={session}
-          onBack={() => router.back()}
-        />
 
-        <View className="px-1">
-          {/* ── Timer ── */}
-          <SessionTimer startTime={session.start_time} />
+  // ── FlatList data: header + exercises + footer as one list ─────────────────
+  const listItems = useMemo<ListItem[]>(() => {
+    if (!session) return [];
+    return [
+      { type: "header" },
+      ...session.workout_exercises.map((we) => ({
+        type: "exercise" as const,
+        data: we,
+      })),
+      { type: "footer" },
+    ];
+  }, [session]);
 
-          {/* ── Progress ── */}
-          <SessionProgress
-            completedSets={completedSets}
-            totalSets={totalSets}
-          />
-
-          {/* ── Exercise cards ── */}
-          {session.workout_exercises.map((we) => (
-            <ExerciseCard
-              weightUnit={session.weight_unit}
-              key={we.id}
-              workoutExercise={we}
-              sessionId={session.id}
-              onUpdate={loadSession}
+  // ── renderItem (memoized, no inline closures) ──────────────────────────────
+  const renderItem = useCallback(
+    ({ item }: { item: ListItem }) => {
+      if (item.type === "header") {
+        return (
+          <View className="">
+            <SessionHeader
+              weightUnit={session!.weight_unit}
+              session={session!}
+              onBack={() => router.back()}
             />
-          ))}
+            <SessionTimer startTime={session!.start_time} />
+            <SessionProgress
+              completedSets={completedSets}
+              totalSets={totalSets}
+            />
+          </View>
+        );
+      }
 
-          {/* ── Add exercise ── */}
+      if (item.type === "exercise") {
+        return (
+          <ExerciseCard
+            weightUnit={session!.weight_unit}
+            workoutExercise={item.data}
+            sessionId={session!.id}
+            onUpdate={loadSession}
+          />
+        );
+      }
+
+      // footer
+      return (
+        <View className="px-1">
           <Pressable
-            onPress={() => setShowAddExercise(true)}
+            onPress={handleOpenAddExercise}
             className="items-center justify-center bg-white border border-dashed border-slate-300 rounded-[16px] py-2 mb-4"
           >
             <Feather name="plus-circle" size={16} color="#94a3b8" />
@@ -150,7 +174,6 @@ export default function ActiveSessionScreen() {
             </Text>
           </Pressable>
 
-          {/* ── Finish button — inline, bottom of scroll ── */}
           <Pressable
             onPress={handleFinish}
             disabled={finishing}
@@ -169,7 +192,6 @@ export default function ActiveSessionScreen() {
             )}
           </Pressable>
 
-          {/* Extra bottom delete session*/}
           <Pressable
             onPress={handleDelete}
             disabled={finishing}
@@ -188,13 +210,58 @@ export default function ActiveSessionScreen() {
             )}
           </Pressable>
         </View>
-      </ScrollView>
+      );
+    },
+    [
+      session,
+      completedSets,
+      totalSets,
+      finishing,
+      loadSession,
+      handleFinish,
+      handleDelete,
+      handleOpenAddExercise,
+    ],
+  );
+
+  const keyExtractor = useCallback((item: ListItem, index: number) => {
+    if (item.type === "exercise") return `exercise-${item.data.id}`;
+    return `${item.type}-${index}`;
+  }, []);
+
+  // ── Loading / empty states ─────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-slate-50 items-center justify-center">
+        <ActivityIndicator size="large" color="#f97316" />
+        <Text className="text-sm text-slate-400 mt-3">Loading session…</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!session) return null;
+
+  return (
+    <SafeAreaView className="flex-1 bg-slate-50">
+      <FlatList
+        data={listItems}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
+        // ── Performance tuning ──
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={4}
+        windowSize={5}
+        initialNumToRender={3}
+        updateCellsBatchingPeriod={50}
+      />
 
       <AddExerciseModal
         category={session.category}
         visible={showAddExercise}
         sessionId={session.id}
-        onClose={() => setShowAddExercise(false)}
+        onClose={handleCloseAddExercise}
         onAdded={loadSession}
       />
     </SafeAreaView>

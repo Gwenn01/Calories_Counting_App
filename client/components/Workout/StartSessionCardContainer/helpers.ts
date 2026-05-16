@@ -25,6 +25,20 @@ export const CATEGORY_META: {
     bg: "bg-emerald-50",
     border: "border-emerald-200",
   },
+
+  anterior: {
+    label: "Anterior",
+    color: "#ec4899",
+    bg: "bg-pink-50",
+    border: "border-pink-200",
+  },
+
+  posterior: {
+    label: "Posterior",
+    color: "#6366f1",
+    bg: "bg-indigo-50",
+    border: "border-indigo-200",
+  },
 };
 
 export const getCategoryMeta = (category: string) =>
@@ -37,7 +51,9 @@ export const getCategoryMeta = (category: string) =>
 
 export const formatDuration = (mins: number) => {
   if (mins < 60) return `${mins}m`;
+
   const h = Math.floor(mins / 60);
   const m = mins % 60;
+
   return m > 0 ? `${h}h ${m}m` : `${h}h`;
 };
